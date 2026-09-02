@@ -1,0 +1,111 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { GoalsService } from '../../src/modules/goals/goals.service';
+import { PrismaService } from '../../src/prisma/prisma.service';
+import { GoalStatus, Prisma } from '@prisma/client';
+
+describe('GoalsService', () => {
+  let service: GoalsService;
+  let prisma: any;
+
+  beforeEach(async () => {
+    prisma = {
+      $transaction: jest.fn((cb) => cb(prisma)),
+      goal: {
+        create: jest.fn(),
+        findMany: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
+      goalDeposit: {
+        create: jest.fn(),
+      },
+      account: {
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
+      category: {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+      },
+      transaction: {
+        create: jest.fn(),
+      },
+      familyMember: {
+        findUnique: jest.fn(),
+      },
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        GoalsService,
+        { provide: PrismaService, useValue: prisma },
+      ],
+    }).compile();
+
+    service = module.get<GoalsService>(GoalsService);
+  });
+
+  describe('create', () => {
+    it('should create a goal with initial currentAmount 0 and IN_PROGRESS status', async () => {
+      prisma.goal.create.mockResolvedValue({
+        id: 'goal-1',
+        name: 'Reserva',
+        targetAmount: new Prisma.Decimal(10000),
+        currentAmount: new Prisma.Decimal(0),
+        status: GoalStatus.IN_PROGRESS,
+      });
+
+      const result = await service.create('user-1', {
+        name: 'Reserva',
+        targetAmount: 10000,
+      });
+
+      expect(result.id).toBe('goal-1');
+      expect(prisma.goal.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('addDeposit', () => {
+    it('should add deposit, update currentAmount and status if target reached', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        name: 'Reserva',
+        userId: 'user-1',
+        targetAmount: new Prisma.Decimal(1000),
+        currentAmount: new Prisma.Decimal(800),
+        status: GoalStatus.IN_PROGRESS,
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-1',
+        currentBalance: new Prisma.Decimal(2000),
+      });
+
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-goal' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-goal' });
+      prisma.goalDeposit.create.mockResolvedValue({ id: 'dep-1' });
+      prisma.account.update.mockResolvedValue({ id: 'acc-1' });
+      prisma.goal.update.mockResolvedValue({ id: 'goal-1', status: GoalStatus.COMPLETED });
+
+      const result = await service.addDeposit('user-1', 'goal-1', {
+        amount: 250, // 800 + 250 = 1050 >= 1000 -> COMPLETED
+        depositDate: '2026-09-01',
+        accountId: 'acc-1',
+      });
+
+      expect(result.id).toBe('dep-1');
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 'goal-1' },
+        data: {
+          currentAmount: new Prisma.Decimal(1050),
+          status: GoalStatus.COMPLETED,
+        },
+      });
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { currentBalance: { decrement: new Prisma.Decimal(250) } },
+      });
+    });
+  });
+});

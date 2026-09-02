@@ -293,9 +293,9 @@ T22 → T23
 **Depends on**: T13
 **Requirement**: GOAL-01
 **Done when**:
-- [ ] Goals creation with target amounts and deadlines
-- [ ] Deposit creation updating `current_amount`
-- [ ] Unit tests verify percentage completion calculations
+- [x] Goals creation with target amounts and deadlines
+- [x] Deposit creation updating `current_amount`
+- [x] Unit tests verify percentage completion calculations
 **Tests**: unit
 **Gate**: quick
 
