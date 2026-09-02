@@ -308,10 +308,10 @@ T22 → T23
 **Depends on**: T14
 **Requirement**: REP-01
 **Done when**:
-- [ ] Aggregated metrics endpoint for dashboard
-- [ ] Category spending distribution endpoint
-- [ ] CSV data generator for transactions export
-- [ ] Unit tests verify aggregation math and export generator
+- [x] Aggregated metrics endpoint for dashboard
+- [x] Category spending distribution endpoint
+- [x] CSV data generator for transactions export
+- [x] Unit tests verify aggregation math and export generator
 **Tests**: unit
 **Gate**: quick
 
