@@ -278,9 +278,9 @@ T22 → T23
 **Depends on**: T12
 **Requirement**: BUD-01
 **Done when**:
-- [ ] Budget creation per category and month (`YYYY-MM`)
-- [ ] Calculation of spent vs target amount and alert trigger flag
-- [ ] Unit tests verify consumption math and alert threshold logic
+- [x] Budget creation per category and month (`YYYY-MM`)
+- [x] Calculation of spent vs target amount and alert trigger flag
+- [x] Unit tests verify consumption math and alert threshold logic
 **Tests**: unit
 **Gate**: quick
 
