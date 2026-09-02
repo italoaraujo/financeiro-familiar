@@ -246,9 +246,9 @@ T22 → T23
 **Depends on**: T10
 **Requirement**: CAT-01
 **Done when**:
-- [ ] Category hierarchy listing and custom creation
-- [ ] Prevent deletion of categories associated with active transactions
-- [ ] Unit tests verify hierarchy and deletion guards
+- [x] Category hierarchy listing and custom creation
+- [x] Prevent deletion of categories associated with active transactions
+- [x] Unit tests verify hierarchy and deletion guards
 **Tests**: unit
 **Gate**: quick
 

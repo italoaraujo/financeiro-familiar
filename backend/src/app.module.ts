@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FamiliesModule } from './modules/families/families.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { CreditCardsModule } from './modules/credit-cards/credit-cards.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CreditCardsModule } from './modules/credit-cards/credit-cards.module';
     FamiliesModule,
     AccountsModule,
     CreditCardsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
