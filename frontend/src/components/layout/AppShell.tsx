@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -15,7 +16,6 @@ import {
   FileSpreadsheet,
   LogOut,
   ChevronDown,
-  Building,
   Menu,
   X,
 } from 'lucide-react';
@@ -67,15 +67,22 @@ export default function AppShell({ children }: AppShellProps) {
   const NavContent = () => (
     <>
       <div className="p-5 sm:p-6 border-b border-slate-800/80 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
-            <Building className="h-5 w-5 text-slate-950 font-bold" />
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative h-10 w-10 flex items-center justify-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="Logo Finanças"
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain drop-shadow-md transition-transform group-hover:scale-105"
+              priority
+            />
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-lg text-white leading-tight truncate">Finanças</h1>
             <span className="text-xs text-emerald-400 font-medium truncate block">Pessoal & Familiar</span>
           </div>
-        </div>
+        </Link>
         <button
           onClick={() => setMobileMenuOpen(false)}
           className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"

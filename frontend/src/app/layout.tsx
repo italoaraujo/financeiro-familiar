@@ -5,6 +5,10 @@ import { AuthProvider } from '../context/AuthContext';
 export const metadata: Metadata = {
   title: 'Finanças Familiar - Gestão Financeira Pessoal & Familiar',
   description: 'Controle integrado de contas, cartões, orçamentos e metas familiares',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export const viewport: Viewport = {

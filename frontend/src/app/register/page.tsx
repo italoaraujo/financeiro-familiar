@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { Building, Lock, Mail, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, Mail, User, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -26,7 +27,7 @@ export default function RegisterPage() {
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter no mínimo 6 caracteres');
+      setError('A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
@@ -47,11 +48,20 @@ export default function RegisterPage() {
       <div className="w-full max-w-md my-auto">
         {/* Logo Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 items-center justify-center shadow-xl shadow-emerald-500/20 mb-3.5 sm:mb-4">
-            <Building className="h-6 w-6 sm:h-7 sm:w-7 text-slate-950 font-bold" />
+          <div className="relative inline-flex items-center justify-center mb-4 sm:mb-5">
+            {/* Glow effect atrás da logo */}
+            <div className="absolute inset-0 bg-emerald-500/15 blur-2xl rounded-full scale-125 pointer-events-none" />
+            <Image
+              src="/logo.png"
+              alt="Logo Finanças Familiar"
+              width={140}
+              height={140}
+              className="relative h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 object-contain drop-shadow-[0_10px_20px_rgba(16,185,129,0.2)] transition-transform duration-300 hover:scale-105"
+              priority
+            />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Criar Nova Conta</h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">Comece a controlar suas finanças pessoais e familiares</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Criar Nova Conta</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-xs mx-auto">Comece a controlar suas finanças pessoais e familiares</p>
         </div>
 
         {/* Card */}
