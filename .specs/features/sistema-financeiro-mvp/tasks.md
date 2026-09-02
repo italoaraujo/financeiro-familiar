@@ -145,7 +145,7 @@ T22 → T23
 **Depends on**: T3
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] `backend/Dockerfile` and `frontend/Dockerfile` created and syntax-checked
+- [x] `backend/Dockerfile` and `frontend/Dockerfile` created and syntax-checked
 **Tests**: none
 **Gate**: build
 
