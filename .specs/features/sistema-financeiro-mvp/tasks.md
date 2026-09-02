@@ -186,9 +186,9 @@ T22 → T23
 **Depends on**: T6
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] `POST /auth/register` creates user and returns JWT
-- [ ] `POST /auth/login` verifies credentials and returns JWT
-- [ ] Unit tests cover registration, login success, and invalid credential rejections (401)
+- [x] `POST /auth/register` creates user and returns JWT
+- [x] `POST /auth/login` verifies credentials and returns JWT
+- [x] Unit tests cover registration, login success, and invalid credential rejections (401)
 **Tests**: unit
 **Gate**: quick
 
