@@ -397,10 +397,10 @@ T22 → T23
 **Depends on**: T20
 **Requirement**: BUD-01
 **Done when**:
-- [ ] Budget progress bars with warning colors on >80% consumption
-- [ ] Goals cards with target progress and deposit modal
-- [ ] Family members table with invitation form
-- [ ] Reports page with instant CSV export download
+- [x] Budget progress bars with warning colors on >80% consumption
+- [x] Goals cards with target progress and deposit modal
+- [x] Family members table with invitation form
+- [x] Reports page with instant CSV export download
 **Tests**: unit
 **Gate**: quick
 
