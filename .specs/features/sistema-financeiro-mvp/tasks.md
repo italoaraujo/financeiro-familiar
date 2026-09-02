@@ -216,9 +216,9 @@ T22 → T23
 **Depends on**: None
 **Requirement**: ACCT-01
 **Done when**:
-- [ ] Account CRUD with types `CHECKING`, `SAVINGS`, `INVESTMENT`, `CASH`, `OTHER`
-- [ ] Archiving prevents deletion if transactions exist
-- [ ] Unit tests verify account balance defaults and updates
+- [x] Account CRUD with types `CHECKING`, `SAVINGS`, `INVESTMENT`, `CASH`, `OTHER`
+- [x] Archiving prevents deletion if transactions exist
+- [x] Unit tests verify account balance defaults and updates
 **Tests**: unit
 **Gate**: quick
 
