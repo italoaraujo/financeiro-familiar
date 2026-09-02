@@ -231,9 +231,9 @@ T22 → T23
 **Depends on**: T9
 **Requirement**: CARD-01
 **Done when**:
-- [ ] Credit card creation with closing and due day cycle
-- [ ] Invoice retrieval and payment status transition to `PAID`
-- [ ] Unit tests verify invoice reference month calculation and limit subtraction
+- [x] Credit card creation with closing and due day cycle
+- [x] Invoice retrieval and payment status transition to `PAID`
+- [x] Unit tests verify invoice reference month calculation and limit subtraction
 **Tests**: unit
 **Gate**: quick
 
