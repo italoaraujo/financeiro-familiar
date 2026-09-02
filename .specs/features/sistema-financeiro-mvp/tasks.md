@@ -158,8 +158,8 @@ T22 → T23
 **Depends on**: None
 **Requirement**: ACCT-01
 **Done when**:
-- [ ] Schema declares all models, enums, relations, indexes, and decimal fields
-- [ ] `npx prisma validate` passes
+- [x] Schema declares all models, enums, relations, indexes, and decimal fields
+- [x] `npx prisma validate` passes
 **Tests**: none
 **Gate**: build
 

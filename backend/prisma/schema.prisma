@@ -1,0 +1,320 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum FamilyMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+  CASH
+  OTHER
+}
+
+enum InvoiceStatus {
+  OPEN
+  CLOSED
+  PAID
+  OVERDUE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum GoalStatus {
+  IN_PROGRESS
+  COMPLETED
+  PAUSED
+}
+
+model User {
+  id           String         @id @default(uuid()) @db.Uuid
+  name         String         @db.VarChar(100)
+  email        String         @unique @db.VarChar(150)
+  passwordHash String         @map("password_hash") @db.VarChar(255)
+  avatarUrl    String?        @map("avatar_url") @db.VarChar(255)
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  ownedFamilies Family[]       @relation("FamilyOwner")
+  memberships   FamilyMember[]
+  accounts      Account[]
+  creditCards   CreditCard[]
+  categories    Category[]
+  transactions  Transaction[]
+  recurrences   Recurrence[]
+  budgets       Budget[]
+  goals         Goal[]
+
+  @@map("users")
+}
+
+model Family {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String         @db.VarChar(100)
+  description String?        @db.Text
+  ownerId     String         @map("owner_id") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  owner       User           @relation("FamilyOwner", fields: [ownerId], references: [id])
+  members     FamilyMember[]
+  accounts    Account[]
+  creditCards CreditCard[]
+  categories  Category[]
+  transactions Transaction[]
+  recurrences Recurrence[]
+  budgets     Budget[]
+  goals       Goal[]
+
+  @@map("families")
+}
+
+model FamilyMember {
+  id        String           @id @default(uuid()) @db.Uuid
+  familyId  String           @map("family_id") @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  role      FamilyMemberRole @default(MEMBER)
+  joinedAt  DateTime         @default(now()) @map("joined_at") @db.Timestamptz
+
+  family    Family           @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, userId])
+  @@map("family_members")
+}
+
+model Account {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  familyId       String?       @map("family_id") @db.Uuid
+  name           String        @db.VarChar(100)
+  type           AccountType   @default(CHECKING)
+  initialBalance Decimal       @default(0.00) @map("initial_balance") @db.Decimal(15, 2)
+  currentBalance Decimal       @default(0.00) @map("current_balance") @db.Decimal(15, 2)
+  currency       String        @default("BRL") @db.VarChar(3)
+  color          String?       @db.VarChar(7)
+  icon           String?       @db.VarChar(50)
+  isActive       Boolean       @default(true) @map("is_active")
+  isArchived     Boolean       @default(false) @map("is_archived")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family         Family?       @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  creditCards    CreditCard[]
+  transactions   Transaction[] @relation("SourceAccount")
+  destTransfers  Transaction[] @relation("DestAccount")
+  recurrences    Recurrence[]
+
+  @@map("accounts")
+}
+
+model CreditCard {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @map("user_id") @db.Uuid
+  familyId     String?             @map("family_id") @db.Uuid
+  accountId    String?             @map("account_id") @db.Uuid
+  name         String              @db.VarChar(100)
+  brand        String?             @db.VarChar(50)
+  creditLimit  Decimal             @default(0.00) @map("credit_limit") @db.Decimal(15, 2)
+  closingDay   Int                 @map("closing_day") @db.SmallInt
+  dueDay       Int                 @map("due_day") @db.SmallInt
+  color        String?             @db.VarChar(7)
+  isActive     Boolean             @default(true) @map("is_active")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family       Family?             @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  account      Account?            @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  invoices     CreditCardInvoice[]
+  transactions Transaction[]
+
+  @@map("credit_cards")
+}
+
+model CreditCardInvoice {
+  id             String        @id @default(uuid()) @db.Uuid
+  creditCardId   String        @map("credit_card_id") @db.Uuid
+  referenceMonth String        @map("reference_month") @db.VarChar(7)
+  closingDate    DateTime      @map("closing_date") @db.Date
+  dueDate        DateTime      @map("due_date") @db.Date
+  status         InvoiceStatus @default(OPEN)
+  totalAmount    Decimal       @default(0.00) @map("total_amount") @db.Decimal(15, 2)
+  paidAmount     Decimal       @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  paidAt         DateTime?     @map("paid_at") @db.Timestamptz
+
+  creditCard     CreditCard    @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+
+  @@unique([creditCardId, referenceMonth])
+  @@map("credit_card_invoices")
+}
+
+model Category {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String?         @map("user_id") @db.Uuid
+  familyId        String?         @map("family_id") @db.Uuid
+  parentId        String?         @map("parent_id") @db.Uuid
+  name            String          @db.VarChar(100)
+  type            TransactionType @default(EXPENSE)
+  icon            String?         @db.VarChar(50)
+  color           String?         @db.VarChar(7)
+  isSystemDefault Boolean         @default(false) @map("is_system_default")
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  user            User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family          Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  parent          Category?       @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subcategories   Category[]      @relation("CategoryHierarchy")
+  transactions    Transaction[]
+  recurrences     Recurrence[]
+  budgets         Budget[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id                   String            @id @default(uuid()) @db.Uuid
+  userId               String            @map("user_id") @db.Uuid
+  familyId             String?           @map("family_id") @db.Uuid
+  accountId            String?           @map("account_id") @db.Uuid
+  destinationAccountId String?           @map("destination_account_id") @db.Uuid
+  creditCardId         String?           @map("credit_card_id") @db.Uuid
+  invoiceId            String?           @map("invoice_id") @db.Uuid
+  categoryId           String            @map("category_id") @db.Uuid
+  recurrenceId         String?           @map("recurrence_id") @db.Uuid
+  type                 TransactionType
+  amount               Decimal           @db.Decimal(15, 2)
+  description          String            @db.VarChar(255)
+  notes                String?           @db.Text
+  transactionDate      DateTime          @map("transaction_date") @db.Date
+  status               TransactionStatus @default(COMPLETED)
+  isPrivate            Boolean           @default(false) @map("is_private")
+  installmentNumber    Int?              @map("installment_number") @db.SmallInt
+  totalInstallments    Int?              @map("total_installments") @db.SmallInt
+  installmentGroupId   String?           @map("installment_group_id") @db.Uuid
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family               Family?           @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  account              Account?          @relation("SourceAccount", fields: [accountId], references: [id], onDelete: SetNull)
+  destinationAccount   Account?          @relation("DestAccount", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+  creditCard           CreditCard?       @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+  invoice              CreditCardInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  category             Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  recurrence           Recurrence?       @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+  goalDeposits         GoalDeposit[]
+
+  @@index([userId, transactionDate])
+  @@index([familyId, transactionDate])
+  @@index([accountId, transactionDate])
+  @@index([categoryId, transactionDate])
+  @@map("transactions")
+}
+
+model Recurrence {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @map("user_id") @db.Uuid
+  familyId     String?             @map("family_id") @db.Uuid
+  accountId    String              @map("account_id") @db.Uuid
+  categoryId   String              @map("category_id") @db.Uuid
+  type         TransactionType
+  amount       Decimal             @db.Decimal(15, 2)
+  description  String              @db.VarChar(255)
+  frequency    RecurrenceFrequency @default(MONTHLY)
+  startDate    DateTime            @map("start_date") @db.Date
+  endDate      DateTime?           @map("end_date") @db.Date
+  autoConfirm  Boolean             @default(false) @map("auto_confirm")
+  isActive     Boolean             @default(true) @map("is_active")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family       Family?             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  account      Account             @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  category     Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  transactions Transaction[]
+
+  @@map("recurrences")
+}
+
+model Budget {
+  id              String    @id @default(uuid()) @db.Uuid
+  familyId        String?   @map("family_id") @db.Uuid
+  userId          String?   @map("user_id") @db.Uuid
+  categoryId      String    @map("category_id") @db.Uuid
+  periodMonth     String    @map("period_month") @db.VarChar(7)
+  targetAmount    Decimal   @map("target_amount") @db.Decimal(15, 2)
+  alertPercentage Int       @default(80) @map("alert_percentage") @db.SmallInt
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  family          Family?   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user            User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@map("budgets")
+}
+
+model Goal {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  familyId      String?       @map("family_id") @db.Uuid
+  name          String        @db.VarChar(150)
+  targetAmount  Decimal       @map("target_amount") @db.Decimal(15, 2)
+  currentAmount Decimal       @default(0.00) @map("current_amount") @db.Decimal(15, 2)
+  deadline      DateTime?     @db.Date
+  status        GoalStatus    @default(IN_PROGRESS)
+  color         String?       @db.VarChar(7)
+  icon          String?       @db.VarChar(50)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family        Family?       @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  deposits      GoalDeposit[]
+
+  @@map("goals")
+}
+
+model GoalDeposit {
+  id            String       @id @default(uuid()) @db.Uuid
+  goalId        String       @map("goal_id") @db.Uuid
+  transactionId String?      @map("transaction_id") @db.Uuid
+  amount        Decimal      @db.Decimal(15, 2)
+  depositDate   DateTime     @map("deposit_date") @db.Date
+  notes         String?      @db.Text
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  goal          Goal         @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@map("goal_deposits")
+}
