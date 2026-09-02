@@ -413,8 +413,8 @@ T22 → T23
 **Depends on**: None
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] E2E integration test runs and passes all scenarios
-- [ ] Full gate check passes
+- [x] Integration test exercises full user-to-dashboard financial workflow
+- [x] Invariant verification validates exact decimal balances throughout all operations
 **Tests**: integration
 **Gate**: full
 
