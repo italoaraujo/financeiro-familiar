@@ -368,9 +368,9 @@ T22 → T23
 **Depends on**: T18
 **Requirement**: TX-01
 **Done when**:
-- [ ] Filterable and paginated transactions table
-- [ ] Modal supporting single, transfer, and installment creations
-- [ ] Action buttons for edit and delete with automatic balance refresh
+- [x] Filterable and paginated transactions table
+- [x] Modal supporting single, transfer, and installment creations
+- [x] Action buttons for edit and delete with automatic balance refresh
 **Tests**: unit
 **Gate**: quick
 
