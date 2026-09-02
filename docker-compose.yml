@@ -31,16 +31,13 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-financial_db}?schema=public
       JWT_SECRET: ${JWT_SECRET:-supersecretjwtkey1234567890}
       JWT_EXPIRATION: 1d
     ports:
       - "3001:3001"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     networks:
       - financial-net
 
@@ -53,14 +50,10 @@ services:
     depends_on:
       - api
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - financial-net
 
