@@ -28,4 +28,4 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npx prisma db push && npm run prisma:seed || true && if [ -f dist/src/main.js ]; then node dist/src/main.js; else node dist/main.js; fi"]
+CMD ["sh", "-c", "npx prisma db push && node dist/prisma/seed.js && if [ -f dist/src/main.js ]; then node dist/src/main.js; else node dist/main.js; fi"]

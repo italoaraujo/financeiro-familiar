@@ -42,23 +42,31 @@
 - **Date**: 2026-09-02
 - **Status**: active
 
+### AD-006
+- **Decision**: Pre-compile database seed TypeScript script (`prisma/seed.ts`) to native JavaScript (`dist/prisma/seed.js`) during Docker build and execute directly via Node in container entrypoint.
+- **Reason**: Prevents runtime failures in production containers where `devDependencies` (such as `ts-node`) are omitted by `npm ci` under `NODE_ENV=production`.
+- **Trade-off**: Requires compiling the seed script during build phase.
+- **Scope**: Backend build pipeline, Dockerfile entrypoint, and database seeding scripts.
+- **Date**: 2026-09-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `responsividade-telas`
-- **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
+- **Active Feature**: `fix-database-seed`
+- **Total Tasks**: 2
+- **Completed Tasks**: 2 / 2 (100%)
 - **Status**: **COMPLETE & VERIFIED**
-- **Test Suite Results**: Frontend build OK (`13/13` static routes generated), Backend build OK (`nest build` passed)
+- **Test Suite Results**: Backend build OK (`nest build` + `tsc prisma/seed.ts`), Seed execution OK (14 categories + demo admin user created), Login API test OK (JWT 200 OK)
 - **Build Status**: OK
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/responsividade-telas
+- **Feature**: .specs/features/fix-database-seed
 - **Phase / Task**: Complete
-- **Completed**: AppShell mobile drawer, global viewport controls, Dashboard, Transações, Contas, Cartões, Orçamentos, Metas, Família, Relatórios e Telas de Auth 100% responsivos.
+- **Completed**: Compilação de seed no Dockerfile, script `prisma:seed:prod`, execução da seed com criação de 14 categorias e usuário `admin@exemplo.com` / `123456`.
 - **In-progress**: none
-- **Next step**: Ready for deployment / user interaction.
+- **Next step**: Ready for demonstration and user usage.
 - **Blockers**: none
-- **Uncommitted files**: .specs/features/responsividade-telas/*, frontend/src/*
+- **Uncommitted files**: backend/*, .specs/*
 - **Branch**: main
