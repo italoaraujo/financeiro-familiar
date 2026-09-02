@@ -131,8 +131,8 @@ T22 → T23
 **Depends on**: T2
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] Next.js App Router scaffolded with Tailwind CSS and base styles
-- [ ] Frontend compiles without errors
+- [x] Next.js App Router scaffolded with Tailwind CSS and base styles
+- [x] Frontend compiles without errors
 **Tests**: none
 **Gate**: build
 
