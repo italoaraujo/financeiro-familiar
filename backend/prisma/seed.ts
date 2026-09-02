@@ -47,38 +47,44 @@ async function main() {
     }
   }
 
-  // Demo user: admin@exemplo.com / 123456
-  const existingUser = await prisma.user.findUnique({
-    where: { email: 'admin@exemplo.com' },
-  });
+  // Demo user: admin@exemplo.com / 123456 (only created in development environment)
+  const currentEnv = (process.env.APP_ENV || 'development').toLowerCase();
 
-  if (!existingUser) {
-    const passwordHash = await bcrypt.hash('123456', 10);
-    const demoUser = await prisma.user.create({
-      data: {
-        name: 'Usuário Demo',
-        email: 'admin@exemplo.com',
-        passwordHash,
-      },
+  if (currentEnv === 'development') {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'admin@exemplo.com' },
     });
 
-    const demoFamily = await prisma.family.create({
-      data: {
-        name: 'Família Silva',
-        description: 'Finanças compartilhadas do lar',
-        ownerId: demoUser.id,
-      },
-    });
+    if (!existingUser) {
+      const passwordHash = await bcrypt.hash('123456', 10);
+      const demoUser = await prisma.user.create({
+        data: {
+          name: 'Usuário Demo',
+          email: 'admin@exemplo.com',
+          passwordHash,
+        },
+      });
 
-    await prisma.familyMember.create({
-      data: {
-        familyId: demoFamily.id,
-        userId: demoUser.id,
-        role: 'OWNER',
-      },
-    });
+      const demoFamily = await prisma.family.create({
+        data: {
+          name: 'Família Silva',
+          description: 'Finanças compartilhadas do lar',
+          ownerId: demoUser.id,
+        },
+      });
 
-    console.log('Demo user and family created: admin@exemplo.com / 123456');
+      await prisma.familyMember.create({
+        data: {
+          familyId: demoFamily.id,
+          userId: demoUser.id,
+          role: 'OWNER',
+        },
+      });
+
+      console.log('Demo user and family created: admin@exemplo.com / 123456');
+    }
+  } else {
+    console.log(`Skipping demo user creation for environment: '${currentEnv}'`);
   }
 
   console.log('Database seeding finished successfully!');
