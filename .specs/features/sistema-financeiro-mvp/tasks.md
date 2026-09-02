@@ -261,11 +261,11 @@ T22 → T23
 **Depends on**: None
 **Requirement**: TX-01
 **Done when**:
-- [ ] Creates income/expense with immediate balance recalculation
-- [ ] Creates atomic transfers debiting origin and crediting destination
-- [ ] Generates installment series across consecutive invoice cycles
-- [ ] Respects `is_private` visibility flag
-- [ ] Unit tests verify decimal accuracy, rollback on failure, and private filters
+- [x] Creates income/expense with immediate balance recalculation
+- [x] Creates atomic transfers debiting origin and crediting destination
+- [x] Generates installment series across consecutive invoice cycles
+- [x] Respects `is_private` visibility flag
+- [x] Unit tests verify decimal accuracy, rollback on failure, and private filters
 **Tests**: unit
 **Gate**: quick
 

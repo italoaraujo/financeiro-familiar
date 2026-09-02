@@ -8,6 +8,7 @@ import { FamiliesModule } from './modules/families/families.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { CreditCardsModule } from './modules/credit-cards/credit-cards.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
     AccountsModule,
     CreditCardsModule,
     CategoriesModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
