@@ -201,9 +201,9 @@ T22 → T23
 **Depends on**: T7
 **Requirement**: AUTH-02
 **Done when**:
-- [ ] `POST /families` creates family group
-- [ ] `POST /families/:id/members` adds member with role
-- [ ] Unit tests verify role assignment and member listings
+- [x] `POST /families` creates family group
+- [x] `POST /families/:id/members` adds member with role
+- [x] Unit tests verify role assignment and member listings
 **Tests**: unit
 **Gate**: quick
 
