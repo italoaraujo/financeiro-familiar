@@ -208,48 +208,54 @@ export default function CreditCardsPage() {
 
                     {/* Invoices List */}
                     <div className="mt-5 sm:mt-6 space-y-2.5">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Faturas Recentes</h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Faturas ({card.invoices?.length || 0})
+                        </h4>
+                      </div>
                       {card.invoices?.length === 0 ? (
                         <p className="text-xs text-slate-500">Nenhuma fatura registrada.</p>
                       ) : (
-                        card.invoices?.map((inv: any) => (
-                          <div
-                            key={inv.id}
-                            className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
-                              <div className="min-w-0">
-                                <p className="font-semibold text-white truncate">Mês: {inv.referenceMonth}</p>
-                                <p className="text-slate-400 text-[11px] truncate">Vencimento: {formatDate(inv.dueDate)}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/40">
-                              <div className="text-left sm:text-right">
-                                <p className="font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
-                                <span
-                                  className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
-                                    inv.status === 'PAID'
-                                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                  }`}
-                                >
-                                  {inv.status}
-                                </span>
+                        <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                          {card.invoices?.map((inv: any) => (
+                            <div
+                              key={inv.id}
+                              className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-white truncate">Mês: {inv.referenceMonth}</p>
+                                  <p className="text-slate-400 text-[11px] truncate">Vencimento: {formatDate(inv.dueDate)}</p>
+                                </div>
                               </div>
 
-                              {inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
-                                <button
-                                  onClick={() => openPayModal(inv)}
-                                  className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"
-                                >
-                                  Pagar Fatura
-                                </button>
-                              )}
+                              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/40">
+                                <div className="text-left sm:text-right">
+                                  <p className="font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
+                                  <span
+                                    className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                                      inv.status === 'PAID'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                    }`}
+                                  >
+                                    {inv.status}
+                                  </span>
+                                </div>
+
+                                {inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
+                                  <button
+                                    onClick={() => openPayModal(inv)}
+                                    className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"
+                                  >
+                                    Pagar Fatura
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>

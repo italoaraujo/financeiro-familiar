@@ -48,9 +48,24 @@ export class TransactionsService {
 
         const createdTransactions = [];
 
+        const baseYear = baseDate.getFullYear();
+        const baseMonth = baseDate.getMonth();
+        const baseDay = baseDate.getDate();
+
         for (let i = 1; i <= totalInstallments; i++) {
-          const installmentDate = new Date(baseDate);
-          installmentDate.setMonth(installmentDate.getMonth() + (i - 1));
+          const targetMonth = baseMonth + (i - 1);
+          const targetYear = baseYear + Math.floor(targetMonth / 12);
+          const monthIndex = ((targetMonth % 12) + 12) % 12;
+          const maxDaysInMonth = new Date(targetYear, monthIndex + 1, 0).getDate();
+          const targetDay = Math.min(baseDay, maxDaysInMonth);
+          const installmentDate = new Date(
+            targetYear,
+            monthIndex,
+            targetDay,
+            baseDate.getHours(),
+            baseDate.getMinutes(),
+            baseDate.getSeconds(),
+          );
 
           const invoice = await this.creditCardsService.determineInvoiceForDate(
             dto.creditCardId!,

@@ -51,8 +51,7 @@ export class CreditCardsService {
       where: familyId ? { familyId, isActive: true } : { userId, isActive: true },
       include: {
         invoices: {
-          orderBy: { referenceMonth: 'desc' },
-          take: 6,
+          orderBy: { referenceMonth: 'asc' },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -79,7 +78,7 @@ export class CreditCardsService {
       where: { id },
       include: {
         invoices: {
-          orderBy: { referenceMonth: 'desc' },
+          orderBy: { referenceMonth: 'asc' },
         },
       },
     });

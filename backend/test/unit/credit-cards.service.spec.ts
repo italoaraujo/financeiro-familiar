@@ -154,4 +154,44 @@ describe('CreditCardsService', () => {
       });
     });
   });
+
+  describe('findAll', () => {
+    it('should return all invoices and calculate committedAmount and availableLimit accurately without 6 invoices cap', async () => {
+      // Simula 10 faturas de R$ 10,00 cada
+      const mockInvoices = Array.from({ length: 10 }, (_, i) => ({
+        id: `inv-${i + 1}`,
+        creditCardId: 'card-1',
+        referenceMonth: `2026-${String(i + 1).padStart(2, '0')}`,
+        status: InvoiceStatus.OPEN,
+        totalAmount: new Prisma.Decimal(10),
+        paidAmount: new Prisma.Decimal(0),
+      }));
+
+      prisma.creditCard.findMany.mockResolvedValue([
+        {
+          id: 'card-1',
+          name: 'Nubank',
+          creditLimit: new Prisma.Decimal(1000),
+          invoices: mockInvoices,
+        },
+      ]);
+
+      const result = await service.findAll('user-1');
+
+      expect(prisma.creditCard.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', isActive: true },
+        include: {
+          invoices: {
+            orderBy: { referenceMonth: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].invoices).toHaveLength(10);
+      expect(result[0].committedAmount.toNumber()).toBe(100);
+      expect(result[0].availableLimit.toNumber()).toBe(900);
+    });
+  });
 });
