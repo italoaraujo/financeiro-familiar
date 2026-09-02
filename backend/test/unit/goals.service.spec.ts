@@ -62,7 +62,49 @@ describe('GoalsService', () => {
       });
 
       expect(result.id).toBe('goal-1');
-      expect(prisma.goal.create).toHaveBeenCalled();
+      expect(prisma.goal.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'user-1',
+          familyId: null,
+          name: 'Reserva',
+        }),
+      });
+    });
+
+    it('should verify family access and create goal with familyId and userId', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        familyId: 'family-1',
+        userId: 'user-1',
+      });
+
+      prisma.goal.create.mockResolvedValue({
+        id: 'goal-2',
+        userId: 'user-1',
+        familyId: 'family-1',
+        name: 'Viagem',
+        targetAmount: new Prisma.Decimal(5000),
+        currentAmount: new Prisma.Decimal(0),
+        status: GoalStatus.IN_PROGRESS,
+      });
+
+      const result = await service.create('user-1', {
+        name: 'Viagem',
+        targetAmount: 5000,
+        familyId: 'family-1',
+      });
+
+      expect(result.id).toBe('goal-2');
+      expect(prisma.familyMember.findUnique).toHaveBeenCalledWith({
+        where: {
+          familyId_userId: { familyId: 'family-1', userId: 'user-1' },
+        },
+      });
+      expect(prisma.goal.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'user-1',
+          familyId: 'family-1',
+        }),
+      });
     });
   });
 

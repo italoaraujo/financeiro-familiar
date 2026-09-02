@@ -21,7 +21,7 @@ export class GoalsService {
 
     return this.prisma.goal.create({
       data: {
-        userId: dto.familyId ? null : userId,
+        userId,
         familyId: dto.familyId || null,
         name: dto.name,
         targetAmount: new Prisma.Decimal(dto.targetAmount),
@@ -79,9 +79,9 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId && goal.userId !== userId && goal.familyId) {
+    if (goal.userId !== userId && goal.familyId) {
       await this.verifyFamilyAccess(userId, goal.familyId);
-    } else if (goal.userId && goal.userId !== userId) {
+    } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado à meta especificada');
     }
 
@@ -105,9 +105,9 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId && goal.userId !== userId && goal.familyId) {
+    if (goal.userId !== userId && goal.familyId) {
       await this.verifyFamilyAccess(userId, goal.familyId);
-    } else if (goal.userId && goal.userId !== userId) {
+    } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado à meta especificada');
     }
 
@@ -203,7 +203,9 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId && goal.userId !== userId) {
+    if (goal.userId !== userId && goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId);
+    } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado');
     }
 
@@ -229,7 +231,9 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId && goal.userId !== userId) {
+    if (goal.userId !== userId && goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId);
+    } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado');
     }
 
