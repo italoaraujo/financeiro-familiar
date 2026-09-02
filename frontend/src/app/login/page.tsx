@@ -109,9 +109,11 @@ export default function LoginPage() {
                 Cadastre-se gratuitamente
               </Link>
             </p>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-2">
-              Conta de demonstração: <span className="text-slate-400">admin@exemplo.com</span> / <span className="text-slate-400">123456</span>
-            </p>
+            {((process.env.NEXT_PUBLIC_APP_ENV || 'development').toLowerCase() === 'development') && (
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-2">
+                Conta de demonstração: <span className="text-slate-400">admin@exemplo.com</span> / <span className="text-slate-400">123456</span>
+              </p>
+            )}
           </div>
         </div>
       </div>
