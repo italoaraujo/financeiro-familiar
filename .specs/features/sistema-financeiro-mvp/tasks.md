@@ -339,8 +339,8 @@ T22 → T23
 **Depends on**: T16
 **Requirement**: AUTH-04
 **Done when**:
-- [ ] Login and Register forms with validation and error toasts
-- [ ] Sidebar navigation with active route highlights and context switcher
+- [x] Login and Register forms with validation and error toasts
+- [x] Sidebar navigation with active route highlights and context switcher
 **Tests**: unit
 **Gate**: quick
 
