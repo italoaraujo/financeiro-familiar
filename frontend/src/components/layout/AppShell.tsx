@@ -97,11 +97,11 @@ export default function AppShell({ children }: AppShellProps) {
         <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-9 w-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-              {user.name.charAt(0).toUpperCase()}
+              {user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')}
             </div>
             <div className="truncate">
-              <p className="text-sm font-semibold text-slate-200 truncate">{user.name}</p>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
+              <p className="text-sm font-semibold text-slate-200 truncate">{user?.name || user?.email || 'Usuário'}</p>
+              <p className="text-xs text-slate-400 truncate">{user?.email || ''}</p>
             </div>
           </div>
           <button

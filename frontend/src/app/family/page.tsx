@@ -44,10 +44,11 @@ export default function FamilyPage() {
       const fams = await apiRequest('/families');
       setFamilies(fams || []);
 
-      if (fams.length > 0) {
-        const activeFamId = selectedFamilyId || fams[0].family.id;
+      if (fams && fams.length > 0) {
+        const activeFamId = selectedFamilyId || fams[0].family?.id || fams[0].id;
         const details = await apiRequest(`/families/${activeFamId}`);
-        setCurrentFamily(details);
+        const familyData = details?.family ? { ...details.family, role: details.role } : details;
+        setCurrentFamily(familyData);
       } else {
         setCurrentFamily(null);
       }
@@ -195,20 +196,20 @@ export default function FamilyPage() {
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 text-white font-bold text-xl">
-                  {currentFamily.name.charAt(0).toUpperCase()}
+                  {currentFamily?.name ? currentFamily.name.charAt(0).toUpperCase() : 'F'}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">{currentFamily.name}</h2>
+                  <h2 className="text-xl font-bold text-white">{currentFamily?.name || 'Grupo Familiar'}</h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    {currentFamily.description || 'Gestão financeira compartilhada'} • Criado em{' '}
-                    {formatDate(currentFamily.createdAt)}
+                    {currentFamily?.description || 'Gestão financeira compartilhada'} • Criado em{' '}
+                    {currentFamily?.createdAt ? formatDate(currentFamily.createdAt) : '-'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-400 font-medium">
-                  {currentFamily.members?.length} integrantes ativos
+                  {currentFamily?.members?.length || 0} integrantes ativos
                 </span>
               </div>
             </div>
@@ -218,22 +219,22 @@ export default function FamilyPage() {
               <h3 className="text-base font-bold text-white mb-4">Integrantes do Grupo</h3>
 
               <div className="divide-y divide-slate-800/80">
-                {currentFamily.members?.map((m: any) => (
+                {currentFamily?.members?.map((m: any) => (
                   <div key={m.id} className="py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-200 font-bold text-sm">
-                        {m.user?.name?.charAt(0).toUpperCase()}
+                        {m.user?.name ? m.user.name.charAt(0).toUpperCase() : (m.user?.email ? m.user.email.charAt(0).toUpperCase() : 'U')}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-white text-sm">{m.user?.name}</p>
+                          <p className="font-semibold text-white text-sm">{m.user?.name || m.user?.email || 'Membro'}</p>
                           {m.user?.id === user?.id && (
                             <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold">
                               Você
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400">{m.user?.email}</p>
+                        <p className="text-xs text-slate-400">{m.user?.email || '-'}</p>
                       </div>
                     </div>
 
