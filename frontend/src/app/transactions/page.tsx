@@ -8,15 +8,12 @@ import { formatCurrency, formatDate } from '../../lib/formatters';
 import {
   Plus,
   Search,
-  Filter,
   ArrowUpRight,
   ArrowDownRight,
   ArrowLeftRight,
   Trash2,
-  Calendar,
   Wallet,
   CreditCard,
-  Tag,
   Lock,
   X,
 } from 'lucide-react';
@@ -65,13 +62,13 @@ export default function TransactionsPage() {
         apiRequest('/credit-cards', { params }),
         apiRequest('/categories', { params }),
       ]);
-      setAccounts(accs);
-      setCards(cds);
-      setCategories(cats);
+      setAccounts(accs || []);
+      setCards(cds || []);
+      setCategories(cats || []);
 
-      if (accs.length > 0) setAccountId(accs[0].id);
-      if (cds.length > 0) setCreditCardId(cds[0].id);
-      if (cats.length > 0) setCategoryId(cats[0].id);
+      if (accs && accs.length > 0) setAccountId(accs[0].id);
+      if (cds && cds.length > 0) setCreditCardId(cds[0].id);
+      if (cats && cats.length > 0) setCategoryId(cats[0].id);
     } catch (err) {
       console.error('Error loading auxiliary data:', err);
     }
@@ -91,8 +88,8 @@ export default function TransactionsPage() {
       };
 
       const result = await apiRequest('/transactions', { params });
-      setTransactions(result.data || []);
-      setMeta(result.meta || { total: 0, page: 1, limit: 15, totalPages: 1 });
+      setTransactions(result?.data || []);
+      setMeta(result?.meta || { total: 0, page: 1, limit: 15, totalPages: 1 });
     } catch (err) {
       console.error('Error loading transactions:', err);
     } finally {
@@ -184,37 +181,37 @@ export default function TransactionsPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         {/* Top Header & Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Extrato & Lançamentos</h1>
-            <p className="text-sm text-slate-400">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Extrato & Lançamentos</h1>
+            <p className="text-xs sm:text-sm text-slate-400">
               Histórico completo de receitas, despesas, transferências e parcelamentos
             </p>
           </div>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-500/20 transition-all"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 shrink-0" />
             <span>Novo Lançamento</span>
           </button>
         </div>
 
         {/* Search & Filters Bar */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 sm:p-4">
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
             {/* Search query */}
-            <div className="relative lg:col-span-2">
-              <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
+            <div className="relative sm:col-span-2 lg:col-span-2">
+              <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por descrição..."
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-9 pr-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
@@ -226,7 +223,7 @@ export default function TransactionsPage() {
                   setType(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value="">Todos os Tipos</option>
                 <option value="EXPENSE">Despesas</option>
@@ -244,7 +241,7 @@ export default function TransactionsPage() {
                   setStartDate(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
 
@@ -257,7 +254,7 @@ export default function TransactionsPage() {
                   setEndDate(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
           </form>
@@ -265,54 +262,54 @@ export default function TransactionsPage() {
 
         {/* Transactions Table */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-800/50 text-xs uppercase font-semibold text-slate-400 border-b border-slate-800">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-xs sm:text-sm text-slate-300 min-w-[640px]">
+              <thead className="bg-slate-800/50 text-[11px] sm:text-xs uppercase font-semibold text-slate-400 border-b border-slate-800">
                 <tr>
-                  <th className="px-6 py-4">Data</th>
-                  <th className="px-6 py-4">Descrição</th>
-                  <th className="px-6 py-4">Categoria</th>
-                  <th className="px-6 py-4">Conta / Cartão</th>
-                  <th className="px-6 py-4">Valor</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
+                  <th className="px-4 sm:px-6 py-3.5">Data</th>
+                  <th className="px-4 sm:px-6 py-3.5">Descrição</th>
+                  <th className="px-4 sm:px-6 py-3.5">Categoria</th>
+                  <th className="px-4 sm:px-6 py-3.5">Conta / Cartão</th>
+                  <th className="px-4 sm:px-6 py-3.5">Valor</th>
+                  <th className="px-4 sm:px-6 py-3.5">Status</th>
+                  <th className="px-4 sm:px-6 py-3.5 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-4 sm:px-6 py-12 text-center text-slate-500 text-xs sm:text-sm">
                       Carregando lançamentos...
                     </td>
                   </tr>
                 ) : transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-4 sm:px-6 py-12 text-center text-slate-500 text-xs sm:text-sm">
                       Nenhum lançamento encontrado para os filtros aplicados.
                     </td>
                   </tr>
                 ) : (
                   transactions.map((tx) => (
                     <tr key={tx.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-xs text-slate-400">
                         {formatDate(tx.transactionDate)}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 font-medium text-white">
+                      <td className="px-4 sm:px-6 py-3.5">
+                        <div className="flex items-center gap-2 font-medium text-white max-w-xs">
                           {tx.isPrivate && (
                             <span title="Lançamento Privado">
                               <Lock className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                             </span>
                           )}
-                          <span>{tx.description}</span>
+                          <span className="truncate">{tx.description}</span>
                           {tx.totalInstallments && tx.totalInstallments > 1 && (
-                            <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">
+                            <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0">
                               {tx.installmentNumber}/{tx.totalInstallments}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
                         <span
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
                           style={{
@@ -327,28 +324,28 @@ export default function TransactionsPage() {
                           {tx.category?.name || 'Geral'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-300">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-xs text-slate-300">
                         {tx.type === 'TRANSFER' ? (
                           <div className="flex items-center gap-1">
                             <span>{tx.account?.name}</span>
-                            <ArrowLeftRight className="h-3 w-3 text-slate-500" />
+                            <ArrowLeftRight className="h-3 w-3 text-slate-500 shrink-0" />
                             <span>{tx.destinationAccount?.name}</span>
                           </div>
                         ) : tx.account ? (
                           <div className="flex items-center gap-1.5">
-                            <Wallet className="h-3.5 w-3.5 text-slate-400" />
+                            <Wallet className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                             <span>{tx.account.name}</span>
                           </div>
                         ) : tx.creditCard ? (
                           <div className="flex items-center gap-1.5">
-                            <CreditCard className="h-3.5 w-3.5 text-purple-400" />
+                            <CreditCard className="h-3.5 w-3.5 text-purple-400 shrink-0" />
                             <span>{tx.creditCard.name}</span>
                           </div>
                         ) : (
                           '-'
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-bold">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap font-bold">
                         <span
                           className={
                             tx.type === 'INCOME'
@@ -362,7 +359,7 @@ export default function TransactionsPage() {
                           {formatCurrency(tx.amount)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
                         <span
                           className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
                             tx.status === 'COMPLETED'
@@ -373,7 +370,7 @@ export default function TransactionsPage() {
                           {tx.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-right">
                         <button
                           onClick={() => handleDelete(tx.id)}
                           className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
@@ -391,7 +388,7 @@ export default function TransactionsPage() {
 
           {/* Pagination Footer */}
           {meta.totalPages > 1 && (
-            <div className="p-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-3.5 sm:p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
               <span>
                 Mostrando página <strong className="text-white">{meta.page}</strong> de{' '}
                 <strong className="text-white">{meta.totalPages}</strong> ({meta.total} registros)
@@ -419,19 +416,20 @@ export default function TransactionsPage() {
 
         {/* Create Transaction Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative my-8">
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute right-4 top-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                aria-label="Fechar"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-xl font-bold text-white mb-4">Novo Lançamento Financeiro</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Novo Lançamento Financeiro</h2>
 
               {/* Type Switcher Tabs */}
-              <div className="grid grid-cols-3 gap-2 p-1 bg-slate-800/80 rounded-xl mb-6">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1 bg-slate-800/80 rounded-xl mb-5">
                 <button
                   type="button"
                   onClick={() => setModalType('EXPENSE')}
@@ -467,7 +465,7 @@ export default function TransactionsPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateTransaction} className="space-y-4">
+              <form onSubmit={handleCreateTransaction} className="space-y-3.5 sm:space-y-4">
                 {/* Amount */}
                 <div>
                   <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
@@ -481,7 +479,7 @@ export default function TransactionsPage() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0,00"
-                    className="w-full text-lg font-bold bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-base sm:text-lg font-bold bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -496,7 +494,7 @@ export default function TransactionsPage() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Ex: Aluguel, Supermercado, Salário..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -510,13 +508,13 @@ export default function TransactionsPage() {
                     required
                     value={transactionDate}
                     onChange={(e) => setTransactionDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                   />
                 </div>
 
                 {/* Conditional Fields for TRANSFER */}
                 {modalType === 'TRANSFER' ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
                         Conta Origem *
@@ -525,7 +523,7 @@ export default function TransactionsPage() {
                         value={accountId}
                         onChange={(e) => setAccountId(e.target.value)}
                         required
-                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       >
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
@@ -543,7 +541,7 @@ export default function TransactionsPage() {
                         value={destinationAccountId}
                         onChange={(e) => setDestinationAccountId(e.target.value)}
                         required
-                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       >
                         <option value="">Selecione...</option>
                         {accounts
@@ -567,7 +565,7 @@ export default function TransactionsPage() {
                         value={categoryId}
                         onChange={(e) => setCategoryId(e.target.value)}
                         required
-                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       >
                         {categories
                           .filter((c) => !c.type || c.type === modalType)
@@ -581,12 +579,12 @@ export default function TransactionsPage() {
 
                     {/* Payment Mode (Account vs Card) for Expense */}
                     {modalType === 'EXPENSE' && (
-                      <div className="space-y-3 pt-1">
+                      <div className="space-y-2.5 pt-1">
                         <label className="block text-xs font-semibold uppercase text-slate-400">
                           Forma de Pagamento
                         </label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                          <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 cursor-pointer">
                             <input
                               type="radio"
                               name="paymentMode"
@@ -596,7 +594,7 @@ export default function TransactionsPage() {
                             />
                             <span>Conta Bancária / Dinheiro</span>
                           </label>
-                          <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                          <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 cursor-pointer">
                             <input
                               type="radio"
                               name="paymentMode"
@@ -613,7 +611,7 @@ export default function TransactionsPage() {
                             <select
                               value={accountId}
                               onChange={(e) => setAccountId(e.target.value)}
-                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
                             >
                               {accounts.map((acc) => (
                                 <option key={acc.id} value={acc.id}>
@@ -623,12 +621,12 @@ export default function TransactionsPage() {
                             </select>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                             <div>
                               <select
                                 value={creditCardId}
                                 onChange={(e) => setCreditCardId(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
                               >
                                 {cards.map((c) => (
                                   <option key={c.id} value={c.id}>
@@ -645,7 +643,7 @@ export default function TransactionsPage() {
                                 value={totalInstallments}
                                 onChange={(e) => setTotalInstallments(parseInt(e.target.value) || 1)}
                                 placeholder="Parcelas (ex: 1)"
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
                               />
                             </div>
                           </div>
@@ -661,7 +659,7 @@ export default function TransactionsPage() {
                         <select
                           value={accountId}
                           onChange={(e) => setAccountId(e.target.value)}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
                         >
                           {accounts.map((acc) => (
                             <option key={acc.id} value={acc.id}>
@@ -681,9 +679,9 @@ export default function TransactionsPage() {
                       type="checkbox"
                       checked={isPrivate}
                       onChange={(e) => setIsPrivate(e.target.checked)}
-                      className="accent-emerald-500 rounded"
+                      className="accent-emerald-500 rounded shrink-0"
                     />
-                    <span>Marcar como lançamento privado (ocultar detalhes de outros membros da família)</span>
+                    <span>Marcar como lançamento privado (ocultar de outros membros)</span>
                   </label>
                 </div>
 
@@ -691,7 +689,7 @@ export default function TransactionsPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
+                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
                 >
                   {submitting ? 'Salvando lançamento...' : 'Confirmar Lançamento'}
                 </button>

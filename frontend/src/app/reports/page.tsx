@@ -6,12 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { formatCurrency } from '../../lib/formatters';
 import {
-  FileSpreadsheet,
   Download,
-  Calendar,
   Filter,
-  TrendingUp,
-  TrendingDown,
   PieChart as PieIcon,
   BarChart2,
 } from 'lucide-react';
@@ -100,12 +96,12 @@ export default function ReportsPage() {
 
   return (
     <AppShell>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Relatórios & Exportação de Dados</h1>
-            <p className="text-sm text-slate-400">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Relatórios & Exportação de Dados</h1>
+            <p className="text-xs sm:text-sm text-slate-400">
               Análise aprofundada da evolução financeira e download de extrato em planilha CSV
             </p>
           </div>
@@ -113,28 +109,28 @@ export default function ReportsPage() {
           <button
             onClick={handleExportCsv}
             disabled={downloading}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 w-full sm:w-auto"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-4 w-4 shrink-0" />
             <span>{downloading ? 'Gerando CSV...' : 'Exportar Extrato (CSV)'}</span>
           </button>
         </div>
 
         {/* Filters and Export Options Banner */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-white">
-            <Filter className="h-4 w-4 text-emerald-400" />
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-white">
+            <Filter className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>Filtros do Relatório & Exportação</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Inicial</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
 
@@ -144,16 +140,16 @@ export default function ReportsPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Janela de Meses no Gráfico</label>
+              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Período nos Gráficos</label>
               <select
                 value={monthsCount}
                 onChange={(e) => setMonthsCount(Number(e.target.value))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value={3}>Últimos 3 meses</option>
                 <option value={6}>Últimos 6 meses</option>
@@ -164,20 +160,23 @@ export default function ReportsPage() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Cash Flow */}
-          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-2 mb-6">
-              <BarChart2 className="h-5 w-5 text-emerald-400" />
-              <h3 className="font-bold text-white text-base">Evolução Mensal (Receitas x Despesas)</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8">
+          {/* Cash Flow Evolution */}
+          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-4 sm:mb-6">
+              <BarChart2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400 shrink-0" />
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white">Evolução Mensal (Receitas x Despesas)</h3>
+                <p className="text-xs text-slate-400">Visão temporal do balanço financeiro</p>
+              </div>
             </div>
 
-            <div className="h-80 w-full">
+            <div className="h-64 sm:h-80 w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cashFlow} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                <BarChart data={cashFlow} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                  <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#0f172a',
@@ -187,7 +186,7 @@ export default function ReportsPage() {
                     }}
                     formatter={(val: any) => [formatCurrency(val), '']}
                   />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                   <Bar dataKey="income" name="Receitas" fill="#10b981" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expense" name="Despesas" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -195,20 +194,23 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Category Share */}
-          <div className="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-            <div className="flex items-center gap-2 mb-4">
-              <PieIcon className="h-5 w-5 text-purple-400" />
-              <h3 className="font-bold text-white text-base">Distribuição por Categoria</h3>
+          {/* Categories Share */}
+          <div className="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 flex flex-col justify-between">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <PieIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 shrink-0" />
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white">Participação de Gastos por Categoria</h3>
+                <p className="text-xs text-slate-400">Distribuição percentual acumulada</p>
+              </div>
             </div>
 
             {categories.length === 0 ? (
-              <div className="h-64 flex items-center justify-center text-slate-500 text-sm">
-                Nenhum dado no período
+              <div className="h-48 sm:h-64 flex items-center justify-center text-slate-500 text-xs sm:text-sm">
+                Nenhum dado encontrado para o período.
               </div>
             ) : (
               <>
-                <div className="h-56 w-full">
+                <div className="h-48 sm:h-56 w-full min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -216,7 +218,7 @@ export default function ReportsPage() {
                         cx="50%"
                         cy="50%"
                         innerRadius={50}
-                        outerRadius={80}
+                        outerRadius={75}
                         paddingAngle={4}
                         dataKey="percentage"
                         nameKey="name"
@@ -244,17 +246,19 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="mt-4 space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="mt-3 sm:mt-4 space-y-2 max-h-40 overflow-y-auto pr-1">
                   {categories.map((cat, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs py-1">
-                      <div className="flex items-center gap-2">
+                    <div key={idx} className="flex items-center justify-between text-xs gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="h-2.5 w-2.5 rounded-full"
+                          className="h-2.5 w-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: cat.color || COLORS[idx % COLORS.length] }}
                         ></span>
-                        <span className="text-slate-300 font-medium">{cat.name}</span>
+                        <span className="text-slate-300 font-medium truncate">{cat.name}</span>
                       </div>
-                      <span className="text-slate-400 font-bold">{formatCurrency(cat.amount)} ({cat.percentage}%)</span>
+                      <span className="text-slate-400 font-semibold shrink-0">
+                        {formatCurrency(cat.amount)} ({cat.percentage}%)
+                      </span>
                     </div>
                   ))}
                 </div>

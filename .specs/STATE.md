@@ -34,23 +34,31 @@
 - **Date**: 2026-09-01
 - **Status**: active
 
+### AD-005
+- **Decision**: Adopt responsive drawer pattern with backdrop-blur overlay, fluid grids, and adaptive overflow containers across all screens for full mobile, tablet, and desktop compatibility.
+- **Reason**: Provides a smooth native-like experience on smaller viewports without compromising desktop navigation.
+- **Trade-off**: Requires managing mobile navigation open/close state in UI shell.
+- **Scope**: Frontend layout, components, pages, modals, and tables.
+- **Date**: 2026-09-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `sistema-financeiro-mvp`
-- **Total Tasks**: 23
-- **Completed Tasks**: 23 / 23 (100%)
+- **Active Feature**: `responsividade-telas`
+- **Total Tasks**: 8
+- **Completed Tasks**: 8 / 8 (100%)
 - **Status**: **COMPLETE & VERIFIED**
-- **Test Suite Results**: 11 passed test suites (33 tests total, 0 failures)
-- **Build Status**: Backend (`nest build`) OK, Frontend (`next build`) OK (13 static routes generated)
-- **Gates Verified**: Quick, Full, and Build deterministic validation checks passed.
+- **Test Suite Results**: Frontend build OK (`13/13` static routes generated), Backend build OK (`nest build` passed)
+- **Build Status**: OK
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/sistema-financeiro-mvp
-- **Phase / Task**: Specify Phase
-- **Completed**: Initial Architecture & DB Analysis, STATE.md initialization
-- **In-progress** (file:line): `.specs/features/sistema-financeiro-mvp/spec.md:1`
-- **Next step**: Complete spec.md, validate with validate_spec.py, and proceed to Design & Tasks.
+- **Feature**: .specs/features/responsividade-telas
+- **Phase / Task**: Complete
+- **Completed**: AppShell mobile drawer, global viewport controls, Dashboard, Transações, Contas, Cartões, Orçamentos, Metas, Família, Relatórios e Telas de Auth 100% responsivos.
+- **In-progress**: none
+- **Next step**: Ready for deployment / user interaction.
 - **Blockers**: none
-- **Uncommitted files**: .specs/STATE.md
+- **Uncommitted files**: .specs/features/responsividade-telas/*, frontend/src/*
 - **Branch**: main
