@@ -172,8 +172,8 @@ T22 → T23
 **Depends on**: T5
 **Requirement**: CAT-01
 **Done when**:
-- [ ] `PrismaService` connects cleanly to PostgreSQL
-- [ ] Seed populates default system categories (Alimentação, Moradia, Transporte, etc.)
+- [x] `PrismaService` connects cleanly to PostgreSQL
+- [x] Seed populates default system categories (Alimentação, Moradia, Transporte, etc.)
 **Tests**: unit
 **Gate**: quick
 
