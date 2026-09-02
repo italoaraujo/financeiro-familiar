@@ -116,9 +116,9 @@ T22 → T23
 **Depends on**: T1
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] NestJS package.json with scripts `build`, `start:dev`, `test` configured
-- [ ] TypeScript config and NestJS bootstrap in place
-- [ ] Backend compiles without errors
+- [x] NestJS package.json with scripts `build`, `start:dev`, `test` configured
+- [x] TypeScript config and NestJS bootstrap in place
+- [x] Backend compiles without errors
 **Tests**: none
 **Gate**: build
 
