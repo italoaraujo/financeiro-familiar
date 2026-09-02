@@ -1,5 +1,6 @@
 # Build stage
 FROM node:20-alpine AS builder
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 COPY package*.json ./
@@ -11,6 +12,7 @@ RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runner
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -26,4 +28,4 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npx prisma db push && npm run prisma:seed || true && node dist/main"]
+CMD ["sh", "-c", "npx prisma db push && npm run prisma:seed || true && if [ -f dist/src/main.js ]; then node dist/src/main.js; else node dist/main.js; fi"]
