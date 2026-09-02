@@ -383,8 +383,8 @@ T22 → T23
 **Depends on**: T19
 **Requirement**: ACCT-01
 **Done when**:
-- [ ] Account listing with balance cards and new account dialog
-- [ ] Credit card listing with visual limit progress bar and invoice details
+- [x] Account listing with balance cards and new account dialog
+- [x] Credit card listing with visual limit progress bar and invoice details
 **Tests**: unit
 **Gate**: quick
 
