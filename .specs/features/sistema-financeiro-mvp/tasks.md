@@ -353,9 +353,9 @@ T22 → T23
 **Depends on**: T17
 **Requirement**: REP-01
 **Done when**:
-- [ ] Dashboard cards render live financial indicators
-- [ ] Interactive charts display expense by category and monthly comparisons
-- [ ] Responsive grid layout adapts to desktop and mobile
+- [x] Dashboard cards render live financial indicators
+- [x] Interactive charts display expense by category and monthly comparisons
+- [x] Responsive grid layout adapts to desktop and mobile
 **Tests**: unit
 **Gate**: quick
 
