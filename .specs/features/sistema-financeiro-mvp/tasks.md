@@ -324,9 +324,9 @@ T22 → T23
 **Depends on**: None
 **Requirement**: AUTH-01
 **Done when**:
-- [ ] API client attaches Bearer token to requests
-- [ ] AuthProvider handles login, register, logout, and family context switcher
-- [ ] Unit tests verify token storage and request formatting
+- [x] API client attaches Bearer token to requests
+- [x] AuthProvider handles login, register, logout, and family context switcher
+- [x] Unit tests verify token storage and request formatting
 **Tests**: unit
 **Gate**: quick
 
