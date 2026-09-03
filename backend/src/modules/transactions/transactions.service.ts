@@ -24,6 +24,18 @@ export class TransactionsService {
       await this.verifyFamilyAccess(userId, dto.familyId);
     }
 
+    if (dto.personId) {
+      const person = await this.prisma.person.findUnique({
+        where: { id: dto.personId },
+      });
+      if (!person) {
+        throw new NotFoundException('Pessoa informada não encontrada');
+      }
+      if (dto.familyId && person.familyId !== dto.familyId) {
+        throw new ForbiddenException('A pessoa selecionada não pertence a este grupo familiar');
+      }
+    }
+
     if (dto.type === TransactionType.TRANSFER) {
       throw new BadRequestException('Para transferências, utilize o endpoint específico /transactions/transfer');
     }
@@ -78,6 +90,7 @@ export class TransactionsService {
             data: {
               userId,
               familyId: dto.familyId || null,
+              personId: dto.personId || null,
               creditCardId: dto.creditCardId,
               invoiceId: invoice.id,
               categoryId: dto.categoryId,
@@ -117,6 +130,7 @@ export class TransactionsService {
           data: {
             userId,
             familyId: dto.familyId || null,
+            personId: dto.personId || null,
             creditCardId: dto.creditCardId,
             invoiceId: invoice.id,
             categoryId: dto.categoryId,
@@ -152,6 +166,7 @@ export class TransactionsService {
         data: {
           userId,
           familyId: dto.familyId || null,
+          personId: dto.personId || null,
           accountId: dto.accountId,
           categoryId: dto.categoryId,
           type: dto.type,
@@ -272,6 +287,7 @@ export class TransactionsService {
     if (filter.accountId) where.accountId = filter.accountId;
     if (filter.creditCardId) where.creditCardId = filter.creditCardId;
     if (filter.categoryId) where.categoryId = filter.categoryId;
+    if (filter.personId) where.personId = filter.personId;
     if (filter.type) where.type = filter.type;
     if (filter.status) where.status = filter.status;
 
@@ -288,6 +304,9 @@ export class TransactionsService {
           account: true,
           destinationAccount: true,
           creditCard: true,
+          person: {
+            select: { id: true, name: true, color: true, avatarUrl: true },
+          },
           user: {
             select: { id: true, name: true, email: true },
           },

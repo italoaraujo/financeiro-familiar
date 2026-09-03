@@ -135,11 +135,11 @@ T7 → T8 → T9
 **Depends on**: T4
 **Requirement**: PERS-04, PERS-05, PERS-06, PERS-07
 **Done when**:
-- [ ] Transações simples e no cartão persistem `personId`
-- [ ] Todas as parcelas de compra parcelada herdam o `personId`
-- [ ] Filtro por `personId` funciona em `findAll`
-- [ ] Retorno inclui dados da pessoa atribuída
-- [ ] Testes unitários cobrem persistência e propagação de parcelas
+- [x] Transações simples e no cartão persistem `personId`
+- [x] Todas as parcelas de compra parcelada herdam o `personId`
+- [x] Filtro por `personId` funciona em `findAll`
+- [x] Retorno inclui dados da pessoa atribuída
+- [x] Testes unitários cobrem persistência e propagação de parcelas
 **Tests**: `backend/test/unit/transactions.service.spec.ts`
 **Gate**: unit
 

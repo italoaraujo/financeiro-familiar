@@ -34,6 +34,9 @@ describe('TransactionsService', () => {
       familyMember: {
         findUnique: jest.fn(),
       },
+      person: {
+        findUnique: jest.fn(),
+      },
     };
 
     creditCardsService = {
@@ -143,6 +146,77 @@ describe('TransactionsService', () => {
 
       expect(prisma.transaction.create).toHaveBeenCalledTimes(3);
       expect(prisma.creditCardInvoice.update).toHaveBeenCalledTimes(3);
+    });
+
+    it('should assign personId and propagate to all installments', async () => {
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({ id: 'inv-month' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-inst-1' });
+      prisma.person.findUnique.mockResolvedValue({ id: 'person-child', familyId: 'fam-1' });
+      prisma.familyMember.findUnique.mockResolvedValue({ role: 'MEMBER' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 300,
+        totalInstallments: 3,
+        description: 'Tênis Pedro',
+        transactionDate: '2026-09-01',
+        categoryId: 'cat-vestuario',
+        creditCardId: 'card-1',
+        familyId: 'fam-1',
+        personId: 'person-child',
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledTimes(3);
+      expect(prisma.transaction.create).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            personId: 'person-child',
+            installmentNumber: 1,
+          }),
+        }),
+      );
+      expect(prisma.transaction.create).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            personId: 'person-child',
+            installmentNumber: 3,
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('findAll with personId filter', () => {
+    it('should filter transactions by personId and return person data', async () => {
+      prisma.transaction.count.mockResolvedValue(1);
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: 'tx-1',
+          description: 'Lanche',
+          amount: new Prisma.Decimal(25),
+          personId: 'person-child',
+          person: { id: 'person-child', name: 'Pedro', color: '#3b82f6' },
+        },
+      ]);
+
+      const result = await service.findAll('user-1', {
+        personId: 'person-child',
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(prisma.transaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 'user-1',
+            personId: 'person-child',
+          }),
+          include: expect.objectContaining({
+            person: expect.anything(),
+          }),
+        }),
+      );
     });
   });
 });
