@@ -32,6 +32,25 @@ import {
 } from 'recharts';
 import Link from 'next/link';
 
+const INVOICE_STATUS_MAP: Record<string, { label: string; className: string }> = {
+  OPEN: {
+    label: 'Aberta',
+    className: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  },
+  CLOSED: {
+    label: 'Fechada',
+    className: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+  },
+  PAID: {
+    label: 'Paga',
+    className: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+  },
+  OVERDUE: {
+    label: 'Vencida',
+    className: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+  },
+};
+
 export default function DashboardPage() {
   const { user, selectedFamilyId } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -372,9 +391,15 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs sm:text-sm font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
-                      <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        {inv.status}
-                      </span>
+                      <div className="mt-0.5">
+                        <span
+                          className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${
+                            (INVOICE_STATUS_MAP[inv.status] || { className: 'bg-slate-700/50 text-slate-300 border border-slate-600' }).className
+                          }`}
+                        >
+                          {(INVOICE_STATUS_MAP[inv.status] || { label: inv.status }).label}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}

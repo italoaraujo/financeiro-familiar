@@ -105,7 +105,7 @@ T6 → T7
 **Tests**: `frontend/src/app/cards/page.tsx`
 **Gate**: `npm --prefix frontend run build`
 
-#### T7: Tradução dos Status de Fatura no Dashboard
+#### T7: Tradução dos Status de Fatura no Dashboard [DONE]
 
 **What**: Atualizar o bloco de faturas do mês no dashboard principal (`/`) para exibir os status traduzidos em português ("Aberta", "Fechada", "Paga", "Vencida") com estilização harmonizada.
 **Where**: `frontend/src/app/page.tsx`

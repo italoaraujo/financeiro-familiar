@@ -103,7 +103,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | INVOICE-05 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Verified |
 | INVOICE-06 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Verified |
 | INVOICE-07 | P2: Tradução e Identificação Visual dos Status das Faturas na Interface | Tasks | Verified |
-| INVOICE-08 | P2: Tradução e Identificação Visual dos Status das Faturas na Interface | Tasks | Pending |
+| INVOICE-08 | P2: Tradução e Identificação Visual dos Status das Faturas na Interface | Tasks | Verified |
 
 **ID format:** `INVOICE-[NUMBER]`
 
