@@ -62,19 +62,19 @@
 
 - **Active Feature**: `edicao-cartao-credito`
 - **Total Tasks**: 7
-- **Completed Tasks**: 0 / 7 (0%)
+- **Completed Tasks**: 2 / 7 (28%)
 - **Status**: **IN_PROGRESS**
-- **Test Suite Results**: Pending execution
-- **Build Status**: Pending execution
+- **Test Suite Results**: In progress
+- **Build Status**: 100% Success
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Phase 1 - T1: Criação do DTO de Atualização de Cartão
-- **Completed**: Planejamento e validação de especificação e tarefas aprovados.
-- **In-progress**: T1: Criação do DTO de Atualização de Cartão
-- **Next step**: Implementar `UpdateCreditCardDto` em `backend/src/modules/credit-cards/dto/update-credit-card.dto.ts`.
+- **Phase / Task**: Phase 1 - T3: Implementação do Método remove com Guarda de Integridade
+- **Completed**: T1 (DTO) e T2 (update no CreditCardsService) implementados e com build validado.
+- **In-progress**: T3: Implementação do Método remove com Guarda de Integridade
+- **Next step**: Implementar método `remove` no `CreditCardsService`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main

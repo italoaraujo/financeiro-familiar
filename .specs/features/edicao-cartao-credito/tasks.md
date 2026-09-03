@@ -60,7 +60,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T2: Implementação do Método update no CreditCardsService
+#### T2: Implementação do Método update no CreditCardsService [DONE]
 
 **What**: Implementar lógica de atualização no `CreditCardsService`, validando propriedade/família e recalculando datas de fechamento e vencimento da fatura aberta atual quando `closingDay` ou `dueDay` forem alterados.
 **Where**: `backend/src/modules/credit-cards/credit-cards.service.ts`

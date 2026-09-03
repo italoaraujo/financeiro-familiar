@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
+import { UpdateCreditCardDto } from './dto/update-credit-card.dto';
 import { PayInvoiceDto } from './dto/pay-invoice.dto';
 import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 
@@ -104,6 +105,74 @@ export class CreditCardsService {
       committedAmount: openAmount,
       availableLimit,
     };
+  }
+
+  async update(userId: string, id: string, dto: UpdateCreditCardDto) {
+    const card = await this.findById(userId, id);
+
+    if (dto.familyId) {
+      await this.verifyFamilyAccess(userId, dto.familyId);
+    }
+
+    if (dto.creditLimit !== undefined && dto.creditLimit <= 0) {
+      throw new BadRequestException('Limite de crédito deve ser maior que zero');
+    }
+
+    if (dto.closingDay !== undefined && (dto.closingDay < 1 || dto.closingDay > 31)) {
+      throw new BadRequestException('Dia de fechamento deve estar entre 1 e 31');
+    }
+
+    if (dto.dueDay !== undefined && (dto.dueDay < 1 || dto.dueDay > 31)) {
+      throw new BadRequestException('Dia de vencimento deve estar entre 1 e 31');
+    }
+
+    const effectiveClosingDay = dto.closingDay ?? card.closingDay;
+    const effectiveDueDay = dto.dueDay ?? card.dueDay;
+    const daysChanged =
+      (dto.closingDay !== undefined && dto.closingDay !== card.closingDay) ||
+      (dto.dueDay !== undefined && dto.dueDay !== card.dueDay);
+
+    await this.prisma.creditCard.update({
+      where: { id: card.id },
+      data: {
+        name: dto.name ?? card.name,
+        brand: dto.brand !== undefined ? dto.brand : card.brand,
+        creditLimit: dto.creditLimit !== undefined ? new Prisma.Decimal(dto.creditLimit) : card.creditLimit,
+        closingDay: effectiveClosingDay,
+        dueDay: effectiveDueDay,
+        color: dto.color !== undefined ? dto.color : card.color,
+        accountId: dto.accountId !== undefined ? dto.accountId : card.accountId,
+        familyId: dto.familyId !== undefined ? dto.familyId : card.familyId,
+        isActive: dto.isActive !== undefined ? dto.isActive : card.isActive,
+      },
+    });
+
+    if (daysChanged) {
+      const openInvoices = await this.prisma.creditCardInvoice.findMany({
+        where: {
+          creditCardId: card.id,
+          status: InvoiceStatus.OPEN,
+        },
+      });
+
+      for (const inv of openInvoices) {
+        const [year, month] = inv.referenceMonth.split('-').map(Number);
+        const closingDate = new Date(year, month - 1, Math.min(effectiveClosingDay, 28));
+        const dueMonth = effectiveDueDay < effectiveClosingDay ? month : month - 1;
+        const dueYear = effectiveDueDay < effectiveClosingDay && month === 12 ? year + 1 : year;
+        const dueDate = new Date(dueYear, dueMonth, Math.min(effectiveDueDay, 28));
+
+        await this.prisma.creditCardInvoice.update({
+          where: { id: inv.id },
+          data: {
+            closingDate,
+            dueDate,
+          },
+        });
+      }
+    }
+
+    return this.findById(userId, id);
   }
 
   async getOrCreateInvoice(creditCardId: string, referenceMonth: string) {
