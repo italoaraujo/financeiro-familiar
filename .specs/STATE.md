@@ -62,19 +62,19 @@
 
 - **Active Feature**: `edicao-cartao-credito`
 - **Total Tasks**: 7
-- **Completed Tasks**: 5 / 7 (71%)
+- **Completed Tasks**: 6 / 7 (86%)
 - **Status**: **IN_PROGRESS**
 - **Test Suite Results**: 15 passed (1 suite)
-- **Build Status**: 100% Success
+- **Build Status**: 100% Success (Backend & Frontend Next.js 14)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Phase 2 - T6: Interface Frontend para Edição de Cartão e Modal
-- **Completed**: T1 a T5 implementados e validados com testes unitários (15 testes passando).
-- **In-progress**: T6: Interface Frontend para Edição de Cartão e Modal
-- **Next step**: Implementar botão de edição e modal com suporte a PUT e DELETE em `frontend/src/app/cards/page.tsx`.
+- **Phase / Task**: Phase 2 - T7: Verificação Integrada e Validação de Gates
+- **Completed**: T1 a T6 implementados (Backend API completa, testes unitários e UI com modal de edição e exclusão).
+- **In-progress**: T7: Verificação Integrada e Validação de Gates
+- **Next step**: Executar suíte completa de testes e validações de gates.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main

@@ -13,6 +13,8 @@ import {
   User,
   ShoppingBag,
   X,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 
 export default function CreditCardsPage() {
@@ -23,6 +25,8 @@ export default function CreditCardsPage() {
 
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<any>(null);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
@@ -36,6 +40,15 @@ export default function CreditCardsPage() {
   const [closingDay, setClosingDay] = useState(20);
   const [dueDay, setDueDay] = useState(27);
   const [color, setColor] = useState('#8b5cf6');
+
+  // Edit Card Form
+  const [editName, setEditName] = useState('');
+  const [editBrand, setEditBrand] = useState('Mastercard');
+  const [editCreditLimit, setEditCreditLimit] = useState('');
+  const [editClosingDay, setEditClosingDay] = useState(20);
+  const [editDueDay, setEditDueDay] = useState(27);
+  const [editColor, setEditColor] = useState('#8b5cf6');
+  const [editIsActive, setEditIsActive] = useState(true);
 
   // Pay Invoice Form
   const [paymentAccountId, setPaymentAccountId] = useState('');
@@ -90,6 +103,64 @@ export default function CreditCardsPage() {
       loadData();
     } catch (err: any) {
       alert(err.message || 'Erro ao criar cartão');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openEditModal = (card: any) => {
+    setEditingCard(card);
+    setEditName(card.name || '');
+    setEditBrand(card.brand || 'Mastercard');
+    setEditCreditLimit(card.creditLimit ? String(card.creditLimit) : '');
+    setEditClosingDay(card.closingDay || 20);
+    setEditDueDay(card.dueDay || 27);
+    setEditColor(card.color || '#8b5cf6');
+    setEditIsActive(card.isActive ?? true);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCard) return;
+    setSubmitting(true);
+
+    try {
+      await apiRequest(`/credit-cards/${editingCard.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: editName,
+          brand: editBrand,
+          creditLimit: parseFloat(editCreditLimit) || 0,
+          closingDay: Number(editClosingDay),
+          dueDay: Number(editDueDay),
+          color: editColor,
+          isActive: editIsActive,
+        }),
+      });
+
+      setIsEditModalOpen(false);
+      setEditingCard(null);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar cartão');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    if (!confirm('Deseja excluir este cartão de crédito? (Apenas permitido se não houver lançamentos vinculados)')) {
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await apiRequest(`/credit-cards/${cardId}`, { method: 'DELETE' });
+      setIsEditModalOpen(false);
+      setEditingCard(null);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao excluir cartão');
     } finally {
       setSubmitting(false);
     }
@@ -198,9 +269,19 @@ export default function CreditCardsPage() {
                         </div>
                       </div>
 
-                      <div className="text-left sm:text-right text-xs text-slate-400 space-y-0.5 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
-                        <p>Fechamento: dia <strong className="text-white">{card.closingDay}</strong></p>
-                        <p>Vencimento: dia <strong className="text-white">{card.dueDay}</strong></p>
+                      <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                        <div className="text-left sm:text-right text-xs text-slate-400 space-y-0.5">
+                          <p>Fechamento: dia <strong className="text-white">{card.closingDay}</strong></p>
+                          <p>Vencimento: dia <strong className="text-white">{card.dueDay}</strong></p>
+                        </div>
+                        <button
+                          onClick={() => openEditModal(card)}
+                          className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                          title="Editar Cartão"
+                          aria-label="Editar Cartão"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
 
@@ -398,6 +479,153 @@ export default function CreditCardsPage() {
                 >
                   {submitting ? 'Cadastrando cartão...' : 'Cadastrar Cartão'}
                 </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Card Modal */}
+        {isEditModalOpen && editingCard && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+              <button
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setEditingCard(null);
+                }}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4 pr-6">
+                <div
+                  className="h-10 w-10 rounded-xl flex items-center justify-center shadow shrink-0"
+                  style={{ backgroundColor: `${editColor}25`, color: editColor }}
+                >
+                  <Pencil className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">Editar Cartão</h2>
+                  <p className="text-xs text-slate-400">Atualize dados cadastrais e ciclo de faturas</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleUpdateCard} className="space-y-3.5 sm:space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Cartão *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Ex: Nubank Ultravioleta, Itaú Black..."
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Bandeira</label>
+                  <select
+                    value={editBrand}
+                    onChange={(e) => setEditBrand(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    <option value="Mastercard">Mastercard</option>
+                    <option value="Visa">Visa</option>
+                    <option value="Elo">Elo</option>
+                    <option value="American Express">American Express</option>
+                    <option value="Hipercard">Hipercard</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Limite Total (R$) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    min="0.01"
+                    value={editCreditLimit}
+                    onChange={(e) => setEditCreditLimit(e.target.value)}
+                    placeholder="Ex: 5000,00"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Dia Fechamento *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      required
+                      value={editClosingDay}
+                      onChange={(e) => setEditClosingDay(parseInt(e.target.value) || 1)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Dia Vencimento *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      required
+                      value={editDueDay}
+                      onChange={(e) => setEditDueDay(parseInt(e.target.value) || 1)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor do Cartão</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
+                    />
+                    <span className="text-xs text-slate-400">{editColor}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="editIsActive"
+                    checked={editIsActive}
+                    onChange={(e) => setEditIsActive(e.target.checked)}
+                    className="h-4 w-4 rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <label htmlFor="editIsActive" className="text-xs sm:text-sm text-slate-300 font-medium cursor-pointer">
+                    Cartão Ativo (exibir no painel)
+                  </label>
+                </div>
+
+                <div className="pt-3 flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteCard(editingCard.id)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs sm:text-sm font-semibold transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Excluir</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                  >
+                    {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
               </form>
             </div>
           </div>

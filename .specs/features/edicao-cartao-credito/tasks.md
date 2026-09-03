@@ -100,7 +100,7 @@ T6 → T7
 
 ### Phase 2: Frontend e Telas de Usuário
 
-#### T6: Interface Frontend para Edição de Cartão e Modal
+#### T6: Interface Frontend para Edição de Cartão e Modal [DONE]
 
 **What**: Adicionar botão "Editar" nos cards da página de cartões, implementar estado de edição e modal com dados pré-preenchidos e chamada a `PUT /credit-cards/:id`.
 **Where**: `frontend/src/app/cards/page.tsx`
