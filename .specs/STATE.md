@@ -62,7 +62,11 @@
 - **Decision**: Alocar despesas realizadas na data de fechamento do cartão (`day >= closingDay`) diretamente na fatura do ciclo seguinte, efetuar transição automática de faturas abertas com `closingDate <= hoje` para status `CLOSED`, impedir novas despesas em faturas fechadas ou pagas e exibir todos os status em português no frontend ("Aberta", "Fechada", "Paga", "Vencida").
 - **Reason**: Alinha o sistema à regra de negócio bancária brasileira de corte de fatura e resolve inconsistências de conciliação relatadas pelo usuário.
 - **Trade-off**: Requer verificação ativa do status da fatura no backend e parsing seguro de datas locais para evitar desvios UTC.
-- **Scope**: Módulos de Cartões de Crédito, Transações e Relatórios no backend; Telas de Cartões e Dashboard no frontend.
+### AD-009
+- **Decision**: Bloquear cadastro de despesas (à vista ou parceladas) cujo valor total exceda o limite disponível do cartão de crédito selecionado (`availableLimit = creditLimit - committedAmount`), tanto no backend (lançando `BadRequestException`) quanto no frontend (desabilitando o botão de confirmação e exibindo alerta em tempo real).
+- **Reason**: Evita compras acima do limite de crédito disponível e garante consistência financeira no fluxo de caixa e gestão do cartão.
+- **Trade-off**: Nenhuma transação pode ultrapassar o limite concedido ao cartão de crédito.
+- **Scope**: `TransactionsService` e testes unitários no backend; tela de extrato e modal de lançamentos (`/transactions`) no frontend.
 - **Date**: 2026-09-03
 - **Status**: active
 
