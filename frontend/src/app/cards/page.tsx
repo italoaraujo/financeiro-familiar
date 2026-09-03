@@ -9,6 +9,9 @@ import {
   Plus,
   CreditCard as CardIcon,
   Calendar,
+  Users,
+  User,
+  ShoppingBag,
   X,
 } from 'lucide-react';
 
@@ -21,7 +24,10 @@ export default function CreditCardsPage() {
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [selectedInvoiceDetails, setSelectedInvoiceDetails] = useState<any>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   // New Card Form
   const [name, setName] = useState('');
@@ -119,6 +125,20 @@ export default function CreditCardsPage() {
     const remaining = Number(inv.totalAmount) - Number(inv.paidAmount);
     setPaymentAmount(remaining.toFixed(2));
     setIsPayModalOpen(true);
+  };
+
+  const openInvoiceDetails = async (invoiceId: string) => {
+    setIsDetailsModalOpen(true);
+    setLoadingDetails(true);
+    try {
+      const details = await apiRequest(`/credit-cards/invoices/${invoiceId}`);
+      setSelectedInvoiceDetails(details);
+    } catch (err: any) {
+      alert(err.message || 'Erro ao carregar detalhes da fatura');
+      setIsDetailsModalOpen(false);
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   return (
@@ -230,29 +250,38 @@ export default function CreditCardsPage() {
                                 </div>
                               </div>
 
-                              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/40">
-                                <div className="text-left sm:text-right">
-                                  <p className="font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
-                                  <span
-                                    className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
-                                      inv.status === 'PAID'
-                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                    }`}
-                                  >
-                                    {inv.status}
-                                  </span>
-                                </div>
+                                <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/40 flex-wrap">
+                                  <div className="text-left sm:text-right">
+                                    <p className="font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
+                                    <span
+                                      className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                                        inv.status === 'PAID'
+                                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                      }`}
+                                    >
+                                      {inv.status}
+                                    </span>
+                                  </div>
 
-                                {inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
                                   <button
-                                    onClick={() => openPayModal(inv)}
-                                    className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"
+                                    onClick={() => openInvoiceDetails(inv.id)}
+                                    className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0 flex items-center gap-1.5"
+                                    title="Ver divisão de gastos por pessoa"
                                   >
-                                    Pagar Fatura
+                                    <Users className="h-3.5 w-3.5 text-purple-400" />
+                                    <span>Divisão por Pessoa</span>
                                   </button>
-                                )}
-                              </div>
+
+                                  {inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
+                                    <button
+                                      onClick={() => openPayModal(inv)}
+                                      className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"
+                                    >
+                                      Pagar Fatura
+                                    </button>
+                                  )}
+                                </div>
                             </div>
                           ))}
                         </div>
@@ -429,6 +458,184 @@ export default function CreditCardsPage() {
                   {submitting ? 'Confirmando pagamento...' : 'Efetivar Pagamento da Fatura'}
                 </button>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Invoice Details & Person Breakdown Modal */}
+        {isDetailsModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+              <button
+                onClick={() => setIsDetailsModalOpen(false)}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="pr-6 mb-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-bold text-white">
+                    Fatura • {selectedInvoiceDetails?.referenceMonth || '...'}
+                  </h2>
+                  <span
+                    className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                      selectedInvoiceDetails?.status === 'PAID'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    }`}
+                  >
+                    {selectedInvoiceDetails?.status}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Cartão: <strong>{selectedInvoiceDetails?.creditCard?.name}</strong> • Vencimento:{' '}
+                  {selectedInvoiceDetails?.dueDate ? formatDate(selectedInvoiceDetails.dueDate) : '-'}
+                </p>
+              </div>
+
+              {loadingDetails ? (
+                <div className="py-12 text-center text-slate-500 text-xs sm:text-sm">
+                  Carregando detalhes e lançamentos da fatura...
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {/* Total Card */}
+                  <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-slate-400">Total Consolidado da Fatura</p>
+                      <p className="text-xl sm:text-2xl font-bold text-white">
+                        {formatCurrency(selectedInvoiceDetails?.totalAmount || 0)}
+                      </p>
+                    </div>
+                    {Number(selectedInvoiceDetails?.paidAmount) > 0 && (
+                      <div className="text-left sm:text-right">
+                        <p className="text-xs text-slate-400">Valor Pago</p>
+                        <p className="text-sm font-semibold text-emerald-400">
+                          {formatCurrency(selectedInvoiceDetails.paidAmount)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Person Breakdown Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <Users className="h-4 w-4 text-purple-400" />
+                        <span>Divisão de Gastos por Pessoa</span>
+                      </h3>
+                      <span className="text-xs text-slate-400">
+                        {selectedInvoiceDetails?.personBreakdown?.length || 0} pessoas com gastos
+                      </span>
+                    </div>
+
+                    {/* Breakdown Progress Stack Bar */}
+                    {selectedInvoiceDetails?.personBreakdown?.length > 0 && Number(selectedInvoiceDetails.totalAmount) > 0 && (
+                      <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden flex">
+                        {selectedInvoiceDetails.personBreakdown.map((item: any, idx: number) => {
+                          const itemPct = Math.max(
+                            2,
+                            Math.round((item.totalAmount / Number(selectedInvoiceDetails.totalAmount)) * 100),
+                          );
+                          return (
+                            <div
+                              key={idx}
+                              style={{ width: `${itemPct}%`, backgroundColor: item.color || '#8b5cf6' }}
+                              className="h-full transition-all"
+                              title={`${item.name}: ${formatCurrency(item.totalAmount)} (${itemPct}%)`}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Breakdown Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                      {selectedInvoiceDetails?.personBreakdown?.map((item: any, idx: number) => {
+                        const totalInv = Number(selectedInvoiceDetails?.totalAmount) || 1;
+                        const pct = Math.round((item.totalAmount / totalInv) * 100);
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between gap-3"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className="h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
+                                style={{ backgroundColor: item.color || '#8b5cf6' }}
+                              >
+                                {item.name ? item.name.charAt(0).toUpperCase() : 'P'}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-white text-xs sm:text-sm truncate">{item.name}</p>
+                                <p className="text-[11px] text-slate-400">{item.count} compra(s)</p>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <p className="font-bold text-white text-xs sm:text-sm">
+                                {formatCurrency(item.totalAmount)}
+                              </p>
+                              <p className="text-[10px] text-slate-400 font-medium">{pct}% da fatura</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Invoice Transactions List */}
+                  <div className="space-y-3 pt-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                      <ShoppingBag className="h-4 w-4 text-slate-400" />
+                      <span>Compras Desta Fatura ({selectedInvoiceDetails?.transactions?.length || 0})</span>
+                    </h3>
+
+                    {selectedInvoiceDetails?.transactions?.length === 0 ? (
+                      <p className="text-xs text-slate-500 py-4 text-center">Nenhum lançamento nesta fatura.</p>
+                    ) : (
+                      <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+                        {selectedInvoiceDetails?.transactions?.map((tx: any) => (
+                          <div key={tx.id} className="p-3 bg-slate-800/30 flex items-center justify-between gap-3 text-xs">
+                            <div className="min-w-0 space-y-0.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium text-white truncate">{tx.description}</span>
+                                {tx.person && (
+                                  <span
+                                    className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium border shrink-0"
+                                    style={{
+                                      backgroundColor: `${tx.person.color || '#8b5cf6'}20`,
+                                      color: tx.person.color || '#a78bfa',
+                                      borderColor: `${tx.person.color || '#8b5cf6'}40`,
+                                    }}
+                                  >
+                                    <User className="h-2.5 w-2.5" />
+                                    <span>{tx.person.name}</span>
+                                  </span>
+                                )}
+                                {tx.totalInstallments && tx.totalInstallments > 1 && (
+                                  <span className="text-[9px] bg-slate-800 text-slate-400 px-1 py-0.5 rounded border border-slate-700 shrink-0">
+                                    {tx.installmentNumber}/{tx.totalInstallments}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-slate-400">
+                                {formatDate(tx.transactionDate)} • {tx.category?.name || 'Geral'}
+                              </p>
+                            </div>
+
+                            <div className="font-bold text-rose-400 whitespace-nowrap text-right">
+                              - {formatCurrency(tx.amount)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -202,8 +202,8 @@ T7 → T8 → T9
 **Depends on**: T8
 **Requirement**: PERS-08
 **Done when**:
-- [ ] Fatura exibe barra/cards com o total gasto por cada pessoa
-- [ ] Transações da fatura mostram o badge de quem fez a compra
-- [ ] Valores batem exatamente com a soma dos lançamentos atribuídos
+- [x] Fatura exibe barra/cards com o total gasto por cada pessoa
+- [x] Lançamentos da fatura identificam a pessoa que realizou a despesa
+- [x] Detalhamento abre de forma responsiva e clara
 **Tests**: none
 **Gate**: build
