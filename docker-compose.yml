@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: financial_postgres
+    profiles: ["db"]
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -26,15 +25,17 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: financial_api
+    profiles: ["app"]
     restart: always
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
     environment:
       NODE_ENV: production
       APP_ENV: ${APP_ENV:-development}
       PORT: 3001
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-financial_db}?schema=public
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
       JWT_SECRET: ${JWT_SECRET:-supersecretjwtkey1234567890}
       JWT_EXPIRATION: 1d
     ports:
@@ -50,6 +51,7 @@ services:
         NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
     container_name: financial_frontend
+    profiles: ["app"]
     restart: always
     depends_on:
       - api
