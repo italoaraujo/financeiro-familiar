@@ -74,7 +74,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T4: Inclusão de Faturas CLOSED no Resumo do Dashboard
+#### T4: Inclusão de Faturas CLOSED no Resumo do Dashboard [DONE]
 
 **What**: Ajustar o método `getDashboardSummary` no `ReportsService` para incluir faturas com status `CLOSED` na busca de faturas a pagar (`openInvoices`), permitindo que faturas fechadas sejam visualizadas e pagas a partir do painel inicial.
 **Where**: `backend/src/modules/reports/reports.service.ts`

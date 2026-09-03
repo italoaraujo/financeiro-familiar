@@ -67,7 +67,7 @@ export class ReportsService {
     // 5. Faturas Abertas / Próximos Vencimentos
     const openInvoices = await this.prisma.creditCardInvoice.findMany({
       where: {
-        status: { in: [InvoiceStatus.OPEN, InvoiceStatus.OVERDUE] },
+        status: { in: [InvoiceStatus.OPEN, InvoiceStatus.CLOSED, InvoiceStatus.OVERDUE] },
         creditCard: userOrFamilyFilter,
       },
       include: { creditCard: true },
