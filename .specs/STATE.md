@@ -62,19 +62,19 @@
 
 - **Active Feature**: `edicao-cartao-credito`
 - **Total Tasks**: 7
-- **Completed Tasks**: 4 / 7 (57%)
+- **Completed Tasks**: 5 / 7 (71%)
 - **Status**: **IN_PROGRESS**
-- **Test Suite Results**: In progress
+- **Test Suite Results**: 15 passed (1 suite)
 - **Build Status**: 100% Success
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Phase 1 - T5: Testes Unitários de Edição e Exclusão no CreditCardsService
-- **Completed**: T1 (DTO), T2 (update), T3 (remove com guarda) e T4 (rotas PUT e DELETE no controller) implementados.
-- **In-progress**: T5: Testes Unitários de Edição e Exclusão no CreditCardsService
-- **Next step**: Implementar testes unitários em `backend/test/unit/credit-cards.service.spec.ts`.
+- **Phase / Task**: Phase 2 - T6: Interface Frontend para Edição de Cartão e Modal
+- **Completed**: T1 a T5 implementados e validados com testes unitários (15 testes passando).
+- **In-progress**: T6: Interface Frontend para Edição de Cartão e Modal
+- **Next step**: Implementar botão de edição e modal com suporte a PUT e DELETE em `frontend/src/app/cards/page.tsx`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main

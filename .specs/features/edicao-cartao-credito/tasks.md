@@ -87,7 +87,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T5: Testes Unitários de Edição e Exclusão no CreditCardsService
+#### T5: Testes Unitários de Edição e Exclusão no CreditCardsService [DONE]
 
 **What**: Adicionar suíte de testes unitários cobrindo atualização com sucesso, atualização com alteração de fatura aberta, erros 404/403, e exclusão com/sem transações.
 **Where**: `backend/test/unit/credit-cards.service.spec.ts`

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreditCardsService } from '../../src/modules/credit-cards/credit-cards.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { InvoiceStatus, Prisma } from '@prisma/client';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('CreditCardsService', () => {
   let service: CreditCardsService;
@@ -15,10 +15,13 @@ describe('CreditCardsService', () => {
         create: jest.fn(),
         findMany: jest.fn(),
         findUnique: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
       },
       creditCardInvoice: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        findMany: jest.fn(),
         update: jest.fn(),
       },
       account: {
@@ -31,6 +34,7 @@ describe('CreditCardsService', () => {
       },
       transaction: {
         create: jest.fn(),
+        findFirst: jest.fn(),
       },
       familyMember: {
         findUnique: jest.fn(),
@@ -245,6 +249,170 @@ describe('CreditCardsService', () => {
       expect(unassigned).toBeDefined();
       expect(unassigned.totalAmount).toBe(300);
       expect(unassigned.count).toBe(1);
+    });
+  });
+
+  describe('update', () => {
+    it('should update credit card properties successfully', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        name: 'Nubank',
+        brand: 'Mastercard',
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 20,
+        dueDay: 27,
+        color: '#8b5cf6',
+        isActive: true,
+        invoices: [],
+      });
+      prisma.creditCard.update.mockResolvedValue({
+        id: 'card-1',
+        name: 'Nubank Ultravioleta',
+        creditLimit: new Prisma.Decimal(5000),
+      });
+
+      const result = await service.update('user-1', 'card-1', {
+        name: 'Nubank Ultravioleta',
+        creditLimit: 5000,
+      });
+
+      expect(prisma.creditCard.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'card-1' },
+          data: expect.objectContaining({
+            name: 'Nubank Ultravioleta',
+            creditLimit: new Prisma.Decimal(5000),
+          }),
+        }),
+      );
+      expect(result.id).toBe('card-1');
+    });
+
+    it('should synchronize open invoices closing and due dates when days change', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        name: 'Nubank',
+        closingDay: 15,
+        dueDay: 22,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+      });
+      prisma.creditCardInvoice.findMany.mockResolvedValue([
+        {
+          id: 'inv-open',
+          creditCardId: 'card-1',
+          referenceMonth: '2026-09',
+          status: InvoiceStatus.OPEN,
+        },
+      ]);
+      prisma.creditCard.update.mockResolvedValue({ id: 'card-1' });
+
+      await service.update('user-1', 'card-1', {
+        closingDay: 20,
+        dueDay: 27,
+      });
+
+      expect(prisma.creditCardInvoice.update).toHaveBeenCalledWith({
+        where: { id: 'inv-open' },
+        data: {
+          closingDate: new Date(2026, 8, 20),
+          dueDate: new Date(2026, 8, 27),
+        },
+      });
+    });
+
+    it('should throw NotFoundException if card does not exist', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue(null);
+
+      await expect(service.update('user-1', 'card-none', { name: 'Novo' })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ForbiddenException if user has no access', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-other',
+        familyId: null,
+      });
+
+      await expect(service.update('user-1', 'card-1', { name: 'Novo' })).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw BadRequestException if creditLimit <= 0', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+
+      await expect(service.update('user-1', 'card-1', { creditLimit: 0 })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException if closingDay is invalid', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+
+      await expect(service.update('user-1', 'card-1', { closingDay: 35 })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException if dueDay is invalid', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+
+      await expect(service.update('user-1', 'card-1', { dueDay: 0 })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove credit card when it has no transactions', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+      prisma.transaction.findFirst.mockResolvedValue(null);
+      prisma.creditCard.delete.mockResolvedValue({ id: 'card-1' });
+
+      const result = await service.remove('user-1', 'card-1');
+
+      expect(prisma.creditCard.delete).toHaveBeenCalledWith({
+        where: { id: 'card-1' },
+      });
+      expect(result.message).toContain('removido com sucesso');
+    });
+
+    it('should throw BadRequestException when card has linked transactions', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+      prisma.transaction.findFirst.mockResolvedValue({ id: 'tx-1' });
+
+      await expect(service.remove('user-1', 'card-1')).rejects.toThrow(BadRequestException);
+      expect(prisma.creditCard.delete).not.toHaveBeenCalled();
     });
   });
 });
