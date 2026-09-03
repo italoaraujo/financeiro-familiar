@@ -170,10 +170,10 @@ T7 → T8 → T9
 **Depends on**: None
 **Requirement**: PERS-01, PERS-02, PERS-03
 **Done when**:
-- [ ] Seção de pessoas exibida com lista unificada
-- [ ] Modal de cadastro de pessoa sem login funcional (envio para API e recarregamento)
-- [ ] Indicador visual e badge diferenciado para membros sem login
-- [ ] Ação de exclusão funcional
+- [x] Seção de pessoas exibida com lista unificada
+- [x] Modal de cadastro de pessoa sem login funcional (envio para API e recarregamento)
+- [x] Indicador visual e badge diferenciado para membros sem login
+- [x] Ação de exclusão funcional
 **Tests**: none
 **Gate**: build
 
