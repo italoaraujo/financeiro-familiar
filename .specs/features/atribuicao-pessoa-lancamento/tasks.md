@@ -186,10 +186,10 @@ T7 → T8 → T9
 **Depends on**: T7
 **Requirement**: PERS-04, PERS-05, PERS-06, PERS-07
 **Done when**:
-- [ ] Dropdown de pessoas disponível no modal de nova transação
-- [ ] Badge colorido da pessoa renderizado na linha da transação na tabela
-- [ ] Filtro por pessoa filtra dinamicamente a tabela
-- [ ] Funciona tanto para despesas em conta quanto compras no cartão
+- [x] Dropdown de pessoas disponível no modal de nova transação
+- [x] Badge colorido da pessoa renderizado na linha da transação na tabela
+- [x] Filtro por pessoa filtra dinamicamente a tabela
+- [x] Funciona tanto para despesas em conta quanto compras no cartão
 **Tests**: none
 **Gate**: build
 

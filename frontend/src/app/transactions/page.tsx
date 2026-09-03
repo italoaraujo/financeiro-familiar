@@ -15,6 +15,7 @@ import {
   Wallet,
   CreditCard,
   Lock,
+  User,
   X,
 } from 'lucide-react';
 
@@ -29,12 +30,14 @@ export default function TransactionsPage() {
   const [type, setType] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [filterPersonId, setFilterPersonId] = useState('');
   const [page, setPage] = useState(1);
 
   // Aux data for modals & filters
   const [accounts, setAccounts] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [people, setPeople] = useState<any[]>([]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +53,7 @@ export default function TransactionsPage() {
   const [destinationAccountId, setDestinationAccountId] = useState('');
   const [creditCardId, setCreditCardId] = useState('');
   const [totalInstallments, setTotalInstallments] = useState(1);
+  const [personId, setPersonId] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -57,14 +61,18 @@ export default function TransactionsPage() {
   const loadAuxData = async () => {
     try {
       const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
-      const [accs, cds, cats] = await Promise.all([
+      const [accs, cds, cats, ppl] = await Promise.all([
         apiRequest('/accounts', { params }),
         apiRequest('/credit-cards', { params }),
         apiRequest('/categories', { params }),
+        selectedFamilyId
+          ? apiRequest(`/families/${selectedFamilyId}/people`).catch(() => [])
+          : Promise.resolve([]),
       ]);
       setAccounts(accs || []);
       setCards(cds || []);
       setCategories(cats || []);
+      setPeople(ppl || []);
 
       if (accs && accs.length > 0) setAccountId(accs[0].id);
       if (cds && cds.length > 0) setCreditCardId(cds[0].id);
@@ -84,6 +92,7 @@ export default function TransactionsPage() {
         type: type || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        personId: filterPersonId || undefined,
         familyId: selectedFamilyId || undefined,
       };
 
@@ -107,7 +116,7 @@ export default function TransactionsPage() {
     if (user) {
       loadTransactions();
     }
-  }, [user, selectedFamilyId, page, type, startDate, endDate]);
+  }, [user, selectedFamilyId, page, type, startDate, endDate, filterPersonId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +153,7 @@ export default function TransactionsPage() {
             accountId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? undefined : accountId,
             creditCardId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? creditCardId : undefined,
             totalInstallments: modalType === 'EXPENSE' && paymentMode === 'CARD' ? totalInstallments : 1,
+            personId: personId || undefined,
             isPrivate,
             notes: notes || undefined,
             familyId: selectedFamilyId || undefined,
@@ -156,6 +166,7 @@ export default function TransactionsPage() {
       setAmount('');
       setDescription('');
       setNotes('');
+      setPersonId('');
       setTotalInstallments(1);
       setIsPrivate(false);
       loadTransactions();
@@ -257,6 +268,27 @@ export default function TransactionsPage() {
                 className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
+
+            {/* Person Filter */}
+            {people.length > 0 && (
+              <div>
+                <select
+                  value={filterPersonId}
+                  onChange={(e) => {
+                    setFilterPersonId(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="">Todas as Pessoas</option>
+                  {people.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </form>
         </div>
 
@@ -295,13 +327,27 @@ export default function TransactionsPage() {
                         {formatDate(tx.transactionDate)}
                       </td>
                       <td className="px-4 sm:px-6 py-3.5">
-                        <div className="flex items-center gap-2 font-medium text-white max-w-xs">
+                        <div className="flex items-center gap-2 font-medium text-white max-w-xs flex-wrap">
                           {tx.isPrivate && (
                             <span title="Lançamento Privado">
                               <Lock className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                             </span>
                           )}
                           <span className="truncate">{tx.description}</span>
+                          {tx.person && (
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium border shrink-0"
+                              style={{
+                                backgroundColor: `${tx.person.color || '#8b5cf6'}20`,
+                                color: tx.person.color || '#a78bfa',
+                                borderColor: `${tx.person.color || '#8b5cf6'}40`,
+                              }}
+                              title={`Responsável: ${tx.person.name}`}
+                            >
+                              <User className="h-2.5 w-2.5" />
+                              <span>{tx.person.name}</span>
+                            </span>
+                          )}
                           {tx.totalInstallments && tx.totalInstallments > 1 && (
                             <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0">
                               {tx.installmentNumber}/{tx.totalInstallments}
@@ -670,6 +716,30 @@ export default function TransactionsPage() {
                       </div>
                     )}
                   </>
+                )}
+
+                {/* Person Attribution */}
+                {people.length > 0 && modalType !== 'TRANSFER' && (
+                  <div className="pt-1">
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Quem realizou? (Pessoa da Família)
+                    </label>
+                    <select
+                      value={personId}
+                      onChange={(e) => setPersonId(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                    >
+                      <option value="">Nenhum / Não atribuído (Titular)</option>
+                      {people.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} {p.userId ? '(Membro)' : '(Sem login)'}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Identifique quem usou o cartão emprestado ou realizou esta despesa/receita.
+                    </p>
+                  </div>
                 )}
 
                 {/* Privacy toggle */}
