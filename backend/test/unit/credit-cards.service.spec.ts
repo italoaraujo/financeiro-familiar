@@ -32,6 +32,9 @@ describe('CreditCardsService', () => {
       transaction: {
         create: jest.fn(),
       },
+      familyMember: {
+        findUnique: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -192,6 +195,56 @@ describe('CreditCardsService', () => {
       expect(result[0].invoices).toHaveLength(10);
       expect(result[0].committedAmount.toNumber()).toBe(100);
       expect(result[0].availableLimit.toNumber()).toBe(900);
+    });
+  });
+
+  describe('getInvoiceDetails', () => {
+    it('should aggregate transactions by person accurately in invoice', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-1',
+        referenceMonth: '2026-09',
+        totalAmount: new Prisma.Decimal(650),
+        creditCard: {
+          id: 'card-1',
+          userId: 'user-1',
+          familyId: 'fam-1',
+        },
+        transactions: [
+          {
+            id: 'tx-1',
+            amount: new Prisma.Decimal(200),
+            personId: 'person-pedro',
+            person: { id: 'person-pedro', name: 'Pedro', color: '#3b82f6' },
+          },
+          {
+            id: 'tx-2',
+            amount: new Prisma.Decimal(150),
+            personId: 'person-pedro',
+            person: { id: 'person-pedro', name: 'Pedro', color: '#3b82f6' },
+          },
+          {
+            id: 'tx-3',
+            amount: new Prisma.Decimal(300),
+            personId: null,
+            person: null,
+          },
+        ],
+      });
+
+      const result = await service.getInvoiceDetails('user-1', 'inv-1');
+
+      expect(result.id).toBe('inv-1');
+      expect(result.personBreakdown).toHaveLength(2);
+
+      const pedroBreakdown = result.personBreakdown.find((b: any) => b.personId === 'person-pedro');
+      expect(pedroBreakdown).toBeDefined();
+      expect(pedroBreakdown.totalAmount).toBe(350);
+      expect(pedroBreakdown.count).toBe(2);
+
+      const unassigned = result.personBreakdown.find((b: any) => b.personId === null);
+      expect(unassigned).toBeDefined();
+      expect(unassigned.totalAmount).toBe(300);
+      expect(unassigned.count).toBe(1);
     });
   });
 });

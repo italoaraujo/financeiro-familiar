@@ -268,6 +268,67 @@ export class CreditCardsService {
     });
   }
 
+  async getInvoiceDetails(userId: string, invoiceId: string) {
+    const invoice = await this.prisma.creditCardInvoice.findUnique({
+      where: { id: invoiceId },
+      include: {
+        creditCard: true,
+        transactions: {
+          include: {
+            category: true,
+            person: {
+              select: { id: true, name: true, color: true, avatarUrl: true },
+            },
+          },
+          orderBy: { transactionDate: 'desc' },
+        },
+      },
+    });
+
+    if (!invoice) {
+      throw new NotFoundException('Fatura não encontrada');
+    }
+
+    if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
+      await this.verifyFamilyAccess(userId, invoice.creditCard.familyId);
+    } else if (invoice.creditCard.userId !== userId) {
+      throw new ForbiddenException('Acesso negado à fatura');
+    }
+
+    const breakdownMap = new Map<string, {
+      personId: string | null;
+      name: string;
+      color: string;
+      totalAmount: Prisma.Decimal;
+      count: number;
+    }>();
+
+    for (const tx of invoice.transactions) {
+      const key = tx.personId || 'unassigned';
+      const current = breakdownMap.get(key) || {
+        personId: tx.personId,
+        name: tx.person?.name || 'Titular / Não atribuído',
+        color: tx.person?.color || '#64748b',
+        totalAmount: new Prisma.Decimal(0),
+        count: 0,
+      };
+
+      current.totalAmount = current.totalAmount.add(tx.amount);
+      current.count += 1;
+      breakdownMap.set(key, current);
+    }
+
+    const personBreakdown = Array.from(breakdownMap.values()).map((item) => ({
+      ...item,
+      totalAmount: item.totalAmount.toNumber(),
+    }));
+
+    return {
+      ...invoice,
+      personBreakdown,
+    };
+  }
+
   private async verifyFamilyAccess(userId: string, familyId: string) {
     const member = await this.prisma.familyMember.findUnique({
       where: {

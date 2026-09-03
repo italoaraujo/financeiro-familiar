@@ -38,6 +38,15 @@ export class CreditCardsController {
     return this.creditCardsService.findAll(userId, familyId);
   }
 
+  @Get('invoices/:invoiceId')
+  @ApiOperation({ summary: 'Obter detalhes da fatura com divisão por pessoa' })
+  async getInvoiceDetails(
+    @GetUser('id') userId: string,
+    @Param('invoiceId') invoiceId: string,
+  ) {
+    return this.creditCardsService.getInvoiceDetails(userId, invoiceId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obter detalhes do cartão e faturas' })
   async findById(

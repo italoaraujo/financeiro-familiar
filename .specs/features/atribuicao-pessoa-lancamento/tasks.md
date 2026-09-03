@@ -152,10 +152,10 @@ T7 → T8 → T9
 **Depends on**: T5
 **Requirement**: PERS-08
 **Done when**:
-- [ ] Transações de faturas incluem dados da pessoa
-- [ ] Fatura retorna cálculo consolidado do total gasto por pessoa
-- [ ] Gastos sem pessoa atribuída são classificados como não atribuídos
-- [ ] Testes unitários validam a agregação correta de valores
+- [x] Transações de faturas incluem dados da pessoa
+- [x] Fatura retorna cálculo consolidado do total gasto por pessoa
+- [x] Gastos sem pessoa atribuída são classificados como não atribuídos
+- [x] Testes unitários validam a agregação correta de valores
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: unit
 
