@@ -78,7 +78,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController
+#### T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController [DONE]
 
 **What**: Adicionar as rotas `@Put(':id')` e `@Delete(':id')` no `CreditCardsController` com documentação OpenAPI/Swagger e guardas de autenticação.
 **Where**: `backend/src/modules/credit-cards/credit-cards.controller.ts`

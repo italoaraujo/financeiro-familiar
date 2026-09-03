@@ -1,15 +1,18 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreditCardsService } from './credit-cards.service';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
+import { UpdateCreditCardDto } from './dto/update-credit-card.dto';
 import { PayInvoiceDto } from './dto/pay-invoice.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
@@ -64,5 +67,26 @@ export class CreditCardsController {
     @Body() dto: PayInvoiceDto,
   ) {
     return this.creditCardsService.payInvoice(userId, invoiceId, dto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualizar dados cadastrais do cartão de crédito' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito atualizado com sucesso' })
+  async update(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateCreditCardDto,
+  ) {
+    return this.creditCardsService.update(userId, id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Excluir cartão de crédito sem histórico de lançamentos' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito removido com sucesso' })
+  async remove(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.creditCardsService.remove(userId, id);
   }
 }

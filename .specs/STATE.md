@@ -62,7 +62,7 @@
 
 - **Active Feature**: `edicao-cartao-credito`
 - **Total Tasks**: 7
-- **Completed Tasks**: 3 / 7 (42%)
+- **Completed Tasks**: 4 / 7 (57%)
 - **Status**: **IN_PROGRESS**
 - **Test Suite Results**: In progress
 - **Build Status**: 100% Success
@@ -71,10 +71,10 @@
 ## Handoff
 
 - **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Phase 1 - T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController
-- **Completed**: T1 (DTO), T2 (update) e T3 (remove com guarda) implementados.
-- **In-progress**: T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController
-- **Next step**: Adicionar `@Put(':id')` e `@Delete(':id')` no `CreditCardsController`.
+- **Phase / Task**: Phase 1 - T5: Testes Unitários de Edição e Exclusão no CreditCardsService
+- **Completed**: T1 (DTO), T2 (update), T3 (remove com guarda) e T4 (rotas PUT e DELETE no controller) implementados.
+- **In-progress**: T5: Testes Unitários de Edição e Exclusão no CreditCardsService
+- **Next step**: Implementar testes unitários em `backend/test/unit/credit-cards.service.spec.ts`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
