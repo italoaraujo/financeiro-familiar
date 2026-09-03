@@ -69,7 +69,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T3: Implementação do Método remove com Guarda de Integridade
+#### T3: Implementação do Método remove com Guarda de Integridade [DONE]
 
 **What**: Implementar o método `remove` no `CreditCardsService` que impede a exclusão física se houver transações vinculadas e permite a exclusão caso contrário.
 **Where**: `backend/src/modules/credit-cards/credit-cards.service.ts`

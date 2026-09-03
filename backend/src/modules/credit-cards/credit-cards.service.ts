@@ -175,6 +175,26 @@ export class CreditCardsService {
     return this.findById(userId, id);
   }
 
+  async remove(userId: string, id: string) {
+    const card = await this.findById(userId, id);
+
+    const hasTransactions = await this.prisma.transaction.findFirst({
+      where: { creditCardId: card.id },
+    });
+
+    if (hasTransactions) {
+      throw new BadRequestException(
+        'Não é possível excluir um cartão que possui lançamentos vinculados. Utilize a opção de desativar o cartão.',
+      );
+    }
+
+    await this.prisma.creditCard.delete({
+      where: { id: card.id },
+    });
+
+    return { message: 'Cartão de crédito removido com sucesso' };
+  }
+
   async getOrCreateInvoice(creditCardId: string, referenceMonth: string) {
     let invoice = await this.prisma.creditCardInvoice.findUnique({
       where: {

@@ -62,7 +62,7 @@
 
 - **Active Feature**: `edicao-cartao-credito`
 - **Total Tasks**: 7
-- **Completed Tasks**: 2 / 7 (28%)
+- **Completed Tasks**: 3 / 7 (42%)
 - **Status**: **IN_PROGRESS**
 - **Test Suite Results**: In progress
 - **Build Status**: 100% Success
@@ -71,10 +71,10 @@
 ## Handoff
 
 - **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Phase 1 - T3: Implementação do Método remove com Guarda de Integridade
-- **Completed**: T1 (DTO) e T2 (update no CreditCardsService) implementados e com build validado.
-- **In-progress**: T3: Implementação do Método remove com Guarda de Integridade
-- **Next step**: Implementar método `remove` no `CreditCardsService`.
+- **Phase / Task**: Phase 1 - T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController
+- **Completed**: T1 (DTO), T2 (update) e T3 (remove com guarda) implementados.
+- **In-progress**: T4: Exposição dos Endpoints PUT e DELETE no CreditCardsController
+- **Next step**: Adicionar `@Put(':id')` e `@Delete(':id')` no `CreditCardsController`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
