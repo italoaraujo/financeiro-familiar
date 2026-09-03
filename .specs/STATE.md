@@ -62,19 +62,19 @@
 
 - **Active Feature**: `atribuicao-pessoa-lancamento`
 - **Total Tasks**: 9
-- **Completed Tasks**: 0 / 9 (0%)
-- **Status**: **IN PROGRESS**
-- **Test Suite Results**: Pending execution of tasks
-- **Build Status**: Pending
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
+- **Completed Tasks**: 9 / 9 (100%)
+- **Status**: **VERIFIED & COMPLETED**
+- **Test Suite Results**: 11 test suites passed (44 tests total)
+- **Build Status**: 100% Success (NestJS backend & Next.js 14 frontend)
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/atribuicao-pessoa-lancamento
-- **Phase / Task**: Phase 1 / T1
-- **Completed**: Spec and Tasks definition validated.
-- **In-progress**: T1 (Prisma Schema update and generation)
-- **Next step**: Update schema.prisma and execute prisma generate.
+- **Phase / Task**: Completed
+- **Completed**: Todas as 9 tarefas (T1 a T9) implementadas, testadas com commits atômicos convencionais e validadas pelo Verificador.
+- **In-progress**: None
+- **Next step**: Apresentação e demonstração ao usuário.
 - **Blockers**: none
-- **Uncommitted files**: .specs/*
+- **Uncommitted files**: none
 - **Branch**: main
