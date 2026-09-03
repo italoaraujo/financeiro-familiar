@@ -121,8 +121,8 @@ T7 → T8 → T9
 **Depends on**: T3
 **Requirement**: PERS-01, PERS-03
 **Done when**:
-- [ ] Rotas declaradas com decoradores Swagger e Auth Guards
-- [ ] Parâmetros e payloads repassados corretamente ao `FamiliesService`
+- [x] Rotas declaradas com decoradores Swagger e Auth Guards
+- [x] Parâmetros e payloads repassados corretamente ao `FamiliesService`
 **Tests**: `backend/test/unit/families.service.spec.ts`
 **Gate**: unit
 

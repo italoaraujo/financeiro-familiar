@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { FamiliesService } from './families.service';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { AddMemberDto } from './dto/add-member.dto';
+import { CreatePersonDto } from './dto/create-person.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 
@@ -61,5 +63,45 @@ export class FamiliesController {
     @Param('memberId') targetUserId: string,
   ) {
     return this.familiesService.removeMember(userId, familyId, targetUserId);
+  }
+
+  @Get(':id/people')
+  @ApiOperation({ summary: 'Listar pessoas do grupo familiar (com e sem login)' })
+  async getFamilyPeople(
+    @GetUser('id') userId: string,
+    @Param('id') familyId: string,
+  ) {
+    return this.familiesService.getFamilyPeople(userId, familyId);
+  }
+
+  @Post(':id/people')
+  @ApiOperation({ summary: 'Cadastrar nova pessoa sem login no grupo familiar' })
+  async createPerson(
+    @GetUser('id') userId: string,
+    @Param('id') familyId: string,
+    @Body() dto: CreatePersonDto,
+  ) {
+    return this.familiesService.createPerson(userId, familyId, dto);
+  }
+
+  @Patch(':id/people/:personId')
+  @ApiOperation({ summary: 'Atualizar dados de pessoa no grupo familiar' })
+  async updatePerson(
+    @GetUser('id') userId: string,
+    @Param('id') familyId: string,
+    @Param('personId') personId: string,
+    @Body() dto: Partial<CreatePersonDto>,
+  ) {
+    return this.familiesService.updatePerson(userId, familyId, personId, dto);
+  }
+
+  @Delete(':id/people/:personId')
+  @ApiOperation({ summary: 'Remover pessoa sem login do grupo familiar' })
+  async removePerson(
+    @GetUser('id') userId: string,
+    @Param('id') familyId: string,
+    @Param('personId') personId: string,
+  ) {
+    return this.familiesService.removePerson(userId, familyId, personId);
   }
 }
