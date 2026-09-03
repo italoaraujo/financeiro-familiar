@@ -60,21 +60,21 @@
 
 ## Current Execution State
 
-- **Active Feature**: `atribuicao-pessoa-lancamento`
-- **Total Tasks**: 9
-- **Completed Tasks**: 9 / 9 (100%)
-- **Status**: **VERIFIED & COMPLETED**
-- **Test Suite Results**: 11 test suites passed (44 tests total)
-- **Build Status**: 100% Success (NestJS backend & Next.js 14 frontend)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `edicao-cartao-credito`
+- **Total Tasks**: 7
+- **Completed Tasks**: 0 / 7 (0%)
+- **Status**: **IN_PROGRESS**
+- **Test Suite Results**: Pending execution
+- **Build Status**: Pending execution
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/atribuicao-pessoa-lancamento
-- **Phase / Task**: Completed
-- **Completed**: Todas as 9 tarefas (T1 a T9) implementadas, testadas com commits atômicos convencionais e validadas pelo Verificador.
-- **In-progress**: None
-- **Next step**: Apresentação e demonstração ao usuário.
+- **Feature**: .specs/features/edicao-cartao-credito
+- **Phase / Task**: Phase 1 - T1: Criação do DTO de Atualização de Cartão
+- **Completed**: Planejamento e validação de especificação e tarefas aprovados.
+- **In-progress**: T1: Criação do DTO de Atualização de Cartão
+- **Next step**: Implementar `UpdateCreditCardDto` em `backend/src/modules/credit-cards/dto/update-credit-card.dto.ts`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
