@@ -109,7 +109,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix frontend run build`
 
-#### T7: Verificação Integrada e Validação de Gates
+#### T7: Verificação Integrada e Validação de Gates [DONE]
 
 **What**: Executar builds completos e verificação de integridade no backend e frontend garantindo ausência de regressões.
 **Where**: `frontend/src/app/cards/page.tsx`

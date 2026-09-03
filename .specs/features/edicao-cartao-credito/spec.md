@@ -93,18 +93,18 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| CARD-01 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-02 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-03 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-04 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-05 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-06 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-07 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-08 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-09 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Specify | Pending |
-| CARD-10 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Specify | Pending |
-| CARD-11 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Specify | Pending |
-| CARD-12 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Specify | Pending |
+| CARD-01 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-02 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-03 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-04 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-05 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-06 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-07 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-08 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-09 | P1: Edição Cadastral de Cartão de Crédito no Backend e Frontend | Execute | Verified |
+| CARD-10 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Execute | Verified |
+| CARD-11 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Execute | Verified |
+| CARD-12 | P2: Desativação e Exclusão Segura de Cartão de Crédito | Execute | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]` (e.g., `AUTH-01`, `CART-03`, `NOTIF-02`)
 
@@ -118,7 +118,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 How we know the feature is successful:
 
-- [ ] Usuário consegue editar nome, bandeira, limite, dias de ciclo e cor de qualquer cartão que possua acesso.
-- [ ] Fatura aberta vigente sincroniza suas datas de fechamento e vencimento de acordo com as alterações.
-- [ ] Interface visual reflete imediatamente as atualizações sem necessidade de recarregar a página manualmente.
-- [ ] 100% dos testes unitários do backend cobrindo os cenários de sucesso, validação e permissão passam com sucesso.
+- [x] Usuário consegue editar nome, bandeira, limite, dias de ciclo e cor de qualquer cartão que possua acesso.
+- [x] Fatura aberta vigente sincroniza suas datas de fechamento e vencimento de acordo com as alterações.
+- [x] Interface visual reflete imediatamente as atualizações sem necessidade de recarregar a página manualmente.
+- [x] 100% dos testes unitários do backend cobrindo os cenários de sucesso, validação e permissão passam com sucesso.
