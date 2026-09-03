@@ -50,23 +50,31 @@
 - **Date**: 2026-09-02
 - **Status**: active
 
+### AD-007
+- **Decision**: Model family individuals using a unified `Person` entity (`people`) linked to `Family`, allowing optional `userId` for members with login, and allowing non-login persons (name and color tag) for dependants. Link `Transaction` to `Person` via optional `personId` with automatic propagation across installment groups.
+- **Reason**: Solves the shared credit card and family lending attribution without forcing all relatives/children to create email accounts and credentials.
+- **Trade-off**: Requires maintaining synchronization between user family members and person profiles.
+- **Scope**: Prisma schema, Families module, Transactions module, Credit Cards module, and Frontend UI.
+- **Date**: 2026-09-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `fix-database-seed`
-- **Total Tasks**: 2
-- **Completed Tasks**: 2 / 2 (100%)
-- **Status**: **COMPLETE & VERIFIED**
-- **Test Suite Results**: Backend build OK (`nest build` + `tsc prisma/seed.ts`), Seed execution OK (14 categories + demo admin user created), Login API test OK (JWT 200 OK)
-- **Build Status**: OK
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `atribuicao-pessoa-lancamento`
+- **Total Tasks**: 9
+- **Completed Tasks**: 0 / 9 (0%)
+- **Status**: **IN PROGRESS**
+- **Test Suite Results**: Pending execution of tasks
+- **Build Status**: Pending
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/fix-database-seed
-- **Phase / Task**: Complete
-- **Completed**: Compilação de seed no Dockerfile, script `prisma:seed:prod`, execução da seed com criação de 14 categorias e usuário `admin@exemplo.com` / `123456`.
-- **In-progress**: none
-- **Next step**: Ready for demonstration and user usage.
+- **Feature**: .specs/features/atribuicao-pessoa-lancamento
+- **Phase / Task**: Phase 1 / T1
+- **Completed**: Spec and Tasks definition validated.
+- **In-progress**: T1 (Prisma Schema update and generation)
+- **Next step**: Update schema.prisma and execute prisma generate.
 - **Blockers**: none
-- **Uncommitted files**: backend/*, .specs/*
+- **Uncommitted files**: .specs/*
 - **Branch**: main

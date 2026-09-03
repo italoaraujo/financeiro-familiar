@@ -72,6 +72,7 @@ model User {
   recurrences   Recurrence[]
   budgets       Budget[]
   goals         Goal[]
+  personProfiles Person[]
 
   @@map("users")
 }
@@ -93,6 +94,7 @@ model Family {
   recurrences Recurrence[]
   budgets     Budget[]
   goals       Goal[]
+  people      Person[]
 
   @@map("families")
 }
@@ -212,6 +214,7 @@ model Transaction {
   invoiceId            String?           @map("invoice_id") @db.Uuid
   categoryId           String            @map("category_id") @db.Uuid
   recurrenceId         String?           @map("recurrence_id") @db.Uuid
+  personId             String?           @map("person_id") @db.Uuid
   type                 TransactionType
   amount               Decimal           @db.Decimal(15, 2)
   description          String            @db.VarChar(255)
@@ -233,12 +236,14 @@ model Transaction {
   invoice              CreditCardInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   category             Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   recurrence           Recurrence?       @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+  person               Person?           @relation(fields: [personId], references: [id], onDelete: SetNull)
   goalDeposits         GoalDeposit[]
 
   @@index([userId, transactionDate])
   @@index([familyId, transactionDate])
   @@index([accountId, transactionDate])
   @@index([categoryId, transactionDate])
+  @@index([personId, transactionDate])
   @@map("transactions")
 }
 
@@ -317,4 +322,22 @@ model GoalDeposit {
   transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
 
   @@map("goal_deposits")
+}
+
+model Person {
+  id        String        @id @default(uuid()) @db.Uuid
+  familyId  String        @map("family_id") @db.Uuid
+  userId    String?       @map("user_id") @db.Uuid
+  name      String        @db.VarChar(100)
+  color     String?       @db.VarChar(7)
+  avatarUrl String?       @map("avatar_url") @db.VarChar(255)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  family       Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  @@index([familyId])
+  @@map("people")
 }
