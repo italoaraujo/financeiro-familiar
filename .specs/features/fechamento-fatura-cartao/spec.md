@@ -99,8 +99,8 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | INVOICE-01 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
 | INVOICE-02 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
 | INVOICE-03 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
-| INVOICE-04 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
-| INVOICE-05 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
+| INVOICE-04 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
+| INVOICE-05 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
 | INVOICE-06 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
 | INVOICE-07 | P2: Tradução e Identificação Visual dos Status das Faturas na Interface | Tasks | Pending |
 | INVOICE-08 | P2: Tradução e Identificação Visual dos Status das Faturas na Interface | Tasks | Pending |

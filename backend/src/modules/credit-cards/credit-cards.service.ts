@@ -48,6 +48,8 @@ export class CreditCardsService {
       await this.verifyFamilyAccess(userId, familyId);
     }
 
+    await this.syncInvoiceStatuses();
+
     const cards = await this.prisma.creditCard.findMany({
       where: familyId ? { familyId, isActive: true } : { userId, isActive: true },
       include: {
@@ -75,6 +77,8 @@ export class CreditCardsService {
   }
 
   async findById(userId: string, id: string) {
+    await this.syncInvoiceStatuses(id);
+
     const card = await this.prisma.creditCard.findUnique({
       where: { id },
       include: {
@@ -205,6 +209,16 @@ export class CreditCardsService {
       },
     });
 
+    const now = new Date();
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    if (invoice && invoice.status === InvoiceStatus.OPEN && invoice.closingDate <= todayEnd) {
+      invoice = await this.prisma.creditCardInvoice.update({
+        where: { id: invoice.id },
+        data: { status: InvoiceStatus.CLOSED },
+      });
+    }
+
     if (!invoice) {
       const card = await this.prisma.creditCard.findUnique({
         where: { id: creditCardId },
@@ -215,10 +229,17 @@ export class CreditCardsService {
       }
 
       const [year, month] = referenceMonth.split('-').map(Number);
-      const closingDate = new Date(year, month - 1, Math.min(card.closingDay, 28));
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const effectiveClosingDay = Math.min(card.closingDay, daysInMonth);
+      const closingDate = new Date(year, month - 1, effectiveClosingDay, 12, 0, 0);
+
       const dueMonth = card.dueDay < card.closingDay ? month : month - 1;
       const dueYear = card.dueDay < card.closingDay && month === 12 ? year + 1 : year;
-      const dueDate = new Date(dueYear, dueMonth, Math.min(card.dueDay, 28));
+      const daysInDueMonth = new Date(dueYear, dueMonth + 1, 0).getDate();
+      const effectiveDueDay = Math.min(card.dueDay, daysInDueMonth);
+      const dueDate = new Date(dueYear, dueMonth, effectiveDueDay, 12, 0, 0);
+
+      const isPastClosing = closingDate <= todayEnd;
 
       invoice = await this.prisma.creditCardInvoice.create({
         data: {
@@ -226,7 +247,7 @@ export class CreditCardsService {
           referenceMonth,
           closingDate,
           dueDate,
-          status: InvoiceStatus.OPEN,
+          status: isPastClosing ? InvoiceStatus.CLOSED : InvoiceStatus.OPEN,
           totalAmount: new Prisma.Decimal(0),
           paidAmount: new Prisma.Decimal(0),
         },
@@ -237,6 +258,8 @@ export class CreditCardsService {
   }
 
   async determineInvoiceForDate(creditCardId: string, transactionDate: Date | string) {
+    await this.syncInvoiceStatuses(creditCardId);
+
     const card = await this.prisma.creditCard.findUnique({
       where: { id: creditCardId },
     });
@@ -329,12 +352,14 @@ export class CreditCardsService {
       const newPaidAmount = invoice.paidAmount.add(amountToPay);
       const isFullPayment = newPaidAmount.gte(invoice.totalAmount);
 
+      const partialStatus = invoice.status === InvoiceStatus.CLOSED ? InvoiceStatus.CLOSED : InvoiceStatus.OPEN;
+
       // Atualiza status da fatura
       const updatedInvoice = await tx.creditCardInvoice.update({
         where: { id: invoice.id },
         data: {
           paidAmount: newPaidAmount,
-          status: isFullPayment ? InvoiceStatus.PAID : InvoiceStatus.OPEN,
+          status: isFullPayment ? InvoiceStatus.PAID : partialStatus,
           paidAt: isFullPayment ? new Date() : null,
         },
       });
@@ -386,6 +411,8 @@ export class CreditCardsService {
   }
 
   async getInvoiceDetails(userId: string, invoiceId: string) {
+    await this.syncInvoiceStatuses();
+
     const invoice = await this.prisma.creditCardInvoice.findUnique({
       where: { id: invoiceId },
       include: {
@@ -456,5 +483,23 @@ export class CreditCardsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado à família especificada');
     }
+  }
+
+  async syncInvoiceStatuses(creditCardId?: string): Promise<void> {
+    const today = new Date();
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+
+    await this.prisma.creditCardInvoice.updateMany({
+      where: {
+        ...(creditCardId ? { creditCardId } : {}),
+        status: InvoiceStatus.OPEN,
+        closingDate: {
+          lte: endOfToday,
+        },
+      },
+      data: {
+        status: InvoiceStatus.CLOSED,
+      },
+    });
   }
 }

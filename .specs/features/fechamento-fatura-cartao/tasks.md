@@ -65,7 +65,7 @@ T6 → T7
 **Tests**: `backend/test/unit/credit-cards.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T3: Transição Automática para CLOSED e Preservação de Status
+#### T3: Transição Automática para CLOSED e Preservação de Status [DONE]
 
 **What**: Implementar sincronização de status de faturas vencidas no ciclo (`closingDate <= hoje` transiciona `OPEN` para `CLOSED`) e garantir que pagamentos parciais no método `payInvoice` mantenham o status `CLOSED`.
 **Where**: `backend/src/modules/credit-cards/credit-cards.service.ts`
