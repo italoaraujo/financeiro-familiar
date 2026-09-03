@@ -17,6 +17,37 @@ import {
   Trash2,
 } from 'lucide-react';
 
+const INVOICE_STATUS_MAP: Record<string, { label: string; className: string }> = {
+  OPEN: {
+    label: 'Aberta',
+    className: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  },
+  CLOSED: {
+    label: 'Fechada',
+    className: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+  },
+  PAID: {
+    label: 'Paga',
+    className: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+  },
+  OVERDUE: {
+    label: 'Vencida',
+    className: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+  },
+};
+
+function renderInvoiceStatusBadge(status: string) {
+  const config = INVOICE_STATUS_MAP[status] || {
+    label: status,
+    className: 'bg-slate-700/50 text-slate-300 border border-slate-600',
+  };
+  return (
+    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 sm:px-2 py-0.5 rounded ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
+
 export default function CreditCardsPage() {
   const { user, selectedFamilyId } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -334,15 +365,9 @@ export default function CreditCardsPage() {
                                 <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/40 flex-wrap">
                                   <div className="text-left sm:text-right">
                                     <p className="font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
-                                    <span
-                                      className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
-                                        inv.status === 'PAID'
-                                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                      }`}
-                                    >
-                                      {inv.status}
-                                    </span>
+                                    <div className="mt-0.5">
+                                      {renderInvoiceStatusBadge(inv.status)}
+                                    </div>
                                   </div>
 
                                   <button
@@ -707,15 +732,7 @@ export default function CreditCardsPage() {
                   <h2 className="text-lg sm:text-xl font-bold text-white">
                     Fatura • {selectedInvoiceDetails?.referenceMonth || '...'}
                   </h2>
-                  <span
-                    className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                      selectedInvoiceDetails?.status === 'PAID'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    }`}
-                  >
-                    {selectedInvoiceDetails?.status}
-                  </span>
+                  {selectedInvoiceDetails?.status && renderInvoiceStatusBadge(selectedInvoiceDetails.status)}
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
                   Cartão: <strong>{selectedInvoiceDetails?.creditCard?.name}</strong> • Vencimento:{' '}

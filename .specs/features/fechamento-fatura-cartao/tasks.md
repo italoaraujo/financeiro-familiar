@@ -96,7 +96,7 @@ T6 → T7
 
 ### Phase 2: Frontend e Telas de Usuário
 
-#### T6: Tradução de Status e Badges na Tela de Cartões
+#### T6: Tradução de Status e Badges na Tela de Cartões [DONE]
 
 **What**: Traduzir os status das faturas para português ("Aberta", "Fechada", "Paga", "Vencida") com cores distintas e atualizar a visualização tanto na listagem de cartões quanto no modal de divisão por pessoa em `/cards`.
 **Where**: `frontend/src/app/cards/page.tsx`
