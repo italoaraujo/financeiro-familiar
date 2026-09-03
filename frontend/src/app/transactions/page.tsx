@@ -58,6 +58,13 @@ export default function TransactionsPage() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const selectedCard = cards.find((c) => c.id === creditCardId);
+  const parsedAmount = parseFloat(amount) || 0;
+  const isCardOverLimit =
+    modalType === 'EXPENSE' &&
+    paymentMode === 'CARD' &&
+    Boolean(selectedCard && parsedAmount > Number(selectedCard.availableLimit));
+
   const loadAuxData = async () => {
     try {
       const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
@@ -126,6 +133,14 @@ export default function TransactionsPage() {
 
   const handleCreateTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isCardOverLimit) {
+      alert(
+        `O valor da despesa (${formatCurrency(parsedAmount)}) excede o limite disponível do cartão (${formatCurrency(selectedCard?.availableLimit || 0)}).`,
+      );
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -667,31 +682,38 @@ export default function TransactionsPage() {
                             </select>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                            <div>
-                              <select
-                                value={creditCardId}
-                                onChange={(e) => setCreditCardId(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
-                              >
-                                {cards.map((c) => (
-                                  <option key={c.id} value={c.id}>
-                                    {c.name} (Disp: {formatCurrency(c.availableLimit)})
-                                  </option>
-                                ))}
-                              </select>
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                              <div>
+                                <select
+                                  value={creditCardId}
+                                  onChange={(e) => setCreditCardId(e.target.value)}
+                                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
+                                >
+                                  {cards.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                      {c.name} (Disp: {formatCurrency(c.availableLimit)})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="48"
+                                  value={totalInstallments}
+                                  onChange={(e) => setTotalInstallments(parseInt(e.target.value) || 1)}
+                                  placeholder="Parcelas (ex: 1)"
+                                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
+                                />
+                              </div>
                             </div>
-                            <div>
-                              <input
-                                type="number"
-                                min="1"
-                                max="48"
-                                value={totalInstallments}
-                                onChange={(e) => setTotalInstallments(parseInt(e.target.value) || 1)}
-                                placeholder="Parcelas (ex: 1)"
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white"
-                              />
-                            </div>
+                            {isCardOverLimit && (
+                              <p className="text-[11px] sm:text-xs text-rose-400 font-medium bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+                                <span>⚠️ O valor da despesa ({formatCurrency(parsedAmount)}) excede o limite disponível de {formatCurrency(selectedCard?.availableLimit || 0)}.</span>
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
@@ -758,10 +780,14 @@ export default function TransactionsPage() {
                 {/* Submit button */}
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                  disabled={submitting || isCardOverLimit}
+                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                 >
-                  {submitting ? 'Salvando lançamento...' : 'Confirmar Lançamento'}
+                  {isCardOverLimit
+                    ? 'Limite do cartão insuficiente'
+                    : submitting
+                    ? 'Salvando lançamento...'
+                    : 'Confirmar Lançamento'}
                 </button>
               </form>
             </div>
