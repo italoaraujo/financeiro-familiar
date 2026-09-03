@@ -49,6 +49,11 @@ export class FilterTransactionDto {
   @IsOptional()
   familyId?: string;
 
+  @ApiProperty({ required: false, description: 'Filtrar por pessoa responsável' })
+  @IsUUID('4')
+  @IsOptional()
+  personId?: string;
+
   @ApiProperty({ required: false, default: 1 })
   @Type(() => Number)
   @IsInt()

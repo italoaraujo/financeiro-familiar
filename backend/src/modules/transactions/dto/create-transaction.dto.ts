@@ -79,4 +79,9 @@ export class CreateTransactionDto {
   @IsUUID('4')
   @IsOptional()
   familyId?: string;
+
+  @ApiProperty({ required: false, description: 'Pessoa da família responsável pelo lançamento' })
+  @IsUUID('4', { message: 'ID da pessoa inválido' })
+  @IsOptional()
+  personId?: string;
 }

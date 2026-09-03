@@ -91,8 +91,8 @@ T7 → T8 → T9
 **Depends on**: None
 **Requirement**: PERS-01, PERS-04, PERS-07
 **Done when**:
-- [ ] `CreatePersonDto` criado com validações `@IsNotEmpty()`, `@IsString()` e `@IsOptional()`
-- [ ] `CreateTransactionDto` e `FilterTransactionDto` atualizados com `personId`
+- [x] `CreatePersonDto` criado com validações `@IsNotEmpty()`, `@IsString()` e `@IsOptional()`
+- [x] `CreateTransactionDto` e `FilterTransactionDto` atualizados com `personId`
 **Tests**: none
 **Gate**: quick
 
