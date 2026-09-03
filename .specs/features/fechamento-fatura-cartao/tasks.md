@@ -56,7 +56,7 @@ T6 → T7
 **Tests**: `backend/test/unit/transactions.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T2: Alocação no Dia de Fechamento e Faturas Fechadas
+#### T2: Alocação no Dia de Fechamento e Faturas Fechadas [DONE]
 
 **What**: Atualizar o método `determineInvoiceForDate` e `getOrCreateInvoice` no `CreditCardsService` para que compras realizadas no dia de fechamento (`day >= card.closingDay`) sejam alocadas na fatura do mês seguinte e para que faturas com status `CLOSED` ou `PAID` não recebam novas despesas.
 **Where**: `backend/src/modules/credit-cards/credit-cards.service.ts`

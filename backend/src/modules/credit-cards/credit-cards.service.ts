@@ -236,7 +236,7 @@ export class CreditCardsService {
     return invoice;
   }
 
-  async determineInvoiceForDate(creditCardId: string, transactionDate: Date) {
+  async determineInvoiceForDate(creditCardId: string, transactionDate: Date | string) {
     const card = await this.prisma.creditCard.findUnique({
       where: { id: creditCardId },
     });
@@ -245,13 +245,28 @@ export class CreditCardsService {
       throw new NotFoundException('Cartão de crédito não encontrado');
     }
 
-    const tDate = new Date(transactionDate);
-    const day = tDate.getDate();
-    let month = tDate.getMonth() + 1;
-    let year = tDate.getFullYear();
+    let day: number, month: number, year: number;
+    if (typeof transactionDate === 'string') {
+      const parts = transactionDate.split('T')[0].split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        year = parts[0];
+        month = parts[1];
+        day = parts[2];
+      } else {
+        const tDate = new Date(transactionDate);
+        day = tDate.getDate();
+        month = tDate.getMonth() + 1;
+        year = tDate.getFullYear();
+      }
+    } else {
+      const tDate = new Date(transactionDate);
+      day = tDate.getDate();
+      month = tDate.getMonth() + 1;
+      year = tDate.getFullYear();
+    }
 
-    // Se o dia da compra for após o dia de fechamento, entra na fatura do mês seguinte
-    if (day > card.closingDay) {
+    // Se o dia da compra for igual ou após o dia de fechamento, entra na fatura do mês seguinte
+    if (day >= card.closingDay) {
       month += 1;
       if (month > 12) {
         month = 1;
@@ -259,8 +274,21 @@ export class CreditCardsService {
       }
     }
 
-    const refMonth = `${year}-${String(month).padStart(2, '0')}`;
-    return this.getOrCreateInvoice(creditCardId, refMonth);
+    let refMonth = `${year}-${String(month).padStart(2, '0')}`;
+    let invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+
+    // Se a fatura correspondente já estiver fechada ou paga, aloca na próxima fatura aberta
+    while (invoice.status === InvoiceStatus.CLOSED || invoice.status === InvoiceStatus.PAID) {
+      month += 1;
+      if (month > 12) {
+        month = 1;
+        year += 1;
+      }
+      refMonth = `${year}-${String(month).padStart(2, '0')}`;
+      invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+    }
+
+    return invoice;
   }
 
   async payInvoice(userId: string, invoiceId: string, dto: PayInvoiceDto) {

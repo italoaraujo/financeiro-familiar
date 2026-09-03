@@ -96,9 +96,9 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| INVOICE-01 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
+| INVOICE-01 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
 | INVOICE-02 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
-| INVOICE-03 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
+| INVOICE-03 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Implementing |
 | INVOICE-04 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
 | INVOICE-05 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
 | INVOICE-06 | P1: Alocação Correta no Fechamento e Transição Automática de Status | Tasks | Pending |
