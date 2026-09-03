@@ -105,10 +105,10 @@ T7 → T8 → T9
 **Depends on**: T2
 **Requirement**: PERS-01, PERS-02, PERS-03
 **Done when**:
-- [ ] `createPerson` valida permissão e persiste pessoa sem login vinculada à família
-- [ ] `getFamilyPeople` lista membros e pessoas da família com seus identificadores
-- [ ] `removePerson` remove pessoa com segurança desvinculando lançamentos existentes
-- [ ] Testes unitários cobrem criação e listagem de pessoas
+- [x] `createPerson` valida permissão e persiste pessoa sem login vinculada à família
+- [x] `getFamilyPeople` lista membros e pessoas da família com seus identificadores
+- [x] `removePerson` remove pessoa com segurança desvinculando lançamentos existentes
+- [x] Testes unitários cobrem criação e listagem de pessoas
 **Tests**: `backend/test/unit/families.service.spec.ts`
 **Gate**: unit
 
