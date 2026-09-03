@@ -9,7 +9,7 @@ import { CreditCardsService } from '../credit-cards/credit-cards.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
-import { Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -51,6 +51,45 @@ export class TransactionsService {
     const baseDate = this.parseTransactionDate(dto.transactionDate);
 
     return this.prisma.$transaction(async (tx) => {
+      // Validação de limite e status do cartão de crédito
+      if (dto.creditCardId) {
+        const card = await tx.creditCard.findUnique({
+          where: { id: dto.creditCardId },
+          include: {
+            invoices: {
+              where: { status: { not: InvoiceStatus.PAID } },
+            },
+          },
+        });
+
+        if (!card) {
+          throw new NotFoundException('Cartão de crédito não encontrado');
+        }
+
+        if (card.userId !== userId && card.familyId) {
+          await this.verifyFamilyAccess(userId, card.familyId);
+        } else if (card.userId !== userId) {
+          throw new ForbiddenException('Acesso negado ao cartão de crédito');
+        }
+
+        if (!card.isActive) {
+          throw new BadRequestException('Não é possível realizar lançamentos em um cartão de crédito inativo');
+        }
+
+        const committedAmount = card.invoices.reduce(
+          (acc, inv) => acc.add(inv.totalAmount.minus(inv.paidAmount)),
+          new Prisma.Decimal(0),
+        );
+
+        const availableLimit = Prisma.Decimal.max(0, card.creditLimit.minus(committedAmount));
+
+        if (totalAmount.gt(availableLimit)) {
+          throw new BadRequestException(
+            `O valor da despesa (R$ ${totalAmount.toFixed(2)}) excede o limite disponível do cartão (R$ ${availableLimit.toFixed(2)})`,
+          );
+        }
+      }
+
       // Caso 1: Compra parcelada no cartão de crédito
       if (isInstallment) {
         const installmentGroupId = randomUUID();

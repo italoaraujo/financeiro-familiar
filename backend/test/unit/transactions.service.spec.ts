@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreditCardsService } from '../../src/modules/credit-cards/credit-cards.service';
-import { Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 import { BadRequestException } from '@nestjs/common';
 
 describe('TransactionsService', () => {
@@ -13,6 +13,16 @@ describe('TransactionsService', () => {
   beforeEach(async () => {
     prisma = {
       $transaction: jest.fn((cb) => cb(prisma)),
+      creditCard: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'card-1',
+          userId: 'user-1',
+          familyId: null,
+          isActive: true,
+          creditLimit: new Prisma.Decimal(5000),
+          invoices: [],
+        }),
+      },
       account: {
         findUnique: jest.fn(),
         update: jest.fn(),
@@ -217,6 +227,114 @@ describe('TransactionsService', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe('credit card limit validation', () => {
+    it('should reject single purchase if amount exceeds available limit', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [
+          {
+            totalAmount: new Prisma.Decimal(800),
+            paidAmount: new Prisma.Decimal(0),
+            status: InvoiceStatus.OPEN,
+          },
+        ],
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 300,
+          description: 'Compra cara',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-1',
+          creditCardId: 'card-1',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject installment purchase if total amount exceeds available limit', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [
+          {
+            totalAmount: new Prisma.Decimal(500),
+            paidAmount: new Prisma.Decimal(0),
+            status: InvoiceStatus.OPEN,
+          },
+        ],
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 600,
+          totalInstallments: 3,
+          description: 'Notebook parcelado',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-1',
+          creditCardId: 'card-1',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject purchase if credit card is inactive', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: false,
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 50,
+          description: 'Compra',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-1',
+          creditCardId: 'card-1',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should allow purchase when amount is within available limit', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [
+          {
+            totalAmount: new Prisma.Decimal(500),
+            paidAmount: new Prisma.Decimal(100),
+            status: InvoiceStatus.OPEN,
+          },
+        ],
+      });
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({ id: 'inv-1' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-1', amount: new Prisma.Decimal(200) });
+      prisma.creditCardInvoice.update.mockResolvedValue({ id: 'inv-1' });
+
+      const tx = await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 200,
+        description: 'Compra válida',
+        transactionDate: '2026-09-01',
+        categoryId: 'cat-1',
+        creditCardId: 'card-1',
+      });
+
+      expect(tx).toBeDefined();
     });
   });
 });
