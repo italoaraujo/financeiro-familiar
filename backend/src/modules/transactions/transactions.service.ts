@@ -48,7 +48,7 @@ export class TransactionsService {
     const totalAmount = new Prisma.Decimal(dto.amount);
     const totalInstallments = dto.totalInstallments || 1;
     const isInstallment = totalInstallments > 1 && !!dto.creditCardId;
-    const baseDate = new Date(dto.transactionDate);
+    const baseDate = this.parseTransactionDate(dto.transactionDate);
 
     return this.prisma.$transaction(async (tx) => {
       // Caso 1: Compra parcelada no cartão de crédito
@@ -74,9 +74,9 @@ export class TransactionsService {
             targetYear,
             monthIndex,
             targetDay,
-            baseDate.getHours(),
-            baseDate.getMinutes(),
-            baseDate.getSeconds(),
+            12,
+            0,
+            0,
           );
 
           const invoice = await this.creditCardsService.determineInvoiceForDate(
@@ -207,7 +207,7 @@ export class TransactionsService {
     }
 
     const amount = new Prisma.Decimal(dto.amount);
-    const date = new Date(dto.transactionDate);
+    const date = this.parseTransactionDate(dto.transactionDate);
 
     return this.prisma.$transaction(async (tx) => {
       const source = await tx.account.findUnique({ where: { id: dto.sourceAccountId } });
@@ -407,5 +407,17 @@ export class TransactionsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado ao grupo familiar');
     }
+  }
+
+  private parseTransactionDate(dateInput: string | Date): Date {
+    if (typeof dateInput === 'string') {
+      const datePart = dateInput.split('T')[0];
+      const parts = datePart.split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+      }
+    }
+    const d = new Date(dateInput);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
   }
 }

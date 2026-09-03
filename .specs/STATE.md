@@ -58,23 +58,31 @@
 - **Date**: 2026-09-02
 - **Status**: active
 
+### AD-008
+- **Decision**: Alocar despesas realizadas na data de fechamento do cartão (`day >= closingDay`) diretamente na fatura do ciclo seguinte, efetuar transição automática de faturas abertas com `closingDate <= hoje` para status `CLOSED`, impedir novas despesas em faturas fechadas ou pagas e exibir todos os status em português no frontend ("Aberta", "Fechada", "Paga", "Vencida").
+- **Reason**: Alinha o sistema à regra de negócio bancária brasileira de corte de fatura e resolve inconsistências de conciliação relatadas pelo usuário.
+- **Trade-off**: Requer verificação ativa do status da fatura no backend e parsing seguro de datas locais para evitar desvios UTC.
+- **Scope**: Módulos de Cartões de Crédito, Transações e Relatórios no backend; Telas de Cartões e Dashboard no frontend.
+- **Date**: 2026-09-03
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `edicao-cartao-credito`
+- **Active Feature**: `fechamento-fatura-cartao`
 - **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
-- **Status**: **VERIFIED & COMPLETED**
-- **Test Suite Results**: 11 test suites passed (53 tests total)
-- **Build Status**: 100% Success (NestJS backend & Next.js 14 frontend)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Completed Tasks**: 0 / 7 (0%)
+- **Status**: **SPEC & TASKS READY - AWAITING APPROVAL**
+- **Test Suite Results**: A executar após aprovação
+- **Build Status**: 100% Success
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/edicao-cartao-credito
-- **Phase / Task**: Completed
-- **Completed**: Todas as 7 tarefas (T1 a T7) implementadas, testadas com commits atômicos convencionais e validadas pelo Verificador.
-- **In-progress**: None
-- **Next step**: Demonstração e apresentação da funcionalidade de edição de cartão ao usuário.
+- **Feature**: .specs/features/fechamento-fatura-cartao
+- **Phase / Task**: Spec & Tasks aprovados para execução
+- **Completed**: Especificação técnica com critérios EARS (`spec.md`), decomposição atômica de tarefas (`tasks.md`) e plano de implementação gerado.
+- **In-progress**: Aguardando aprovação do usuário para início da execução das tarefas (T1 a T7).
+- **Next step**: Executar T1 (Normalização de data civil nas transações).
 - **Blockers**: none
-- **Uncommitted files**: none
+- **Uncommitted files**: .specs/features/fechamento-fatura-cartao/
 - **Branch**: main
