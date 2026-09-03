@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { InvoiceStatus, Prisma } from '@prisma/client';
 
 describe('ReportsService', () => {
   let service: ReportsService;
@@ -54,6 +54,13 @@ describe('ReportsService', () => {
       expect(summary.monthlyIncome).toEqual(new Prisma.Decimal(5000));
       expect(summary.monthlyExpense).toEqual(new Prisma.Decimal(3200));
       expect(summary.netBalance).toEqual(new Prisma.Decimal(1800));
+      expect(prisma.creditCardInvoice.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: { in: [InvoiceStatus.OPEN, InvoiceStatus.CLOSED, InvoiceStatus.OVERDUE] },
+          }),
+        }),
+      );
     });
   });
 

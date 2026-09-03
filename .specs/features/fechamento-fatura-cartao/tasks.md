@@ -83,7 +83,7 @@ T6 → T7
 **Tests**: `backend/test/unit/reports.service.spec.ts`
 **Gate**: `npm --prefix backend run build`
 
-#### T5: Testes Unitários de Fechamento, Alocação e Status
+#### T5: Testes Unitários de Fechamento, Alocação e Status [DONE]
 
 **What**: Atualizar os testes unitários do `CreditCardsService`, `TransactionsService` e `ReportsService` validando o comportamento de compras no dia de fechamento (`day >= closingDay`), alocação fora de faturas fechadas e transição de status para `CLOSED`.
 **Where**: `backend/test/unit/credit-cards.service.spec.ts`

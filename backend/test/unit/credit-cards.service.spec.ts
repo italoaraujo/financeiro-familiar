@@ -23,6 +23,7 @@ describe('CreditCardsService', () => {
         findUnique: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       account: {
         findUnique: jest.fn(),
@@ -88,7 +89,7 @@ describe('CreditCardsService', () => {
   });
 
   describe('determineInvoiceForDate', () => {
-    it('should allocate to current month invoice if date <= closingDay', async () => {
+    it('should allocate to current month invoice if date < closingDay', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-1',
         closingDay: 20,
@@ -98,10 +99,28 @@ describe('CreditCardsService', () => {
       prisma.creditCardInvoice.findUnique.mockResolvedValue({
         id: 'inv-sep',
         referenceMonth: '2026-09',
+        status: InvoiceStatus.OPEN,
       });
 
-      const invoice = await service.determineInvoiceForDate('card-1', new Date('2026-09-15'));
+      const invoice = await service.determineInvoiceForDate('card-1', '2026-09-15');
       expect(invoice.referenceMonth).toBe('2026-09');
+    });
+
+    it('should allocate to next month invoice if date is on closingDay', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        closingDay: 20,
+        dueDay: 27,
+      });
+
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-oct',
+        referenceMonth: '2026-10',
+        status: InvoiceStatus.OPEN,
+      });
+
+      const invoice = await service.determineInvoiceForDate('card-1', '2026-09-20');
+      expect(invoice.referenceMonth).toBe('2026-10');
     });
 
     it('should allocate to next month invoice if date > closingDay', async () => {
@@ -114,10 +133,50 @@ describe('CreditCardsService', () => {
       prisma.creditCardInvoice.findUnique.mockResolvedValue({
         id: 'inv-oct',
         referenceMonth: '2026-10',
+        status: InvoiceStatus.OPEN,
       });
 
-      const invoice = await service.determineInvoiceForDate('card-1', new Date('2026-09-22'));
+      const invoice = await service.determineInvoiceForDate('card-1', '2026-09-22');
       expect(invoice.referenceMonth).toBe('2026-10');
+    });
+
+    it('should skip CLOSED invoice and allocate to next open invoice', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        closingDay: 20,
+        dueDay: 27,
+      });
+
+      prisma.creditCardInvoice.findUnique
+        .mockResolvedValueOnce({
+          id: 'inv-sep',
+          referenceMonth: '2026-09',
+          status: InvoiceStatus.CLOSED,
+        })
+        .mockResolvedValueOnce({
+          id: 'inv-oct',
+          referenceMonth: '2026-10',
+          status: InvoiceStatus.OPEN,
+        });
+
+      const invoice = await service.determineInvoiceForDate('card-1', '2026-09-10');
+      expect(invoice.referenceMonth).toBe('2026-10');
+    });
+  });
+
+  describe('syncInvoiceStatuses', () => {
+    it('should update OPEN invoices with closingDate <= today to CLOSED', async () => {
+      await service.syncInvoiceStatuses('card-1');
+      expect(prisma.creditCardInvoice.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            creditCardId: 'card-1',
+            status: InvoiceStatus.OPEN,
+            closingDate: expect.any(Object),
+          }),
+          data: { status: InvoiceStatus.CLOSED },
+        }),
+      );
     });
   });
 
@@ -159,6 +218,37 @@ describe('CreditCardsService', () => {
         where: { id: 'acc-1' },
         data: { currentBalance: { decrement: new Prisma.Decimal(500) } },
       });
+    });
+
+    it('should preserve CLOSED status when partial payment is made on closed invoice', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-1',
+        totalAmount: new Prisma.Decimal(500),
+        paidAmount: new Prisma.Decimal(0),
+        status: InvoiceStatus.CLOSED,
+        creditCard: {
+          id: 'card-1',
+          name: 'Nubank',
+          userId: 'user-1',
+        },
+      });
+
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1' });
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-pay' });
+      prisma.creditCardInvoice.update.mockImplementation(({ data }) => ({
+        id: 'inv-1',
+        ...data,
+      }));
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-pay' });
+      prisma.account.update.mockResolvedValue({ id: 'acc-1' });
+
+      const result = await service.payInvoice('user-1', 'inv-1', {
+        accountId: 'acc-1',
+        amount: 200,
+      });
+
+      expect(result.status).toBe(InvoiceStatus.CLOSED);
+      expect(result.paidAmount).toEqual(new Prisma.Decimal(200));
     });
   });
 
