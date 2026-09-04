@@ -76,23 +76,31 @@
 - **Date**: 2026-09-03
 - **Status**: active
 
+### AD-011
+- **Decision**: Implementar arquitetura de logs de auditoria e ações do sistema utilizando a tabela `audit_logs` no PostgreSQL via Prisma ORM, acompanhada de interceptor global assíncrono no NestJS (`AuditLogInterceptor`) para capturar requisições mutativas (`POST`, `PUT`, `PATCH`, `DELETE`) com sanitização obrigatória de dados sensíveis (`password`, `token`, etc.), serviço resiliente (`AuditLogsService`) e controle de acesso RBAC restrito a administradores de família (`OWNER`, `ADMIN`) e logs próprios.
+- **Reason**: Atende à necessidade de auditoria e conformidade contábil das ações dos usuários e administradores sem prejudicar o tempo de resposta ou disponibilidade das transações financeiras.
+- **Trade-off**: A gravação assíncrona não bloqueante prioriza performance e disponibilidade, capturando eventuais falhas de I/O em log sem abortar a operação de negócio principal.
+- **Scope**: Prisma schema, módulo `audit-logs`, interceptor global, utilitário de sanitização e testes automatizados.
+- **Date**: 2026-09-04
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `soft-delete`
-- **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
+- **Active Feature**: `logs`
+- **Total Tasks**: 6
+- **Completed Tasks**: 6 / 6 (100%)
 - **Status**: **COMPLETE / VERIFIED**
-- **Test Suite Results**: 11 passed (83/83 tests total)
+- **Test Suite Results**: 16 passed (112/112 tests total)
 - **Build Status**: 100% Success
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/soft-delete
+- **Feature**: .specs/features/logs
 - **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **Completed**: T1, T2, T3, T4, T5, T6
 - **In-progress**: None
-- **Next step**: Merge da branch `feature/soft_delete` ou novo ciclo de melhorias
+- **Next step**: Merge da branch `feature/logs` para `develop` via git flow feature finish
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/soft_delete
+- **Branch**: feature/logs
