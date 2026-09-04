@@ -127,7 +127,7 @@ T7 → T8
 
 ---
 
-### T3: Implementação das Regras de Cofrinho e Bloqueio de Exclusão no GoalsService
+### T3: Implementação das Regras de Cofrinho e Bloqueio de Exclusão no GoalsService [DONE]
 
 **What**: Adaptar `create()`, `addDeposit()`, `remove()` e implementar `withdraw()` com transação atômica no `GoalsService`.
 **Where**: `backend/src/modules/goals/goals.service.ts`
@@ -138,19 +138,19 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `create()` valida existência da conta bancária e persiste vinculação
-- [ ] `addDeposit()` debita automaticamente da conta vinculada da meta e grava `type: DEPOSIT`
-- [ ] `withdraw()` valida saldo suficiente, credita conta vinculada, debita meta, grava transação e histórico `type: WITHDRAWAL`
-- [ ] `withdraw()` rebaixa status para `IN_PROGRESS` se saldo cair abaixo de `targetAmount`
-- [ ] `remove()` lança `BadRequestException` se `currentAmount > 0`
-- [ ] Gate check passes: `npm --prefix backend run build`
+- [x] `create()` valida existência da conta bancária e persiste vinculação
+- [x] `addDeposit()` debita automaticamente da conta vinculada da meta e grava `type: DEPOSIT`
+- [x] `withdraw()` valida saldo suficiente, credita conta vinculada, debita meta, grava transação e histórico `type: WITHDRAWAL`
+- [x] `withdraw()` rebaixa status para `IN_PROGRESS` se saldo cair abaixo de `targetAmount`
+- [x] `remove()` lança `BadRequestException` se `currentAmount > 0`
+- [x] Gate check passes: `npm --prefix backend run build`
 
 **Tests**: `backend/test/unit/goals.service.spec.ts`
 **Gate**: quick
 
 ---
 
-### T4: Testes Unitários de Regras de Negócio do GoalsService
+### T4: Testes Unitários de Regras de Negócio do GoalsService [DONE]
 
 **What**: Implementar suíte de testes unitários cobrindo aporte, resgate, reversão de status e proteção de exclusão de meta com saldo.
 **Where**: `backend/test/unit/goals.service.spec.ts`
@@ -161,11 +161,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Teste unitário para bloqueio de exclusão com saldo positivo aprovado
-- [ ] Teste unitário para exclusão permitida com saldo zerado aprovado
-- [ ] Teste unitário para resgate com saldo insuficiente lançando erro aprovado
-- [ ] Teste unitário para resgate bem-sucedido com atualização atômica e transação contábil aprovado
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
+- [x] Teste unitário para bloqueio de exclusão com saldo positivo aprovado
+- [x] Teste unitário para exclusão permitida com saldo zerado aprovado
+- [x] Teste unitário para resgate com saldo insuficiente lançando erro aprovado
+- [x] Teste unitário para resgate bem-sucedido com atualização atômica e transação contábil aprovado
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
 
 **Tests**: `backend/test/unit/goals.service.spec.ts`
 **Gate**: quick
