@@ -86,16 +86,16 @@ T5 → T6 → T7
 **Tests**: `python3 -c "from PIL import Image; assert Image.open('frontend/public/icons/icon-192x192.png').size == (192, 192); assert Image.open('frontend/public/icons/icon-512x512.png').size == (512, 512); assert Image.open('frontend/public/icons/maskable-icon-512x512.png').size == (512, 512); assert Image.open('frontend/public/icons/apple-touch-icon.png').size == (180, 180); print('Icons OK')"`
 **Gate**: `python3 -c "from PIL import Image; assert Image.open('frontend/public/icons/icon-192x192.png').size == (192, 192); assert Image.open('frontend/public/icons/icon-512x512.png').size == (512, 512); assert Image.open('frontend/public/icons/maskable-icon-512x512.png').size == (512, 512); assert Image.open('frontend/public/icons/apple-touch-icon.png').size == (180, 180); print('Icons OK')"`
 
-### T2: Criação do Manifesto Web App manifest.json
+### T2: Criação do Manifesto Web App manifest.json [DONE]
 
 **What**: Criar o arquivo `frontend/public/manifest.json` com especificações completas de PWA: `name`, `short_name`, `description`, `start_url`, `display: standalone`, `theme_color: #020617`, `background_color: #020617`, `orientation: portrait-primary` e lista de ícones gerados na tarefa T1.
 **Where**: `frontend/public/manifest.json`
 **Depends on**: T1
 **Requirement**: PWA-01, PWA-04
 **Done when**:
-- [ ] Arquivo `frontend/public/manifest.json` criado com todas as propriedades do padrão W3C Web App Manifest
-- [ ] Links de ícones apontam corretamente para `/icons/`
-- [ ] Propriedades validadas com sucesso via script Node.js
+- [x] Arquivo `frontend/public/manifest.json` criado com todas as propriedades do padrão W3C Web App Manifest
+- [x] Links de ícones apontam corretamente para `/icons/`
+- [x] Propriedades validadas com sucesso via script Node.js
 **Tests**: `node -e "const m = require('./frontend/public/manifest.json'); if(!m.name || !m.icons || m.icons.length < 3 || m.display !== 'standalone') process.exit(1); console.log('Manifest OK');"`
 **Gate**: `node -e "const m = require('./frontend/public/manifest.json'); if(!m.name || !m.icons || m.icons.length < 3 || m.display !== 'standalone') process.exit(1); console.log('Manifest OK');"`
 
