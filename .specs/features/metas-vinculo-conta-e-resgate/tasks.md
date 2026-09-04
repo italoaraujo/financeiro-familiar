@@ -174,7 +174,7 @@ T7 → T8
 
 ### Phase 3: Controller e Integração de API
 
-### T5: Exposição do Endpoint de Resgate no GoalsController
+### T5: Exposição do Endpoint de Resgate no GoalsController [DONE]
 
 **What**: Adicionar endpoint `POST :id/withdraw` no `GoalsController` com tipagem e Swagger.
 **Where**: `backend/src/modules/goals/goals.controller.ts`
@@ -185,9 +185,9 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Método `@Post(':id/withdraw')` mapeado e conectado a `goalsService.withdraw()`
-- [ ] Parâmetros `@CurrentUser('id')`, `@Param('id')` e `@Body()` validados
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
+- [x] Método `@Post(':id/withdraw')` mapeado e conectado a `goalsService.withdraw()`
+- [x] Parâmetros `@CurrentUser('id')`, `@Param('id')` e `@Body()` validados
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
 
 **Tests**: `backend/test/unit/goals.service.spec.ts`
 **Gate**: quick
