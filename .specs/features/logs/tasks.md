@@ -106,7 +106,7 @@ T5 → T6
 
 ### Phase 2: Sanitização e Serviço de Auditoria
 
-### T2: Utilitário de Sanitização Recursiva de Payloads
+### T2: Utilitário de Sanitização Recursiva de Payloads [DONE]
 
 **What**: Criar a função utilitária `sanitizePayload` para mascarar recursivamente campos sensíveis (como senhas, tokens, hashes e secrets) com `[REDACTED]`, acompanhada de testes unitários.
 **Where**: `backend/src/common/utils/sanitizer.util.ts`
@@ -117,10 +117,10 @@ T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Utilitário exporta `sanitizePayload` tratando recursivamente objetos e arrays
-- [ ] Campos sensíveis (`password`, `token`, `refreshToken`, `passwordHash`, `secret`, etc.) são mascarados
-- [ ] Testes unitários em `sanitizer.util.spec.ts` cobrem objetos planos, objetos aninhados, arrays, dados primitivos e referências circulares
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/sanitizer.util.spec.ts`
+- [x] Utilitário exporta `sanitizePayload` tratando recursivamente objetos e arrays
+- [x] Campos sensíveis (`password`, `token`, `refreshToken`, `passwordHash`, `secret`, etc.) são mascarados
+- [x] Testes unitários em `sanitizer.util.spec.ts` cobrem objetos planos, objetos aninhados, arrays, dados primitivos e referências circulares
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/sanitizer.util.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
