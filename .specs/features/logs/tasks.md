@@ -176,7 +176,7 @@ T5 → T6
 
 ### Phase 4: Controller e Teste de Fluxo Integrado
 
-### T5: Implementar AuditLogsController com RBAC
+### T5: Implementar AuditLogsController com RBAC [DONE]
 
 **What**: Criar `AuditLogsController` com rotas `GET /audit-logs` e `GET /audit-logs/:id`, decoradores Swagger e regras de autorização para `OWNER`/`ADMIN` da família e usuário comum.
 **Where**: `backend/src/modules/audit-logs/audit-logs.controller.ts`
@@ -187,12 +187,12 @@ T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Endpoint `GET /audit-logs` aceita query params (`page`, `limit`, `familyId`, `action`, `entityName`)
-- [ ] Usuário que não é `OWNER` ou `ADMIN` é impedido de consultar logs da família (`403 Forbidden`)
-- [ ] Consulta sem `familyId` filtra estritamente as ações do próprio usuário logado
-- [ ] Endpoint `GET /audit-logs/:id` retorna detalhes do log para usuário autorizado
-- [ ] Testes unitários em `audit-logs.controller.spec.ts` validam sucesso e cenários de permissão
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/audit-logs.controller.spec.ts`
+- [x] Endpoint `GET /audit-logs` aceita query params (`page`, `limit`, `familyId`, `action`, `entityName`)
+- [x] Usuário que não é `OWNER` ou `ADMIN` é impedido de consultar logs da família (`403 Forbidden`)
+- [x] Consulta sem `familyId` filtra estritamente as ações do próprio usuário logado
+- [x] Endpoint `GET /audit-logs/:id` retorna detalhes do log para usuário autorizado
+- [x] Testes unitários em `audit-logs.controller.spec.ts` validam sucesso e cenários de permissão
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/audit-logs.controller.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
