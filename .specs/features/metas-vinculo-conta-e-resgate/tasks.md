@@ -82,7 +82,7 @@ T7 → T8
 
 ### Phase 1: Database & Modelagem Prisma
 
-### T1: Atualização do Prisma Schema para Metas Vinculadas e Tipo de Movimentação
+### T1: Atualização do Prisma Schema para Metas Vinculadas e Tipo de Movimentação [DONE]
 
 **What**: Adicionar `accountId` obrigatório em `Goal` com relação para `Account`, enum `GoalMovementType` (`DEPOSIT`, `WITHDRAWAL`) e campo `type` em `GoalDeposit`.
 **Where**: `backend/prisma/schema.prisma`
@@ -93,12 +93,12 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Coluna `accountId` adicionada a `Goal` com índice e relação para `Account`
-- [ ] Enum `GoalMovementType` criado com valores `DEPOSIT` e `WITHDRAWAL`
-- [ ] Campo `type` com default `DEPOSIT` adicionado ao model `GoalDeposit`
-- [ ] Relação `goals Goal[]` adicionada ao model `Account`
-- [ ] `npm --prefix backend run prisma:generate` executado com sucesso
-- [ ] Gate check passes: `npm --prefix backend run build`
+- [x] Coluna `accountId` adicionada a `Goal` com índice e relação para `Account`
+- [x] Enum `GoalMovementType` criado com valores `DEPOSIT` e `WITHDRAWAL`
+- [x] Campo `type` com default `DEPOSIT` adicionado ao model `GoalDeposit`
+- [x] Relação `goals Goal[]` adicionada ao model `Account`
+- [x] `npm --prefix backend run prisma:generate` executado com sucesso
+- [x] Gate check passes: `npm --prefix backend run build`
 
 **Tests**: none
 **Gate**: build
