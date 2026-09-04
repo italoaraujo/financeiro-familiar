@@ -105,18 +105,18 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story       | Phase  | Status  |
 | -------------- | ----------- | ------ | ------- |
-| PWA-01         | P1: Manifesto Web App e Ícones Adaptativos | Design | Pending |
-| PWA-02         | P1: Manifesto Web App e Ícones Adaptativos | Design | Pending |
-| PWA-03         | P1: Manifesto Web App e Ícones Adaptativos | Design | Pending |
-| PWA-04         | P1: Manifesto Web App e Ícones Adaptativos | Design | Pending |
-| PWA-05         | P2: Service Worker e Fallback Offline | Design | Pending |
-| PWA-06         | P2: Service Worker e Fallback Offline | Design | Pending |
-| PWA-07         | P2: Service Worker e Fallback Offline | Design | Pending |
-| PWA-08         | P2: Service Worker e Fallback Offline | Design | Pending |
-| PWA-09         | P3: Banner e Botão de Instalação no App | Design | Pending |
-| PWA-10         | P3: Banner e Botão de Instalação no App | Design | Pending |
-| PWA-11         | P3: Banner e Botão de Instalação no App | Design | Pending |
-| PWA-12         | P3: Banner e Botão de Instalação no App | Design | Pending |
+| PWA-01         | P1: Manifesto Web App e Ícones Adaptativos | Execution | Verified |
+| PWA-02         | P1: Manifesto Web App e Ícones Adaptativos | Execution | Verified |
+| PWA-03         | P1: Manifesto Web App e Ícones Adaptativos | Execution | Verified |
+| PWA-04         | P1: Manifesto Web App e Ícones Adaptativos | Execution | Verified |
+| PWA-05         | P2: Service Worker e Fallback Offline | Execution | Verified |
+| PWA-06         | P2: Service Worker e Fallback Offline | Execution | Verified |
+| PWA-07         | P2: Service Worker e Fallback Offline | Execution | Verified |
+| PWA-08         | P2: Service Worker e Fallback Offline | Execution | Verified |
+| PWA-09         | P3: Banner e Botão de Instalação no App | Execution | Verified |
+| PWA-10         | P3: Banner e Botão de Instalação no App | Execution | Verified |
+| PWA-11         | P3: Banner e Botão de Instalação no App | Execution | Verified |
+| PWA-12         | P3: Banner e Botão de Instalação no App | Execution | Verified |
 
 ---
 
@@ -124,7 +124,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 How we know the feature is successful:
 
-- [ ] Auditoria do Lighthouse PWA ou verificação de critérios de PWA no Chrome DevTools com status "Installable".
-- [ ] Ícones de alta resolução renderizados corretamente na tela inicial do dispositivo sem distorções.
-- [ ] Service worker ativo e registrado no escopo `/` sem erros de runtime.
-- [ ] Botão de instalação funcional em navegadores compatíveis e guia para iOS.
+- [x] Auditoria do Lighthouse PWA ou verificação de critérios de PWA no Chrome DevTools com status "Installable".
+- [x] Ícones de alta resolução renderizados corretamente na tela inicial do dispositivo sem distorções.
+- [x] Service worker ativo e registrado no escopo `/` sem erros de runtime.
+- [x] Botão de instalação funcional em navegadores compatíveis e guia para iOS.
