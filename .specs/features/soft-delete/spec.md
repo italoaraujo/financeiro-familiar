@@ -97,17 +97,17 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| SOFTDEL-01 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-02 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-03 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-04 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-05 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-06 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-07 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
-| SOFTDEL-08 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
-| SOFTDEL-09 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
-| SOFTDEL-10 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
-| SOFTDEL-11 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
+| SOFTDEL-01 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-02 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-03 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-04 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-05 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-06 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Verified |
+| SOFTDEL-07 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Verified |
+| SOFTDEL-08 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Verified |
+| SOFTDEL-09 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Verified |
+| SOFTDEL-10 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Verified |
+| SOFTDEL-11 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Verified |
 
 **ID format:** `SOFTDEL-[NUMBER]`
 
@@ -119,8 +119,8 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 ## Success Criteria
 
-- [ ] Todas as 7 entidades de negócio (`Transaction`, `Account`, `CreditCard`, `Category`, `Goal`, `Budget`, `Person`) possuem o campo `deleted_at` persistido no banco de dados.
-- [ ] Exclusão de qualquer registro dessas entidades preenche `deleted_at` com a data/hora da exclusão sem deletar a linha fisicamente.
-- [ ] Transações excluídas têm seus valores estornados de contas ou faturas normalmente.
-- [ ] Nenhuma consulta do sistema lista ou contabiliza registros que tenham `deleted_at` preenchido.
-- [ ] 100% dos testes unitários e de integração do backend passam com sucesso.
+- [x] Todas as 7 entidades de negócio (`Transaction`, `Account`, `CreditCard`, `Category`, `Goal`, `Budget`, `Person`) possuem o campo `deleted_at` persistido no banco de dados.
+- [x] Exclusão de qualquer registro dessas entidades preenche `deleted_at` com a data/hora da exclusão sem deletar a linha fisicamente.
+- [x] Transações excluídas têm seus valores estornados de contas ou faturas normalmente.
+- [x] Nenhuma consulta do sistema lista ou contabiliza registros que tenham `deleted_at` preenchido.
+- [x] 100% dos testes unitários e de integração do backend passam com sucesso.

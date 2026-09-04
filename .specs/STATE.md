@@ -80,19 +80,19 @@
 
 - **Active Feature**: `soft-delete`
 - **Total Tasks**: 8
-- **Completed Tasks**: 0 / 8 (0%)
-- **Status**: **IN PROGRESS**
-- **Test Suite Results**: 11 passed baseline
+- **Completed Tasks**: 8 / 8 (100%)
+- **Status**: **COMPLETE / VERIFIED**
+- **Test Suite Results**: 11 passed (83/83 tests total)
 - **Build Status**: 100% Success
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
 
 ## Handoff
 
 - **Feature**: .specs/features/soft-delete
-- **Phase / Task**: Phase 1 / T1
-- **Completed**: None
-- **In-progress**: T1: Adicionar deletedAt e índices no Prisma Schema
-- **Next step**: Executar T1 (adicionar deletedAt no schema.prisma, gerar Prisma Client e rodar build)
+- **Phase / Task**: Completed & Verified
+- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **In-progress**: None
+- **Next step**: Merge da branch `feature/soft_delete` ou novo ciclo de melhorias
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: feature/soft_delete
