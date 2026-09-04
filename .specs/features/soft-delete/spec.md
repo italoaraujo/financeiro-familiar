@@ -103,11 +103,11 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | SOFTDEL-04 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
 | SOFTDEL-05 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
 | SOFTDEL-06 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
-| SOFTDEL-07 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
-| SOFTDEL-08 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
-| SOFTDEL-09 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
-| SOFTDEL-10 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
-| SOFTDEL-11 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
+| SOFTDEL-07 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
+| SOFTDEL-08 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
+| SOFTDEL-09 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
+| SOFTDEL-10 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
+| SOFTDEL-11 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Implementing |
 
 **ID format:** `SOFTDEL-[NUMBER]`
 

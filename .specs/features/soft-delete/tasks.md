@@ -152,7 +152,7 @@ T7 → T8
 
 ### Phase 3: Contas, Cartões e Categorias
 
-### T4: Soft Delete em AccountsService
+### T4: Soft Delete em AccountsService [DONE]
 
 **What**: Atualizar `AccountsService` para efetuar exclusão lógica preenchendo `deletedAt`, checar transações vinculadas ativas (`deletedAt: null`) antes de excluir, filtrar `deletedAt: null` nas buscas e atualizar testes unitários.
 **Where**: `backend/src/modules/accounts/accounts.service.ts`
@@ -163,11 +163,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `remove` atualiza conta com `deletedAt: new Date()` e `isActive: false`
-- [ ] Validação de integridade bloqueia exclusão apenas se houver transações com `deletedAt: null`
-- [ ] `findAll` e `findOne` filtram contas com `deletedAt: null`
-- [ ] Testes unitários em `accounts.service.spec.ts` cobrem exclusão lógica e bloqueio
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/accounts.service.spec.ts`
+- [x] `remove` atualiza conta com `deletedAt: new Date()` e `isActive: false`
+- [x] Validação de integridade bloqueia exclusão apenas se houver transações com `deletedAt: null`
+- [x] `findAll` e `findOne` filtram contas com `deletedAt: null`
+- [x] Testes unitários em `accounts.service.spec.ts` cobrem exclusão lógica e bloqueio
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/accounts.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
