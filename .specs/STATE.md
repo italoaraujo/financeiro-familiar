@@ -90,26 +90,31 @@
 - **Trade-off**: Requer que toda meta aponte para uma conta bancária existente e exige que o usuário resgate todo o saldo antes de poder excluir a meta.
 - **Scope**: Prisma schema, módulo `goals`, testes unitários e de integração no backend, e telas/modais de metas no frontend.
 - **Date**: 2026-09-04
+### AD-013
+- **Decision**: Configurar Progressive Web App (PWA) nativo no Next.js 14 App Router através de manifesto W3C (`manifest.json`), ícones adaptativos e maskable (192, 512, apple-touch), Service Worker (`sw.js`) com estratégia Network-First para páginas e bypass estrito (Network-Only) para APIs financeiras, fallback offline amigável (`offline.html`) e componente de instalação interativa com instruções didáticas para iOS.
+- **Reason**: Atende à necessidade de instalação nativa do aplicativo em celulares e desktop sem quebrar o build Docker standalone ou gerar riscos de conciliação por cache de dados financeiros.
+- **Trade-off**: Requer servir assets estáticos de PWA pelo diretório `public/` e gerenciar ciclo de vida do Service Worker no cliente.
+- **Scope**: Frontend Next.js, manifesto, service worker, metadados de layout e componentes de interface.
+- **Date**: 2026-09-04
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `metas-vinculo-conta-e-resgate`
-- **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
+- **Active Feature**: `pwa-installable-app`
+- **Total Tasks**: 7
+- **Completed Tasks**: 7 / 7 (100%)
 - **Status**: **COMPLETE / VERIFIED**
-- **Test Suite Results**: 17 passed (121/121 tests total)
 - **Build Status**: 100% Success
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/metas-vinculo-conta-e-resgate
+- **Feature**: .specs/features/pwa-installable-app
 - **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **Completed**: T1, T2, T3, T4, T5, T6, T7
 - **In-progress**: None
-- **Next step**: Merge da branch `feature/metas-cofrinho-resgate` para `develop`
+- **Next step**: Finalização da branch `feature/pwa-installable-app` com merge para `develop`
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/metas-cofrinho-resgate
+- **Branch**: feature/pwa-installable-app
 
