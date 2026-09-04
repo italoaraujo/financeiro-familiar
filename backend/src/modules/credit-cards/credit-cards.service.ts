@@ -51,7 +51,9 @@ export class CreditCardsService {
     await this.syncInvoiceStatuses();
 
     const cards = await this.prisma.creditCard.findMany({
-      where: familyId ? { familyId, isActive: true } : { userId, isActive: true },
+      where: familyId
+        ? { familyId, isActive: true, deletedAt: null }
+        : { userId, isActive: true, deletedAt: null },
       include: {
         invoices: {
           orderBy: { referenceMonth: 'asc' },
@@ -88,7 +90,7 @@ export class CreditCardsService {
       },
     });
 
-    if (!card) {
+    if (!card || card.deletedAt) {
       throw new NotFoundException('Cartão de crédito não encontrado');
     }
 
@@ -183,7 +185,10 @@ export class CreditCardsService {
     const card = await this.findById(userId, id);
 
     const hasTransactions = await this.prisma.transaction.findFirst({
-      where: { creditCardId: card.id },
+      where: {
+        creditCardId: card.id,
+        deletedAt: null,
+      },
     });
 
     if (hasTransactions) {
@@ -192,8 +197,9 @@ export class CreditCardsService {
       );
     }
 
-    await this.prisma.creditCard.delete({
+    await this.prisma.creditCard.update({
       where: { id: card.id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return { message: 'Cartão de crédito removido com sucesso' };

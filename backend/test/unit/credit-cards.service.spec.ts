@@ -276,7 +276,7 @@ describe('CreditCardsService', () => {
       const result = await service.findAll('user-1');
 
       expect(prisma.creditCard.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user-1', isActive: true },
+        where: { userId: 'user-1', isActive: true, deletedAt: null },
         include: {
           invoices: {
             orderBy: { referenceMonth: 'asc' },
@@ -474,35 +474,51 @@ describe('CreditCardsService', () => {
   });
 
   describe('remove', () => {
-    it('should remove credit card when it has no transactions', async () => {
+    it('should soft delete credit card when it has no active transactions', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-1',
         userId: 'user-1',
         creditLimit: new Prisma.Decimal(1000),
         invoices: [],
+        deletedAt: null,
       });
       prisma.transaction.findFirst.mockResolvedValue(null);
-      prisma.creditCard.delete.mockResolvedValue({ id: 'card-1' });
+      prisma.creditCard.update.mockResolvedValue({ id: 'card-1' });
 
       const result = await service.remove('user-1', 'card-1');
 
-      expect(prisma.creditCard.delete).toHaveBeenCalledWith({
+      expect(prisma.transaction.findFirst).toHaveBeenCalledWith({
+        where: { creditCardId: 'card-1', deletedAt: null },
+      });
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
         where: { id: 'card-1' },
+        data: { deletedAt: expect.any(Date), isActive: false },
       });
       expect(result.message).toContain('removido com sucesso');
     });
 
-    it('should throw BadRequestException when card has linked transactions', async () => {
+    it('should throw BadRequestException when card has linked active transactions', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-1',
         userId: 'user-1',
         creditLimit: new Prisma.Decimal(1000),
         invoices: [],
+        deletedAt: null,
       });
       prisma.transaction.findFirst.mockResolvedValue({ id: 'tx-1' });
 
       await expect(service.remove('user-1', 'card-1')).rejects.toThrow(BadRequestException);
-      expect(prisma.creditCard.delete).not.toHaveBeenCalled();
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when card is already soft-deleted', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.remove('user-1', 'card-1')).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -174,7 +174,7 @@ T7 → T8
 
 ---
 
-### T5: Soft Delete em CreditCardsService
+### T5: Soft Delete em CreditCardsService [DONE]
 
 **What**: Atualizar `CreditCardsService` para efetuar exclusão lógica de cartões preenchendo `deletedAt`, filtrar `deletedAt: null` em buscas de cartões e faturas, e atualizar testes unitários.
 **Where**: `backend/src/modules/credit-cards/credit-cards.service.ts`
@@ -185,10 +185,10 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `remove` atualiza cartão com `deletedAt: new Date()` e `isActive: false`
-- [ ] Buscas de cartões e faturas ignoram registros com `deletedAt != null`
-- [ ] Testes unitários em `credit-cards.service.spec.ts` cobrem exclusão lógica de cartão
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/credit-cards.service.spec.ts`
+- [x] `remove` atualiza cartão com `deletedAt: new Date()` e `isActive: false`
+- [x] Buscas de cartões e faturas ignoram registros com `deletedAt != null`
+- [x] Testes unitários em `credit-cards.service.spec.ts` cobrem exclusão lógica de cartão
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/credit-cards.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
