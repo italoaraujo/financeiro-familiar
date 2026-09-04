@@ -9,7 +9,14 @@ import { CreditCardsService } from '../credit-cards/credit-cards.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import {
+  GoalMovementType,
+  GoalStatus,
+  InvoiceStatus,
+  Prisma,
+  TransactionStatus,
+  TransactionType,
+} from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -387,6 +394,13 @@ export class TransactionsService {
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.transaction.findUnique({
         where: { id },
+        include: {
+          goalDeposits: {
+            include: {
+              goal: true,
+            },
+          },
+        },
       });
 
       if (!transaction || transaction.deletedAt) {
@@ -399,7 +413,55 @@ export class TransactionsService {
 
       // Estorno de saldos se estiver efetivada
       if (transaction.status === TransactionStatus.COMPLETED) {
-        if (transaction.type === TransactionType.INCOME && transaction.accountId) {
+        // Caso A: Transação vinculada a Meta / Cofrinho (Aporte ou Resgate)
+        if (transaction.goalDeposits && transaction.goalDeposits.length > 0) {
+          for (const dep of transaction.goalDeposits) {
+            const goal = dep.goal;
+
+            if (dep.type === GoalMovementType.DEPOSIT) {
+              // No aporte: o dinheiro havia saído da conta e entrado na meta.
+              // Estorno: devolve para a conta bancária e debita da meta.
+              if (transaction.accountId) {
+                await tx.account.update({
+                  where: { id: transaction.accountId },
+                  data: { currentBalance: { increment: transaction.amount } },
+                });
+              }
+
+              const newGoalAmount = Prisma.Decimal.max(0, goal.currentAmount.minus(dep.amount));
+              await tx.goal.update({
+                where: { id: goal.id },
+                data: {
+                  currentAmount: newGoalAmount,
+                  status: newGoalAmount.lt(goal.targetAmount) ? GoalStatus.IN_PROGRESS : goal.status,
+                },
+              });
+            } else if (dep.type === GoalMovementType.WITHDRAWAL) {
+              // No resgate: o dinheiro havia saído da meta e entrado na conta bancária.
+              // Estorno: retira da conta bancária e devolve para a meta.
+              if (transaction.accountId) {
+                await tx.account.update({
+                  where: { id: transaction.accountId },
+                  data: { currentBalance: { decrement: transaction.amount } },
+                });
+              }
+
+              const newGoalAmount = goal.currentAmount.add(dep.amount);
+              await tx.goal.update({
+                where: { id: goal.id },
+                data: {
+                  currentAmount: newGoalAmount,
+                  status: newGoalAmount.gte(goal.targetAmount) ? GoalStatus.COMPLETED : goal.status,
+                },
+              });
+            }
+
+            // Remove o registro de movimentação da meta
+            await tx.goalDeposit.delete({
+              where: { id: dep.id },
+            });
+          }
+        } else if (transaction.type === TransactionType.INCOME && transaction.accountId) {
           await tx.account.update({
             where: { id: transaction.accountId },
             data: { currentBalance: { decrement: transaction.amount } },
