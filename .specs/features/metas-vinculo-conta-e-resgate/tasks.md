@@ -107,7 +107,7 @@ T7 → T8
 
 ### Phase 2: DTOs e Lógica de Negócio do Backend
 
-### T2: Criação e Atualização de DTOs para Metas e Resgate
+### T2: Criação e Atualização de DTOs para Metas e Resgate [DONE]
 
 **What**: Criar `CreateWithdrawalDto` com validações de valor, data e observações, e atualizar `CreateGoalDto` para exigir `accountId`.
 **Where**: `backend/src/modules/goals/dto/create-withdrawal.dto.ts`
@@ -118,9 +118,9 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `CreateWithdrawalDto` criado com decoradores de validação (`@IsNumber`, `@Min(0.01)`, `@IsDateString`, `@IsOptional`)
-- [ ] `CreateGoalDto` atualizado com `@IsUUID()` obrigatório para `accountId`
-- [ ] Gate check passes: `npm --prefix backend run build`
+- [x] `CreateWithdrawalDto` criado com decoradores de validação (`@IsNumber`, `@Min(0.01)`, `@IsDateString`, `@IsOptional`)
+- [x] `CreateGoalDto` atualizado com `@IsUUID()` obrigatório para `accountId`
+- [x] Gate check passes: `npm --prefix backend run build`
 
 **Tests**: none
 **Gate**: build

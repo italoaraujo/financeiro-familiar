@@ -31,4 +31,9 @@ export class CreateGoalDto {
   @IsUUID('4')
   @IsOptional()
   familyId?: string;
+
+  @ApiProperty({ example: '3fa85f64-5717-4562-b3fc-2c963f66afa6', description: 'Conta bancária de custódia vinculada à meta' })
+  @IsUUID('4', { message: 'Conta bancária de custódia deve ser um UUID válido' })
+  @IsNotEmpty({ message: 'Conta bancária de custódia é obrigatória' })
+  accountId: string;
 }
