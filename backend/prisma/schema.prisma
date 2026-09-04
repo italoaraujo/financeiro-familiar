@@ -128,6 +128,7 @@ model Account {
   isArchived     Boolean       @default(false) @map("is_archived")
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz
 
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   family         Family?       @relation(fields: [familyId], references: [id], onDelete: SetNull)
@@ -136,6 +137,8 @@ model Account {
   destTransfers  Transaction[] @relation("DestAccount")
   recurrences    Recurrence[]
 
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
   @@map("accounts")
 }
 
@@ -153,6 +156,7 @@ model CreditCard {
   isActive     Boolean             @default(true) @map("is_active")
   createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?           @map("deleted_at") @db.Timestamptz
 
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   family       Family?             @relation(fields: [familyId], references: [id], onDelete: SetNull)
@@ -160,6 +164,8 @@ model CreditCard {
   invoices     CreditCardInvoice[]
   transactions Transaction[]
 
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
   @@map("credit_cards")
 }
 
@@ -192,6 +198,7 @@ model Category {
   color           String?         @db.VarChar(7)
   isSystemDefault Boolean         @default(false) @map("is_system_default")
   createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt       DateTime?       @map("deleted_at") @db.Timestamptz
 
   user            User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   family          Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
@@ -201,6 +208,8 @@ model Category {
   recurrences     Recurrence[]
   budgets         Budget[]
 
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
   @@map("categories")
 }
 
@@ -227,6 +236,7 @@ model Transaction {
   installmentGroupId   String?           @map("installment_group_id") @db.Uuid
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt            DateTime?         @map("deleted_at") @db.Timestamptz
 
   user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   family               Family?           @relation(fields: [familyId], references: [id], onDelete: SetNull)
@@ -244,6 +254,9 @@ model Transaction {
   @@index([accountId, transactionDate])
   @@index([categoryId, transactionDate])
   @@index([personId, transactionDate])
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
+  @@index([accountId, deletedAt])
   @@map("transactions")
 }
 
@@ -281,11 +294,14 @@ model Budget {
   targetAmount    Decimal   @map("target_amount") @db.Decimal(15, 2)
   alertPercentage Int       @default(80) @map("alert_percentage") @db.SmallInt
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
 
   family          Family?   @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user            User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category        Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
+  @@index([familyId, deletedAt])
+  @@index([userId, deletedAt])
   @@map("budgets")
 }
 
@@ -301,11 +317,14 @@ model Goal {
   color         String?       @db.VarChar(7)
   icon          String?       @db.VarChar(50)
   createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt     DateTime?     @map("deleted_at") @db.Timestamptz
 
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   family        Family?       @relation(fields: [familyId], references: [id], onDelete: Cascade)
   deposits      GoalDeposit[]
 
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
   @@map("goals")
 }
 
@@ -333,11 +352,13 @@ model Person {
   avatarUrl String?       @map("avatar_url") @db.VarChar(255)
   createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
 
   family       Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   transactions Transaction[]
 
   @@index([familyId])
+  @@index([familyId, deletedAt])
   @@map("people")
 }

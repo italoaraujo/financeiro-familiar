@@ -68,25 +68,31 @@
 - **Trade-off**: Nenhuma transação pode ultrapassar o limite concedido ao cartão de crédito.
 - **Scope**: `TransactionsService` e testes unitários no backend; tela de extrato e modal de lançamentos (`/transactions`) no frontend.
 - **Date**: 2026-09-03
+### AD-010
+- **Decision**: Adotar padrão de Soft Delete utilizando a coluna `deleted_at` (`deletedAt DateTime? @map("deleted_at") @db.Timestamptz`) nas 7 entidades de negócio (`Transaction`, `Account`, `CreditCard`, `Category`, `Goal`, `Budget`, `Person`). Todas as exclusões atualizam `deletedAt = now()`, consultas e agregações filtram explicitamente `deletedAt: null`, e o estorno de saldo em contas e faturas na exclusão de transações é preservado.
+- **Reason**: Atende à solicitação explícita do usuário de não apagar registros fisicamente do banco de dados, preservando histórico para conciliação contábil e auditoria.
+- **Trade-off**: Requer manutenção de cláusulas `deletedAt: null` nas consultas do backend e índices dedicados para performance.
+- **Scope**: Prisma schema, migrations, backend services (`transactions`, `accounts`, `credit-cards`, `categories`, `goals`, `budgets`, `families`, `reports`), e testes.
+- **Date**: 2026-09-03
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `fechamento-fatura-cartao`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
-- **Status**: **VERIFIED & COMPLETED**
-- **Test Suite Results**: 11 test suites passed (57 tests total)
-- **Build Status**: 100% Success (NestJS backend & Next.js 14 frontend)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `soft-delete`
+- **Total Tasks**: 8
+- **Completed Tasks**: 0 / 8 (0%)
+- **Status**: **IN PROGRESS**
+- **Test Suite Results**: 11 passed baseline
+- **Build Status**: 100% Success
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/fechamento-fatura-cartao
-- **Phase / Task**: Completed
-- **Completed**: Todas as 7 tarefas (T1 a T7) implementadas, testadas com commits atômicos convencionais e validadas pelo Verificador independente.
-- **In-progress**: None
-- **Next step**: Apresentação e demonstração da funcionalidade ao usuário.
+- **Feature**: .specs/features/soft-delete
+- **Phase / Task**: Phase 1 / T1
+- **Completed**: None
+- **In-progress**: T1: Adicionar deletedAt e índices no Prisma Schema
+- **Next step**: Executar T1 (adicionar deletedAt no schema.prisma, gerar Prisma Client e rodar build)
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: main
+- **Branch**: feature/soft_delete
