@@ -84,23 +84,32 @@
 - **Date**: 2026-09-04
 - **Status**: active
 
+### AD-012
+- **Decision**: Modelar Metas Financeiras como "Cofrinhos" com vínculo obrigatório a uma conta bancária de custódia (`accountId` em `Goal`), permitir aportes e resgates bidirecionais atômicos integrados ao saldo da conta bancária e bloquear estritamente a exclusão de qualquer meta que possua saldo acumulado maior que zero (`currentAmount > 0`).
+- **Reason**: Garante consistência contábil real (o dinheiro está sempre custodiado em uma conta bancária conhecida), viabiliza a recuperação e uso dos recursos aportados via resgate, e elimina o risco de perda ou orfandade de saldo por exclusão indevida.
+- **Trade-off**: Requer que toda meta aponte para uma conta bancária existente e exige que o usuário resgate todo o saldo antes de poder excluir a meta.
+- **Scope**: Prisma schema, módulo `goals`, testes unitários e de integração no backend, e telas/modais de metas no frontend.
+- **Date**: 2026-09-04
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `logs`
-- **Total Tasks**: 6
-- **Completed Tasks**: 6 / 6 (100%)
+- **Active Feature**: `metas-vinculo-conta-e-resgate`
+- **Total Tasks**: 8
+- **Completed Tasks**: 8 / 8 (100%)
 - **Status**: **COMPLETE / VERIFIED**
-- **Test Suite Results**: 16 passed (112/112 tests total)
+- **Test Suite Results**: 17 passed (121/121 tests total)
 - **Build Status**: 100% Success
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/logs
+- **Feature**: .specs/features/metas-vinculo-conta-e-resgate
 - **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6
+- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
 - **In-progress**: None
-- **Next step**: Merge da branch `feature/logs` para `develop` via git flow feature finish
+- **Next step**: Merge da branch `feature/metas-cofrinho-resgate` para `develop`
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/logs
+- **Branch**: feature/metas-cofrinho-resgate
+
