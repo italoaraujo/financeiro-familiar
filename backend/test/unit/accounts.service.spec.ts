@@ -64,21 +64,64 @@ describe('AccountsService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should reject deletion if account has transactions', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+  describe('remove (soft delete)', () => {
+    it('should reject deletion if account has active transactions (deletedAt: null)', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: null });
       prisma.transaction.findFirst.mockResolvedValue({ id: 'tx-1' });
 
       await expect(service.remove('user-1', 'acc-1')).rejects.toThrow(BadRequestException);
+      expect(prisma.transaction.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [{ accountId: 'acc-1' }, { destinationAccountId: 'acc-1' }],
+          deletedAt: null,
+        },
+      });
     });
 
-    it('should delete account if no transactions exist', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+    it('should soft delete account if no active transactions exist', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: null });
       prisma.transaction.findFirst.mockResolvedValue(null);
-      prisma.account.delete.mockResolvedValue({ id: 'acc-1' });
+      prisma.account.update.mockResolvedValue({ id: 'acc-1', deletedAt: new Date(), isActive: false });
 
       const result = await service.remove('user-1', 'acc-1');
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { deletedAt: expect.any(Date), isActive: false },
+      });
       expect(result.message).toContain('removida com sucesso');
+    });
+
+    it('should throw NotFoundException if account is already soft deleted', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: new Date() });
+
+      await expect(service.remove('user-1', 'acc-1')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findAll and findById', () => {
+    it('should filter accounts by deletedAt: null in findAll', async () => {
+      prisma.account.findMany.mockResolvedValue([]);
+
+      await service.findAll('user-1');
+
+      expect(prisma.account.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 'user-1',
+            deletedAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should throw NotFoundException in findById if account has deletedAt', async () => {
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-del',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.findById('user-1', 'acc-del')).rejects.toThrow(NotFoundException);
     });
   });
 });

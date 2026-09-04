@@ -209,7 +209,7 @@ describe('FamiliesService', () => {
       ).rejects.toThrow();
     });
 
-    it('should successfully remove a non-login person and unbind transactions', async () => {
+    it('should successfully soft delete a non-login person while preserving transaction bindings', async () => {
       prisma.familyMember.findUnique.mockResolvedValueOnce({
         role: FamilyMemberRole.OWNER,
       });
@@ -218,18 +218,36 @@ describe('FamiliesService', () => {
         familyId: 'family-1',
         userId: null,
         name: 'Pedro',
+        deletedAt: null,
       });
+      prisma.person.update.mockResolvedValueOnce({ id: 'person-child' });
 
       const result = await service.removePerson('owner-id', 'family-1', 'person-child');
 
       expect(result.message).toContain('sucesso');
-      expect(prisma.transaction.updateMany).toHaveBeenCalledWith({
-        where: { personId: 'person-child' },
-        data: { personId: null },
-      });
-      expect(prisma.person.delete).toHaveBeenCalledWith({
+      expect(prisma.transaction.updateMany).not.toHaveBeenCalled();
+      expect(prisma.person.delete).not.toHaveBeenCalled();
+      expect(prisma.person.update).toHaveBeenCalledWith({
         where: { id: 'person-child' },
+        data: { deletedAt: expect.any(Date) },
       });
+    });
+
+    it('should throw NotFoundException if person is already deleted', async () => {
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        role: FamilyMemberRole.OWNER,
+      });
+      prisma.person.findUnique.mockResolvedValueOnce({
+        id: 'person-child',
+        familyId: 'family-1',
+        userId: null,
+        name: 'Pedro',
+        deletedAt: new Date(),
+      });
+
+      await expect(
+        service.removePerson('owner-id', 'family-1', 'person-child'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

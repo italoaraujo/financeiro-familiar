@@ -91,10 +91,67 @@ describe('BudgetsService', () => {
       });
 
       const results = await service.findAll('user-1', '2026-09');
+
+      expect(prisma.budget.findMany).toHaveBeenCalledWith({
+        where: {
+          periodMonth: '2026-09',
+          deletedAt: null,
+          userId: 'user-1',
+        },
+        include: {
+          category: true,
+        },
+      });
+      expect(prisma.transaction.aggregate).toHaveBeenCalledWith({
+        where: {
+          categoryId: 'cat-alimentacao',
+          type: 'EXPENSE',
+          status: 'COMPLETED',
+          deletedAt: null,
+          transactionDate: {
+            gte: expect.any(Date),
+            lte: expect.any(Date),
+          },
+          userId: 'user-1',
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
       expect(results).toHaveLength(1);
       expect(results[0].percentage).toBe(84);
       expect(results[0].isAlert).toBe(true);
       expect(results[0].isExceeded).toBe(false);
+    });
+  });
+
+  describe('remove', () => {
+    it('should soft delete budget setting deletedAt', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'b-1',
+        userId: 'user-1',
+        deletedAt: null,
+      });
+      prisma.budget.update.mockResolvedValue({ id: 'b-1' });
+
+      const result = await service.remove('user-1', 'b-1');
+
+      expect(prisma.budget.update).toHaveBeenCalledWith({
+        where: { id: 'b-1' },
+        data: { deletedAt: expect.any(Date) },
+      });
+      expect(result.message).toContain('removido com sucesso');
+    });
+
+    it('should throw NotFoundException if budget is already deleted', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'b-1',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.remove('user-1', 'b-1')).rejects.toThrow();
     });
   });
 });

@@ -42,6 +42,7 @@ export class AccountsService {
         where: {
           familyId,
           isArchived: false,
+          deletedAt: null,
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -51,6 +52,7 @@ export class AccountsService {
       where: {
         userId,
         isArchived: false,
+        deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -61,7 +63,7 @@ export class AccountsService {
       where: { id },
     });
 
-    if (!account) {
+    if (!account || account.deletedAt) {
       throw new NotFoundException('Conta não encontrada');
     }
 
@@ -108,6 +110,7 @@ export class AccountsService {
     const hasTransactions = await this.prisma.transaction.findFirst({
       where: {
         OR: [{ accountId: account.id }, { destinationAccountId: account.id }],
+        deletedAt: null,
       },
     });
 
@@ -117,8 +120,9 @@ export class AccountsService {
       );
     }
 
-    await this.prisma.account.delete({
+    await this.prisma.account.update({
       where: { id: account.id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return { message: 'Conta removida com sucesso' };

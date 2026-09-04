@@ -150,4 +150,64 @@ describe('GoalsService', () => {
       });
     });
   });
+
+  describe('findAll', () => {
+    it('should filter deletedAt: null in goal query', async () => {
+      prisma.goal.findMany.mockResolvedValue([
+        {
+          id: 'goal-1',
+          name: 'Viagem',
+          targetAmount: new Prisma.Decimal(5000),
+          currentAmount: new Prisma.Decimal(1000),
+          deposits: [],
+        },
+      ]);
+
+      const result = await service.findAll('user-1');
+
+      expect(prisma.goal.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', deletedAt: null },
+        include: {
+          deposits: {
+            orderBy: { depositDate: 'desc' },
+            take: 5,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('findById', () => {
+    it('should throw NotFoundException if goal has deletedAt', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        userId: 'user-1',
+        deletedAt: new Date(),
+        deposits: [],
+      });
+
+      await expect(service.findById('user-1', 'goal-1')).rejects.toThrow();
+    });
+  });
+
+  describe('remove', () => {
+    it('should soft delete goal by setting deletedAt', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        userId: 'user-1',
+        deletedAt: null,
+      });
+      prisma.goal.update.mockResolvedValue({ id: 'goal-1' });
+
+      const result = await service.remove('user-1', 'goal-1');
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 'goal-1' },
+        data: { deletedAt: expect.any(Date) },
+      });
+      expect(result.message).toContain('removida com sucesso');
+    });
+  });
 });

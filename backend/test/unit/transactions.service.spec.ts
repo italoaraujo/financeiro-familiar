@@ -3,7 +3,7 @@ import { TransactionsService } from '../../src/modules/transactions/transactions
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreditCardsService } from '../../src/modules/credit-cards/credit-cards.service';
 import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('TransactionsService', () => {
   let service: TransactionsService;
@@ -37,6 +37,7 @@ describe('TransactionsService', () => {
       transaction: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        update: jest.fn(),
         delete: jest.fn(),
         count: jest.fn(),
         findMany: jest.fn(),
@@ -221,12 +222,140 @@ describe('TransactionsService', () => {
           where: expect.objectContaining({
             userId: 'user-1',
             personId: 'person-child',
+            deletedAt: null,
           }),
           include: expect.objectContaining({
             person: expect.anything(),
           }),
         }),
       );
+    });
+  });
+
+  describe('remove (soft delete with balance reversal)', () => {
+    it('should soft delete expense transaction, set deletedAt and revert account currentBalance', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-1',
+        userId: 'user-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(50),
+        status: TransactionStatus.COMPLETED,
+        accountId: 'acc-1',
+        deletedAt: null,
+      });
+
+      const result = await service.remove('user-1', 'tx-1');
+
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { currentBalance: { increment: new Prisma.Decimal(50) } },
+      });
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-1' },
+        data: { deletedAt: expect.any(Date) },
+      });
+      expect(result).toEqual({ message: 'Transação excluída e saldo estornado com sucesso' });
+    });
+
+    it('should soft delete income transaction, set deletedAt and revert account currentBalance', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-2',
+        userId: 'user-1',
+        type: TransactionType.INCOME,
+        amount: new Prisma.Decimal(100),
+        status: TransactionStatus.COMPLETED,
+        accountId: 'acc-1',
+        deletedAt: null,
+      });
+
+      await service.remove('user-1', 'tx-2');
+
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { currentBalance: { decrement: new Prisma.Decimal(100) } },
+      });
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-2' },
+        data: { deletedAt: expect.any(Date) },
+      });
+    });
+
+    it('should soft delete credit card expense and decrement invoice totalAmount', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-3',
+        userId: 'user-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(80),
+        status: TransactionStatus.COMPLETED,
+        creditCardId: 'card-1',
+        invoiceId: 'inv-1',
+        deletedAt: null,
+      });
+
+      await service.remove('user-1', 'tx-3');
+
+      expect(prisma.creditCardInvoice.update).toHaveBeenCalledWith({
+        where: { id: 'inv-1' },
+        data: { totalAmount: { decrement: new Prisma.Decimal(80) } },
+      });
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-3' },
+        data: { deletedAt: expect.any(Date) },
+      });
+    });
+
+    it('should soft delete transfer transaction and revert both accounts', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-4',
+        userId: 'user-1',
+        type: TransactionType.TRANSFER,
+        amount: new Prisma.Decimal(200),
+        status: TransactionStatus.COMPLETED,
+        accountId: 'acc-src',
+        destinationAccountId: 'acc-dst',
+        deletedAt: null,
+      });
+
+      await service.remove('user-1', 'tx-4');
+
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-src' },
+        data: { currentBalance: { increment: new Prisma.Decimal(200) } },
+      });
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-dst' },
+        data: { currentBalance: { decrement: new Prisma.Decimal(200) } },
+      });
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-4' },
+        data: { deletedAt: expect.any(Date) },
+      });
+    });
+
+    it('should throw NotFoundException if transaction does not exist', async () => {
+      prisma.transaction.findUnique.mockResolvedValue(null);
+
+      await expect(service.remove('user-1', 'inexistent-tx')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException if transaction is already soft deleted', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-deleted',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.remove('user-1', 'tx-deleted')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if user is not author', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-other',
+        userId: 'other-user',
+        deletedAt: null,
+      });
+
+      await expect(service.remove('user-1', 'tx-other')).rejects.toThrow(ForbiddenException);
     });
   });
 

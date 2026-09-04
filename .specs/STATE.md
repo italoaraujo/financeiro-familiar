@@ -68,25 +68,31 @@
 - **Trade-off**: Nenhuma transação pode ultrapassar o limite concedido ao cartão de crédito.
 - **Scope**: `TransactionsService` e testes unitários no backend; tela de extrato e modal de lançamentos (`/transactions`) no frontend.
 - **Date**: 2026-09-03
+### AD-010
+- **Decision**: Adotar padrão de Soft Delete utilizando a coluna `deleted_at` (`deletedAt DateTime? @map("deleted_at") @db.Timestamptz`) nas 7 entidades de negócio (`Transaction`, `Account`, `CreditCard`, `Category`, `Goal`, `Budget`, `Person`). Todas as exclusões atualizam `deletedAt = now()`, consultas e agregações filtram explicitamente `deletedAt: null`, e o estorno de saldo em contas e faturas na exclusão de transações é preservado.
+- **Reason**: Atende à solicitação explícita do usuário de não apagar registros fisicamente do banco de dados, preservando histórico para conciliação contábil e auditoria.
+- **Trade-off**: Requer manutenção de cláusulas `deletedAt: null` nas consultas do backend e índices dedicados para performance.
+- **Scope**: Prisma schema, migrations, backend services (`transactions`, `accounts`, `credit-cards`, `categories`, `goals`, `budgets`, `families`, `reports`), e testes.
+- **Date**: 2026-09-03
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `fechamento-fatura-cartao`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
-- **Status**: **VERIFIED & COMPLETED**
-- **Test Suite Results**: 11 test suites passed (57 tests total)
-- **Build Status**: 100% Success (NestJS backend & Next.js 14 frontend)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `soft-delete`
+- **Total Tasks**: 8
+- **Completed Tasks**: 8 / 8 (100%)
+- **Status**: **COMPLETE / VERIFIED**
+- **Test Suite Results**: 11 passed (83/83 tests total)
+- **Build Status**: 100% Success
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/fechamento-fatura-cartao
-- **Phase / Task**: Completed
-- **Completed**: Todas as 7 tarefas (T1 a T7) implementadas, testadas com commits atômicos convencionais e validadas pelo Verificador independente.
+- **Feature**: .specs/features/soft-delete
+- **Phase / Task**: Completed & Verified
+- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
 - **In-progress**: None
-- **Next step**: Apresentação e demonstração da funcionalidade ao usuário.
+- **Next step**: Merge da branch `feature/soft_delete` ou novo ciclo de melhorias
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: main
+- **Branch**: feature/soft_delete

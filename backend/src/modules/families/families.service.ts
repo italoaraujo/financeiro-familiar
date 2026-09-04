@@ -224,27 +224,38 @@ export class FamiliesService {
     });
 
     const existingPeople = await this.prisma.person.findMany({
-      where: { familyId },
+      where: { familyId, deletedAt: null },
     });
 
     const existingUserIds = new Set(existingPeople.map((p) => p.userId).filter(Boolean));
 
     for (const m of members) {
       if (!existingUserIds.has(m.userId)) {
-        await this.prisma.person.create({
-          data: {
-            familyId,
-            userId: m.userId,
-            name: m.user.name,
-            color: m.role === FamilyMemberRole.OWNER ? '#10b981' : '#3b82f6',
-            avatarUrl: m.user.avatarUrl,
-          },
+        const personForUser = await this.prisma.person.findFirst({
+          where: { familyId, userId: m.userId },
         });
+
+        if (!personForUser) {
+          await this.prisma.person.create({
+            data: {
+              familyId,
+              userId: m.userId,
+              name: m.user.name,
+              color: m.role === FamilyMemberRole.OWNER ? '#10b981' : '#3b82f6',
+              avatarUrl: m.user.avatarUrl,
+            },
+          });
+        } else if (personForUser.deletedAt) {
+          await this.prisma.person.update({
+            where: { id: personForUser.id },
+            data: { deletedAt: null },
+          });
+        }
       }
     }
 
     return this.prisma.person.findMany({
-      where: { familyId },
+      where: { familyId, deletedAt: null },
       include: {
         user: {
           select: { id: true, name: true, email: true, avatarUrl: true },
@@ -266,7 +277,7 @@ export class FamiliesService {
       where: { id: personId },
     });
 
-    if (!person || person.familyId !== familyId) {
+    if (!person || person.familyId !== familyId || person.deletedAt) {
       throw new NotFoundException('Pessoa não encontrada neste grupo familiar');
     }
 
@@ -287,7 +298,7 @@ export class FamiliesService {
       where: { id: personId },
     });
 
-    if (!person || person.familyId !== familyId) {
+    if (!person || person.familyId !== familyId || person.deletedAt) {
       throw new NotFoundException('Pessoa não encontrada neste grupo familiar');
     }
 
@@ -297,18 +308,12 @@ export class FamiliesService {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      await tx.transaction.updateMany({
-        where: { personId },
-        data: { personId: null },
-      });
-
-      await tx.person.delete({
-        where: { id: personId },
-      });
-
-      return { message: 'Pessoa removida da família com sucesso' };
+    await this.prisma.person.update({
+      where: { id: personId },
+      data: { deletedAt: new Date() },
     });
+
+    return { message: 'Pessoa removida da família com sucesso' };
   }
 
   private async verifyFamilyAccess(userId: string, familyId: string) {

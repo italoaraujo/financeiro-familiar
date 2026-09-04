@@ -308,7 +308,9 @@ export class TransactionsService {
     const limit = filter.limit || 20;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = {
+      deletedAt: null,
+    };
 
     if (filter.familyId) {
       await this.verifyFamilyAccess(userId, filter.familyId);
@@ -387,7 +389,7 @@ export class TransactionsService {
         where: { id },
       });
 
-      if (!transaction) {
+      if (!transaction || transaction.deletedAt) {
         throw new NotFoundException('Transação não encontrada');
       }
 
@@ -428,8 +430,9 @@ export class TransactionsService {
         }
       }
 
-      await tx.transaction.delete({
+      await tx.transaction.update({
         where: { id },
+        data: { deletedAt: new Date() },
       });
 
       return { message: 'Transação excluída e saldo estornado com sucesso' };

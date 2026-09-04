@@ -29,6 +29,7 @@ export class ReportsService {
         ...userOrFamilyFilter,
         isArchived: false,
         isActive: true,
+        deletedAt: null,
       },
     });
 
@@ -41,6 +42,7 @@ export class ReportsService {
     const incomeAgg = await this.prisma.transaction.aggregate({
       where: {
         ...userOrFamilyFilter,
+        deletedAt: null,
         type: TransactionType.INCOME,
         status: TransactionStatus.COMPLETED,
         transactionDate: { gte: startDate, lte: endDate },
@@ -53,6 +55,7 @@ export class ReportsService {
     const expenseAgg = await this.prisma.transaction.aggregate({
       where: {
         ...userOrFamilyFilter,
+        deletedAt: null,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.COMPLETED,
         transactionDate: { gte: startDate, lte: endDate },
@@ -68,7 +71,10 @@ export class ReportsService {
     const openInvoices = await this.prisma.creditCardInvoice.findMany({
       where: {
         status: { in: [InvoiceStatus.OPEN, InvoiceStatus.CLOSED, InvoiceStatus.OVERDUE] },
-        creditCard: userOrFamilyFilter,
+        creditCard: {
+          ...userOrFamilyFilter,
+          deletedAt: null,
+        },
       },
       include: { creditCard: true },
       orderBy: { dueDate: 'asc' },
@@ -77,7 +83,10 @@ export class ReportsService {
 
     // 6. Últimas Transações Recentes
     const recentTransactions = await this.prisma.transaction.findMany({
-      where: userOrFamilyFilter,
+      where: {
+        ...userOrFamilyFilter,
+        deletedAt: null,
+      },
       include: { category: true, account: true, creditCard: true },
       orderBy: { transactionDate: 'desc' },
       take: 5,
@@ -110,6 +119,7 @@ export class ReportsService {
     const transactions = await this.prisma.transaction.findMany({
       where: {
         ...userOrFamilyFilter,
+        deletedAt: null,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.COMPLETED,
         transactionDate: { gte: startDate, lte: endDate },
@@ -179,6 +189,7 @@ export class ReportsService {
         this.prisma.transaction.aggregate({
           where: {
             ...userOrFamilyFilter,
+            deletedAt: null,
             type: TransactionType.INCOME,
             status: TransactionStatus.COMPLETED,
             transactionDate: { gte: startDate, lte: endDate },
@@ -188,6 +199,7 @@ export class ReportsService {
         this.prisma.transaction.aggregate({
           where: {
             ...userOrFamilyFilter,
+            deletedAt: null,
             type: TransactionType.EXPENSE,
             status: TransactionStatus.COMPLETED,
             transactionDate: { gte: startDate, lte: endDate },
@@ -215,7 +227,10 @@ export class ReportsService {
       await this.verifyFamilyAccess(userId, familyId);
     }
 
-    const where: any = familyId ? { familyId } : { userId };
+    const where: any = {
+      ...(familyId ? { familyId } : { userId }),
+      deletedAt: null,
+    };
 
     if (startDate || endDate) {
       where.transactionDate = {};
