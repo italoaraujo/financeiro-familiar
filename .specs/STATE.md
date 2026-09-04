@@ -76,23 +76,30 @@
 - **Date**: 2026-09-03
 - **Status**: active
 
+### AD-011
+- **Decision**: Implementar arquitetura de logs de auditoria e ações do sistema utilizando a tabela `audit_logs` no PostgreSQL via Prisma ORM, acompanhada de interceptor global assíncrono no NestJS (`AuditLogInterceptor`) para capturar requisições mutativas (`POST`, `PUT`, `PATCH`, `DELETE`) com sanitização obrigatória de dados sensíveis (`password`, `token`, etc.), serviço resiliente (`AuditLogsService`) e controle de acesso RBAC restrito a administradores de família (`OWNER`, `ADMIN`) e logs próprios.
+- **Reason**: Atende à necessidade de auditoria e conformidade contábil das ações dos usuários e administradores sem prejudicar o tempo de resposta ou disponibilidade das transações financeiras.
+- **Trade-off**: A gravação assíncrona não bloqueante prioriza performance e disponibilidade, capturando eventuais falhas de I/O em log sem abortar a operação de negócio principal.
+- **Scope**: Prisma schema, módulo `audit-logs`, interceptor global, utilitário de sanitização e testes automatizados.
+- **Date**: 2026-09-04
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `soft-delete`
-- **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
-- **Status**: **COMPLETE / VERIFIED**
+- **Active Feature**: `logs`
+- **Total Tasks**: 6
+- **Completed Tasks**: 0 / 6 (0%)
+- **Status**: **READY FOR EXECUTION**
 - **Test Suite Results**: 11 passed (83/83 tests total)
-- **Build Status**: 100% Success
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/soft-delete
-- **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **Feature**: .specs/features/logs
+- **Phase / Task**: Ready for Phase 1 / T1
+- **Completed**: None
 - **In-progress**: None
-- **Next step**: Merge da branch `feature/soft_delete` ou novo ciclo de melhorias
+- **Next step**: Executar T1: Modelagem e Índices de AuditLog no Prisma Schema
 - **Blockers**: none
-- **Uncommitted files**: none
-- **Branch**: feature/soft_delete
+- **Uncommitted files**: .specs/features/logs/*, .specs/STATE.md
+- **Branch**: feature/logs
