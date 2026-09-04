@@ -199,7 +199,7 @@ T5 → T6
 
 ---
 
-### T6: Registrar Módulo e Interceptor no AppModule e Teste de Fluxo
+### T6: Registrar Módulo e Interceptor no AppModule e Teste de Fluxo [DONE]
 
 **What**: Registrar `AuditLogsModule` e `AuditLogInterceptor` no `AppModule` e criar teste de integração validando o ciclo ponta a ponta de mutação de API gerando log e consulta protegida.
 **Where**: `backend/test/integration/audit-flow.spec.ts`
@@ -210,11 +210,11 @@ T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] `AuditLogsModule` e `APP_INTERCEPTOR` registrados no `AppModule`
-- [ ] Teste de integração valida que mutação em endpoint (`POST /accounts` ou similar) grava registro em `audit_logs`
-- [ ] Teste confirma que payload foi sanitizado e tempo de resposta registrado
-- [ ] Teste valida consulta `GET /audit-logs` retornando o registro gravado
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] `AuditLogsModule` e `APP_INTERCEPTOR` registrados no `AppModule`
+- [x] Teste de integração valida que mutação em endpoint (`POST /accounts` ou similar) grava registro em `audit_logs`
+- [x] Teste confirma que payload foi sanitizado e tempo de resposta registrado
+- [x] Teste valida consulta `GET /audit-logs` retornando o registro gravado
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: integration
 **Gate**: full

@@ -96,14 +96,14 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| LOGS-01 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-02 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-03 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-04 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-05 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-06 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
-| LOGS-07 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
-| LOGS-08 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
+| LOGS-01 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Verified |
+| LOGS-02 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Verified |
+| LOGS-03 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Verified |
+| LOGS-04 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Verified |
+| LOGS-05 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Verified |
+| LOGS-06 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Verified |
+| LOGS-07 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Verified |
+| LOGS-08 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Verified |
 
 **Coverage:** 8 total, 8 mapped to tasks, 0 unmapped
 
