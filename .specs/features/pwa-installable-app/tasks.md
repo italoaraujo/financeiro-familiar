@@ -160,16 +160,16 @@ T5 → T6 → T7
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-### T7: Criação do Componente de Instalação e Ajuda iOS
+### T7: Criação do Componente de Instalação e Ajuda iOS [DONE]
 
 **What**: Criar `frontend/src/components/pwa/InstallPrompt.tsx` com banner e botão de ação para instalação via evento `beforeinstallprompt`, suporte e instruções modais para dispositivos Apple/iOS Safari, e desativação automática quando o app já estiver rodando em modo `standalone`.
 **Where**: `frontend/src/components/pwa/InstallPrompt.tsx`
 **Depends on**: T6
 **Requirement**: PWA-09, PWA-10, PWA-11, PWA-12
 **Done when**:
-- [ ] Componente escuta `beforeinstallprompt` e expõe botão de instalação
-- [ ] Detecta modo standalone e não exibe prompt desnecessário
-- [ ] Modal/Tooltip para iOS Safari implementado
-- [ ] Build e testes executados com sucesso
+- [x] Componente escuta `beforeinstallprompt` e expõe botão de instalação
+- [x] Detecta modo standalone e não exibe prompt desnecessário
+- [x] Modal/Tooltip para iOS Safari implementado
+- [x] Build e testes executados com sucesso
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
