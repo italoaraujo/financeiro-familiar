@@ -218,7 +218,7 @@ T7 → T8
 
 ### Phase 4: Frontend (Interface Web de Cofrinhos)
 
-### T7: Seleção Obrigatória de Conta e Exibição de Cofrinho no Frontend
+### T7: Seleção Obrigatória de Conta e Exibição de Cofrinho no Frontend [DONE]
 
 **What**: Adicionar seletor obrigatório de conta bancária no modal de nova meta e exibir a conta vinculada no card de cada meta.
 **Where**: `frontend/src/app/goals/page.tsx`
@@ -229,17 +229,17 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Select de conta bancária obrigatório no formulário de criação de meta
-- [ ] Card da meta exibe badge/identificação da conta bancária de custódia
-- [ ] Modal de aporte simplificado utilizando diretamente a conta vinculada da meta
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Select de conta bancária obrigatório no formulário de criação de meta
+- [x] Card da meta exibe badge/identificação da conta bancária de custódia
+- [x] Modal de aporte simplificado utilizando diretamente a conta vinculada da meta
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build
 
 ---
 
-### T8: Modal de Resgate, Histórico de Movimentações e Bloqueio Visual de Exclusão
+### T8: Modal de Resgate, Histórico de Movimentações e Bloqueio Visual de Exclusão [DONE]
 
 **What**: Implementar modal de resgate com limite de saldo, histórico unificado de aportes/resgates e proteção no botão de exclusão.
 **Where**: `frontend/src/app/goals/page.tsx`
@@ -250,11 +250,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Botão e modal "Resgatar" implementados para retirar saldo de volta para a conta vinculada
-- [ ] Validação do modal impedindo resgate acima do saldo acumulado
-- [ ] Botão de excluir desabilitado com aviso explicativo se `currentAmount > 0`
-- [ ] Histórico da meta diferenciando visualmente Aportes (+) e Resgates (-)
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Botão e modal "Resgatar" implementados para retirar saldo de volta para a conta vinculada
+- [x] Validação do modal impedindo resgate acima do saldo acumulado
+- [x] Botão de excluir desabilitado com aviso explicativo se `currentAmount > 0`
+- [x] Histórico da meta diferenciando visualmente Aportes (+) e Resgates (-)
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build

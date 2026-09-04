@@ -6,10 +6,10 @@ No modelo atual de Metas Financeiras, uma meta pode ser excluída mesmo possuind
 
 ## Goals
 
-- [ ] Vincular obrigatoriamente cada meta financeira a uma conta bancária de custódia ativa.
-- [ ] Implementar fluxo transacional atômico de resgate de valores da meta para a conta bancária vinculada.
-- [ ] Bloquear estritamente a exclusão (soft-delete) de metas com saldo acumulado maior que zero no backend e frontend.
-- [ ] Fornecer interface no frontend para gestão completa de aportes, resgates, histórico e sinalização de conta vinculada.
+- [x] Vincular obrigatoriamente cada meta financeira a uma conta bancária de custódia ativa.
+- [x] Implementar fluxo transacional atômico de resgate de valores da meta para a conta bancária vinculada.
+- [x] Bloquear estritamente a exclusão (soft-delete) de metas com saldo acumulado maior que zero no backend e frontend.
+- [x] Fornecer interface no frontend para gestão completa de aportes, resgates, histórico e sinalização de conta vinculada.
 
 ## Out of Scope
 
@@ -123,15 +123,15 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| GOAL-01 | P1: Vínculo de Conta Bancária na Meta | Phase 1 | In Tasks |
-| GOAL-02 | P1: Validações de Conta Obrigatória | Phase 2 | In Tasks |
-| GOAL-03 | P2: Operação Atômica de Resgate | Phase 2 | In Tasks |
-| GOAL-04 | P2: Registro Contábil e Histórico de Resgate | Phase 3 | In Tasks |
-| GOAL-05 | P2: Reversão de Status após Resgate | Phase 2 | In Tasks |
-| GOAL-06 | P3: Bloqueio de Exclusão com Saldo | Phase 2 | In Tasks |
-| GOAL-07 | P3: Exclusão com Saldo Zerado | Phase 3 | In Tasks |
-| GOAL-08 | P4: Seleção de Conta e Ações no Frontend | Phase 4 | In Tasks |
-| GOAL-09 | P4: Modal de Resgate e Histórico de Movimentações | Phase 4 | In Tasks |
+| GOAL-01 | P1: Vínculo de Conta Bancária na Meta | Phase 1 | Verified |
+| GOAL-02 | P1: Validações de Conta Obrigatória | Phase 2 | Verified |
+| GOAL-03 | P2: Operação Atômica de Resgate | Phase 2 | Verified |
+| GOAL-04 | P2: Registro Contábil e Histórico de Resgate | Phase 3 | Verified |
+| GOAL-05 | P2: Reversão de Status após Resgate | Phase 2 | Verified |
+| GOAL-06 | P3: Bloqueio de Exclusão com Saldo | Phase 2 | Verified |
+| GOAL-07 | P3: Exclusão com Saldo Zerado | Phase 3 | Verified |
+| GOAL-08 | P4: Seleção de Conta e Ações no Frontend | Phase 4 | Verified |
+| GOAL-09 | P4: Modal de Resgate e Histórico de Movimentações | Phase 4 | Verified |
 
 **Coverage:** 9 total, 9 mapped to tasks, 0 unmapped
 
@@ -139,7 +139,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 ## Success Criteria
 
-- [ ] Zero metas criadas sem conta bancária vinculada no sistema.
-- [ ] 100% de sucesso na validação que impede exclusão de metas com saldo positivo.
-- [ ] Fluxo bidirecional de Aporte e Resgate com reflexo exato no saldo da conta bancária e no saldo da meta.
-- [ ] Todos os testes automatizados de unidade, integração e fechamento de especificação aprovados com sucesso.
+- [x] Zero metas criadas sem conta bancária vinculada no sistema.
+- [x] 100% de sucesso na validação que impede exclusão de metas com saldo positivo.
+- [x] Fluxo bidirecional de Aporte e Resgate com reflexo exato no saldo da conta bancária e no saldo da meta.
+- [x] Todos os testes automatizados de unidade, integração e fechamento de especificação aprovados com sucesso.
