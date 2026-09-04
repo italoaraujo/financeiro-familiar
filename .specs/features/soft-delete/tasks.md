@@ -240,7 +240,7 @@ T7 → T8
 
 ---
 
-### T8: Teste de Integração do Fluxo Financeiro com Soft Delete
+### T8: Teste de Integração do Fluxo Financeiro com Soft Delete [DONE]
 
 **What**: Atualizar o teste de integração de fluxo financeiro para validar ponta a ponta o ciclo de criação de transação, impacto no saldo, exclusão lógica, permanência do registro no banco com `deleted_at` e estorno exato do saldo.
 **Where**: `backend/test/integration/financial-flow.spec.ts`
@@ -251,10 +251,10 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Teste de integração valida que transação excluída mantém linha com `deletedAt` preenchido
-- [ ] Saldo bancário é estornado com exatidão após a exclusão lógica
-- [ ] Listagem de transações e resumo financeiro não retornam a transação deletada
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Teste de integração valida que transação excluída mantém linha com `deletedAt` preenchido
+- [x] Saldo bancário é estornado com exatidão após a exclusão lógica
+- [x] Listagem de transações e resumo financeiro não retornam a transação deletada
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: integration
 **Gate**: full
