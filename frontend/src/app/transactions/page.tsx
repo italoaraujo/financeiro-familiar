@@ -389,8 +389,12 @@ export default function TransactionsPage() {
                         {tx.type === 'TRANSFER' ? (
                           <div className="flex items-center gap-1">
                             <span>{tx.account?.name}</span>
-                            <ArrowLeftRight className="h-3 w-3 text-slate-500 shrink-0" />
-                            <span>{tx.destinationAccount?.name}</span>
+                            {tx.destinationAccount && (
+                              <>
+                                <ArrowLeftRight className="h-3 w-3 text-slate-500 shrink-0" />
+                                <span>{tx.destinationAccount.name}</span>
+                              </>
+                            )}
                           </div>
                         ) : tx.account ? (
                           <div className="flex items-center gap-1.5">

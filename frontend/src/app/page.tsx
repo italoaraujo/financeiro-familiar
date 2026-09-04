@@ -351,10 +351,14 @@ export default function DashboardPage() {
                     </div>
                     <span
                       className={`text-xs sm:text-sm font-bold shrink-0 ${
-                        tx.type === 'INCOME' ? 'text-emerald-400' : 'text-slate-200'
+                        tx.type === 'INCOME'
+                          ? 'text-emerald-400'
+                          : tx.type === 'TRANSFER'
+                          ? 'text-blue-400'
+                          : 'text-rose-400'
                       }`}
                     >
-                      {tx.type === 'INCOME' ? '+' : '-'} {formatCurrency(tx.amount)}
+                      {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'} {formatCurrency(tx.amount)}
                     </span>
                   </div>
                 ))}
