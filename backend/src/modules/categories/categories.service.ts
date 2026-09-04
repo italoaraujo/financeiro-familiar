@@ -44,6 +44,7 @@ export class CategoriesService {
   async findAll(userId: string, familyId?: string, type?: TransactionType) {
     const whereCondition: any = {
       parentId: null, // Categorias raiz
+      deletedAt: null,
       OR: [
         { isSystemDefault: true },
         { userId },
@@ -63,6 +64,7 @@ export class CategoriesService {
       where: whereCondition,
       include: {
         subcategories: {
+          where: { deletedAt: null },
           orderBy: { name: 'asc' },
         },
       },
@@ -74,12 +76,14 @@ export class CategoriesService {
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
-        subcategories: true,
+        subcategories: {
+          where: { deletedAt: null },
+        },
         parent: true,
       },
     });
 
-    if (!category) {
+    if (!category || category.deletedAt) {
       throw new NotFoundException('Categoria não encontrada');
     }
 
@@ -120,7 +124,10 @@ export class CategoriesService {
     }
 
     const hasTransactions = await this.prisma.transaction.findFirst({
-      where: { categoryId: id },
+      where: {
+        categoryId: id,
+        deletedAt: null,
+      },
     });
 
     if (hasTransactions) {
@@ -129,8 +136,9 @@ export class CategoriesService {
       );
     }
 
-    await this.prisma.category.delete({
+    await this.prisma.category.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     return { message: 'Categoria removida com sucesso' };

@@ -54,25 +54,94 @@ describe('CategoriesService', () => {
     });
   });
 
+  describe('findAll', () => {
+    it('should filter deletedAt: null for root and subcategories', async () => {
+      prisma.category.findMany.mockResolvedValue([
+        {
+          id: 'cat-1',
+          name: 'Alimentação',
+          subcategories: [],
+        },
+      ]);
+
+      const result = await service.findAll('user-1');
+
+      expect(prisma.category.findMany).toHaveBeenCalledWith({
+        where: {
+          parentId: null,
+          deletedAt: null,
+          OR: [{ isSystemDefault: true }, { userId: 'user-1' }],
+        },
+        include: {
+          subcategories: {
+            where: { deletedAt: null },
+            orderBy: { name: 'asc' },
+          },
+        },
+        orderBy: { name: 'asc' },
+      });
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('findById', () => {
+    it('should throw NotFoundException if category is soft deleted', async () => {
+      prisma.category.findUnique.mockResolvedValue({
+        id: 'cat-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.findById('cat-1')).rejects.toThrow();
+    });
+  });
+
   describe('remove', () => {
     it('should reject deleting system default category', async () => {
       prisma.category.findUnique.mockResolvedValue({
         id: 'cat-default',
         isSystemDefault: true,
+        deletedAt: null,
       });
 
       await expect(service.remove('user-1', 'cat-default')).rejects.toThrow(BadRequestException);
     });
 
-    it('should reject deleting category with existing transactions', async () => {
+    it('should reject deleting category with active transactions', async () => {
       prisma.category.findUnique.mockResolvedValue({
         id: 'cat-custom',
         userId: 'user-1',
         isSystemDefault: false,
+        deletedAt: null,
       });
       prisma.transaction.findFirst.mockResolvedValue({ id: 'tx-1' });
 
       await expect(service.remove('user-1', 'cat-custom')).rejects.toThrow(BadRequestException);
+      expect(prisma.transaction.findFirst).toHaveBeenCalledWith({
+        where: { categoryId: 'cat-custom', deletedAt: null },
+      });
+      expect(prisma.category.update).not.toHaveBeenCalled();
+    });
+
+    it('should soft delete category when it has no active transactions', async () => {
+      prisma.category.findUnique.mockResolvedValue({
+        id: 'cat-custom',
+        userId: 'user-1',
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.transaction.findFirst.mockResolvedValue(null);
+      prisma.category.update.mockResolvedValue({ id: 'cat-custom' });
+
+      const result = await service.remove('user-1', 'cat-custom');
+
+      expect(prisma.transaction.findFirst).toHaveBeenCalledWith({
+        where: { categoryId: 'cat-custom', deletedAt: null },
+      });
+      expect(prisma.category.update).toHaveBeenCalledWith({
+        where: { id: 'cat-custom' },
+        data: { deletedAt: expect.any(Date) },
+      });
+      expect(result.message).toContain('removida com sucesso');
     });
   });
 });

@@ -195,7 +195,7 @@ T7 → T8
 
 ---
 
-### T6: Soft Delete em CategoriesService
+### T6: Soft Delete em CategoriesService [DONE]
 
 **What**: Atualizar `CategoriesService` para efetuar exclusão lógica com `deletedAt`, validar transações vinculadas ativas (`deletedAt: null`), filtrar `deletedAt: null` nas buscas e atualizar testes unitários.
 **Where**: `backend/src/modules/categories/categories.service.ts`
@@ -206,11 +206,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `remove` atualiza categoria com `deletedAt: new Date()`
-- [ ] Bloqueio de exclusão considera apenas transações com `deletedAt: null`
-- [ ] `findAll` e `findOne` filtram categorias ativas
-- [ ] Testes unitários em `categories.service.spec.ts` cobrem exclusão lógica
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
+- [x] `remove` atualiza categoria com `deletedAt: new Date()`
+- [x] Bloqueio de exclusão considera apenas transações com `deletedAt: null`
+- [x] `findAll` e `findOne` filtram categorias ativas
+- [x] Testes unitários em `categories.service.spec.ts` cobrem exclusão lógica
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
