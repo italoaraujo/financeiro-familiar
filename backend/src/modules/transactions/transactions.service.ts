@@ -9,7 +9,14 @@ import { CreditCardsService } from '../credit-cards/credit-cards.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import {
+  GoalMovementType,
+  GoalStatus,
+  InvoiceStatus,
+  Prisma,
+  TransactionStatus,
+  TransactionType,
+} from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -345,6 +352,9 @@ export class TransactionsService {
           account: true,
           destinationAccount: true,
           creditCard: true,
+          goalDeposits: {
+            select: { id: true, goalId: true },
+          },
           person: {
             select: { id: true, name: true, color: true, avatarUrl: true },
           },
@@ -387,6 +397,10 @@ export class TransactionsService {
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.transaction.findUnique({
         where: { id },
+        include: {
+          category: true,
+          goalDeposits: true,
+        },
       });
 
       if (!transaction || transaction.deletedAt) {
@@ -395,6 +409,17 @@ export class TransactionsService {
 
       if (transaction.userId !== userId) {
         throw new ForbiddenException('Apenas o autor pode excluir o lançamento');
+      }
+
+      // Bloqueio de exclusão avulsa de movimentações de Metas e Cofrinhos
+      if (
+        (transaction.goalDeposits && transaction.goalDeposits.length > 0) ||
+        transaction.category?.name === 'Aporte em Meta' ||
+        transaction.category?.name === 'Resgate de Meta'
+      ) {
+        throw new BadRequestException(
+          'Lançamentos vinculados a Metas e Cofrinhos não podem ser excluídos diretamente pelo extrato. Para movimentar ou retirar valores da sua meta, utilize a operação de Resgate na tela de Metas.'
+        );
       }
 
       // Estorno de saldos se estiver efetivada

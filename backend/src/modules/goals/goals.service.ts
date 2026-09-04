@@ -171,7 +171,7 @@ export class GoalsService {
         );
       }
 
-      // Busca ou cria categoria para Aporte em Meta
+      // Busca ou cria categoria para Aporte em Meta (Transferência Interna)
       let goalCategory = await tx.category.findFirst({
         where: { name: 'Aporte em Meta' },
       });
@@ -180,22 +180,27 @@ export class GoalsService {
         goalCategory = await tx.category.create({
           data: {
             name: 'Aporte em Meta',
-            type: TransactionType.EXPENSE,
+            type: TransactionType.TRANSFER,
             icon: 'PiggyBank',
             color: '#10b981',
             isSystemDefault: true,
           },
         });
+      } else if (goalCategory.type !== TransactionType.TRANSFER) {
+        goalCategory = await tx.category.update({
+          where: { id: goalCategory.id },
+          data: { type: TransactionType.TRANSFER },
+        });
       }
 
-      // Cria transação de despesa na conta bancária
+      // Cria transação de transferência patrimonial na conta bancária
       const createdTx = await tx.transaction.create({
         data: {
           userId,
           familyId: goal.familyId,
           accountId: account.id,
           categoryId: goalCategory.id,
-          type: TransactionType.EXPENSE,
+          type: TransactionType.TRANSFER,
           amount: depositAmount,
           description: `Aporte na meta: ${goal.name}`,
           transactionDate: depositDate,
@@ -276,7 +281,7 @@ export class GoalsService {
         throw new NotFoundException('Conta bancária vinculada à meta não encontrada');
       }
 
-      // Busca ou cria categoria para Resgate de Meta
+      // Busca ou cria categoria para Resgate de Meta (Transferência Interna)
       let returnCategory = await tx.category.findFirst({
         where: { name: 'Resgate de Meta' },
       });
@@ -285,22 +290,27 @@ export class GoalsService {
         returnCategory = await tx.category.create({
           data: {
             name: 'Resgate de Meta',
-            type: TransactionType.INCOME,
+            type: TransactionType.TRANSFER,
             icon: 'PiggyBank',
             color: '#10b981',
             isSystemDefault: true,
           },
         });
+      } else if (returnCategory.type !== TransactionType.TRANSFER) {
+        returnCategory = await tx.category.update({
+          where: { id: returnCategory.id },
+          data: { type: TransactionType.TRANSFER },
+        });
       }
 
-      // Cria transação de receita na conta vinculada
+      // Cria transação de transferência patrimonial na conta vinculada
       const createdTx = await tx.transaction.create({
         data: {
           userId,
           familyId: goal.familyId,
           accountId: account.id,
           categoryId: returnCategory.id,
-          type: TransactionType.INCOME,
+          type: TransactionType.TRANSFER,
           amount: withdrawAmount,
           description: `Resgate da meta: ${goal.name}`,
           transactionDate: withdrawalDate,

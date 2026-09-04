@@ -28,6 +28,7 @@ describe('GoalsService', () => {
       category: {
         findFirst: jest.fn(),
         create: jest.fn(),
+        update: jest.fn(),
       },
       transaction: {
         create: jest.fn(),
@@ -163,7 +164,7 @@ describe('GoalsService', () => {
         deletedAt: null,
       });
 
-      prisma.category.findFirst.mockResolvedValue({ id: 'cat-goal' });
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-goal', type: TransactionType.TRANSFER });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-goal' });
       prisma.goalDeposit.create.mockResolvedValue({ id: 'dep-1' });
       prisma.account.update.mockResolvedValue({ id: 'acc-1' });
@@ -175,6 +176,14 @@ describe('GoalsService', () => {
       });
 
       expect(result.id).toBe('dep-1');
+      expect(prisma.transaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            type: TransactionType.TRANSFER,
+            amount: new Prisma.Decimal(250),
+          }),
+        }),
+      );
       expect(prisma.goalDeposit.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           goalId: 'goal-1',
@@ -259,7 +268,7 @@ describe('GoalsService', () => {
         deletedAt: null,
       });
 
-      prisma.category.findFirst.mockResolvedValue({ id: 'cat-resgate' });
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-resgate', type: TransactionType.TRANSFER });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-resgate' });
       prisma.account.update.mockResolvedValue({ id: 'acc-1' });
       prisma.goalDeposit.create.mockResolvedValue({
@@ -276,6 +285,14 @@ describe('GoalsService', () => {
       });
 
       expect(result.id).toBe('mov-1');
+      expect(prisma.transaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            type: TransactionType.TRANSFER,
+            amount: new Prisma.Decimal(500),
+          }),
+        }),
+      );
       expect(prisma.account.update).toHaveBeenCalledWith({
         where: { id: 'acc-1' },
         data: { currentBalance: { increment: new Prisma.Decimal(500) } },
@@ -311,7 +328,7 @@ describe('GoalsService', () => {
       });
 
       prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', deletedAt: null });
-      prisma.category.findFirst.mockResolvedValue({ id: 'cat-resgate' });
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-resgate', type: TransactionType.TRANSFER });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-resgate' });
       prisma.account.update.mockResolvedValue({ id: 'acc-1' });
       prisma.goalDeposit.create.mockResolvedValue({ id: 'mov-1' });

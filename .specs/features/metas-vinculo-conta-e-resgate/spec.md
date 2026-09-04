@@ -32,7 +32,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | Exclusão de meta com saldo acumulado | Bloqueio total até que o saldo seja zerado via resgate manual | Evita resgates e encerramentos acidentais de reservas financeiras | y |
 | Vínculo de conta bancária na criação | Campo obrigatório accountId no cadastro da meta | Garante que todo cofrinho possui uma conta bancária de custódia conhecida | y |
 | Troca de conta vinculada de meta com saldo | Bloqueada enquanto a meta tiver currentAmount maior que zero | Evita inconsistência de saldo entre a conta de origem dos aportes e de resgate | y |
-| Classificação contábil de resgate | Transação de crédito vinculada à categoria Resgate de Meta | Permite identificar e auditar entradas decorrentes de cofrinhos no extrato | y |
+| Classificação contábil de aporte e resgate | Transação de transferência patrimonial interna (TRANSFER) | Evita distorções de receitas, despesas e balanço líquido no dashboard financeiro | y |
 | Reversão de status após resgate | Retornar de COMPLETED para IN_PROGRESS se saldo cair abaixo da meta | Mantém o indicador visual de atingimento condizente com o saldo real | y |
 
 **Open questions:** none - all resolved or logged above (required before the spec is confirmed).

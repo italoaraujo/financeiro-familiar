@@ -158,9 +158,9 @@ describe('Goals Cofrinho Flow Integration Test', () => {
     expect(meta.currentAmount.toNumber()).toBe(1000.0);
     expect(accounts[0].currentBalance.toNumber()).toBe(4000.0);
 
-    // Verifica geração da transação contábil de despesa
+    // Verifica geração da transação contábil de transferência (aporte)
     expect(transactions).toHaveLength(1);
-    expect(transactions[0].type).toBe(TransactionType.EXPENSE);
+    expect(transactions[0].type).toBe(TransactionType.TRANSFER);
     expect(transactions[0].amount.toNumber()).toBe(1000.0);
     expect(transactions[0].accountId).toBe('acc-nubank-1');
 
@@ -184,9 +184,9 @@ describe('Goals Cofrinho Flow Integration Test', () => {
     expect(meta.currentAmount.toNumber()).toBe(600.0);
     expect(accounts[0].currentBalance.toNumber()).toBe(4400.0);
 
-    // Verifica transação contábil de receita
+    // Verifica transação contábil de transferência (resgate)
     expect(transactions).toHaveLength(2);
-    expect(transactions[1].type).toBe(TransactionType.INCOME);
+    expect(transactions[1].type).toBe(TransactionType.TRANSFER);
     expect(transactions[1].amount.toNumber()).toBe(400.0);
 
     // Ainda não pode excluir porque tem R$ 600

@@ -67,7 +67,18 @@ export class ReportsService {
     // 4. Balanço Líquido
     const netBalance = monthlyIncome.minus(monthlyExpense);
 
-    // 5. Faturas Abertas / Próximos Vencimentos
+    // 5. Saldo em Metas / Cofrinhos e Patrimônio Total
+    const goalsAgg = await this.prisma.goal.aggregate({
+      where: {
+        ...userOrFamilyFilter,
+        deletedAt: null,
+      },
+      _sum: { currentAmount: true },
+    });
+    const goalsBalance = goalsAgg._sum.currentAmount || new Prisma.Decimal(0);
+    const netWorth = totalBalance.add(goalsBalance);
+
+    // 6. Faturas Abertas / Próximos Vencimentos
     const openInvoices = await this.prisma.creditCardInvoice.findMany({
       where: {
         status: { in: [InvoiceStatus.OPEN, InvoiceStatus.CLOSED, InvoiceStatus.OVERDUE] },
@@ -81,7 +92,7 @@ export class ReportsService {
       take: 5,
     });
 
-    // 6. Últimas Transações Recentes
+    // 7. Últimas Transações Recentes
     const recentTransactions = await this.prisma.transaction.findMany({
       where: {
         ...userOrFamilyFilter,
@@ -95,6 +106,8 @@ export class ReportsService {
     return {
       periodMonth: month,
       totalBalance,
+      goalsBalance,
+      netWorth,
       monthlyIncome,
       monthlyExpense,
       netBalance,

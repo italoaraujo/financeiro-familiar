@@ -2,7 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreditCardsService } from '../../src/modules/credit-cards/credit-cards.service';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import {
+  GoalMovementType,
+  GoalStatus,
+  InvoiceStatus,
+  Prisma,
+  TransactionStatus,
+  TransactionType,
+} from '@prisma/client';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('TransactionsService', () => {
@@ -47,6 +54,12 @@ describe('TransactionsService', () => {
       },
       person: {
         findUnique: jest.fn(),
+      },
+      goal: {
+        update: jest.fn(),
+      },
+      goalDeposit: {
+        delete: jest.fn(),
       },
     };
 
@@ -464,6 +477,68 @@ describe('TransactionsService', () => {
       });
 
       expect(tx).toBeDefined();
+    });
+  });
+
+  describe('remove', () => {
+    it('should throw BadRequestException when trying to delete a transaction linked to a goal', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-1',
+        userId: 'user-1',
+        accountId: 'acc-1',
+        amount: new Prisma.Decimal(500),
+        status: TransactionStatus.COMPLETED,
+        type: TransactionType.TRANSFER,
+        deletedAt: null,
+        goalDeposits: [{ id: 'dep-1', goalId: 'goal-1' }],
+      });
+
+      await expect(service.remove('user-1', 'tx-1')).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when category is Aporte em Meta or Resgate de Meta', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-2',
+        userId: 'user-1',
+        accountId: 'acc-1',
+        amount: new Prisma.Decimal(500),
+        status: TransactionStatus.COMPLETED,
+        type: TransactionType.TRANSFER,
+        deletedAt: null,
+        category: { name: 'Aporte em Meta' },
+        goalDeposits: [],
+      });
+
+      await expect(service.remove('user-1', 'tx-2')).rejects.toThrow(BadRequestException);
+    });
+
+    it('should revert account balance and soft-delete regular transaction', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-3',
+        userId: 'user-1',
+        accountId: 'acc-1',
+        amount: new Prisma.Decimal(150),
+        status: TransactionStatus.COMPLETED,
+        type: TransactionType.EXPENSE,
+        deletedAt: null,
+        category: { name: 'Alimentação' },
+        goalDeposits: [],
+      });
+
+      prisma.account.update.mockResolvedValue({});
+      prisma.transaction.update.mockResolvedValue({});
+
+      const result = await service.remove('user-1', 'tx-3');
+
+      expect(result.message).toContain('Transação excluída');
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { currentBalance: { increment: new Prisma.Decimal(150) } },
+      });
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-3' },
+        data: { deletedAt: expect.any(Date) },
+      });
     });
   });
 });
