@@ -133,17 +133,17 @@ T5 → T6 → T7
 
 ### Phase 3: Integração no App Shell e Experiência de Instalação
 
-### T5: Atualização de Metadados e Viewport no RootLayout
+### T5: Atualização de Metadados e Viewport no RootLayout [DONE]
 
 **What**: Atualizar `frontend/src/app/layout.tsx` adicionando link do manifesto `/manifest.json`, metadados de suporte ao iOS (`appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Finanças' }`), cores de tema no viewport e tags de ícones compatíveis com navegadores móveis.
 **Where**: `frontend/src/app/layout.tsx`
 **Depends on**: none
 **Requirement**: PWA-01, PWA-03
 **Done when**:
-- [ ] `manifest: '/manifest.json'` configurado nos metadados do Next.js
-- [ ] Propriedades `themeColor` e `colorScheme: 'dark'` configuradas no viewport
-- [ ] Configuração `appleWebApp` adicionada
-- [ ] `npm --prefix frontend run build` executado com sucesso
+- [x] `manifest: '/manifest.json'` configurado nos metadados do Next.js
+- [x] Propriedades `themeColor` e `colorScheme: 'dark'` configuradas no viewport
+- [x] Configuração `appleWebApp` adicionada
+- [x] `npm --prefix frontend run build` executado com sucesso
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
