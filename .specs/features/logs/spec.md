@@ -99,11 +99,11 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | LOGS-01 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
 | LOGS-02 | P1: Persistência e Captura Automática de Logs de Ações | Design | Pending |
 | LOGS-03 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
-| LOGS-04 | P1: Persistência e Captura Automática de Logs de Ações | Design | Pending |
+| LOGS-04 | P1: Persistência e Captura Automática de Logs de Ações | Tasks | Implementing |
 | LOGS-05 | P1: Persistência e Captura Automática de Logs de Ações | Design | Pending |
-| LOGS-06 | P2: Consulta e Filtragem de Logs de Auditoria | Design | Pending |
-| LOGS-07 | P2: Consulta e Filtragem de Logs de Auditoria | Design | Pending |
-| LOGS-08 | P2: Consulta e Filtragem de Logs de Auditoria | Design | Pending |
+| LOGS-06 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
+| LOGS-07 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
+| LOGS-08 | P2: Consulta e Filtragem de Logs de Auditoria | Tasks | Implementing |
 
 **Coverage:** 8 total, 8 mapped to tasks, 0 unmapped
 

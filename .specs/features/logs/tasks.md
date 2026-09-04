@@ -127,7 +127,7 @@ T5 → T6
 
 ---
 
-### T3: Implementar AuditLogsService Resiliente com Queries
+### T3: Implementar AuditLogsService Resiliente com Queries [DONE]
 
 **What**: Implementar `AuditLogsService` contendo gravação assíncrona não-bloqueante (try/catch seguro), consulta paginada com filtros (`findAll`) e busca individual (`findById`).
 **Where**: `backend/src/modules/audit-logs/audit-logs.service.ts`
@@ -138,11 +138,11 @@ T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] `createLog` persiste no banco via Prisma sem propagar erro caso ocorra falha de I/O
-- [ ] `findAll` aplica paginação e filtros opcionais (`familyId`, `userId`, `entityName`, `action`, período)
-- [ ] `findById` busca o log por UUID e valida consistência
-- [ ] Testes unitários em `audit-logs.service.spec.ts` validam sucesso, resiliência na falha e filtros de busca
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/audit-logs.service.spec.ts`
+- [x] `createLog` persiste no banco via Prisma sem propagar erro caso ocorra falha de I/O
+- [x] `findAll` aplica paginação e filtros opcionais (`familyId`, `userId`, `entityName`, `action`, período)
+- [x] `findById` busca o log por UUID e valida consistência
+- [x] Testes unitários em `audit-logs.service.spec.ts` validam sucesso, resiliência na falha e filtros de busca
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/audit-logs.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
