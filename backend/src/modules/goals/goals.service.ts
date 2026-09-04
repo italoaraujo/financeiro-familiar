@@ -40,7 +40,7 @@ export class GoalsService {
     }
 
     const goals = await this.prisma.goal.findMany({
-      where: familyId ? { familyId } : { userId },
+      where: familyId ? { familyId, deletedAt: null } : { userId, deletedAt: null },
       include: {
         deposits: {
           orderBy: { depositDate: 'desc' },
@@ -75,7 +75,7 @@ export class GoalsService {
       },
     });
 
-    if (!goal) {
+    if (!goal || goal.deletedAt) {
       throw new NotFoundException('Meta não encontrada');
     }
 
@@ -101,7 +101,7 @@ export class GoalsService {
       where: { id: goalId },
     });
 
-    if (!goal) {
+    if (!goal || goal.deletedAt) {
       throw new NotFoundException('Meta não encontrada');
     }
 
@@ -199,7 +199,7 @@ export class GoalsService {
       where: { id },
     });
 
-    if (!goal) {
+    if (!goal || goal.deletedAt) {
       throw new NotFoundException('Meta não encontrada');
     }
 
@@ -227,7 +227,7 @@ export class GoalsService {
       where: { id },
     });
 
-    if (!goal) {
+    if (!goal || goal.deletedAt) {
       throw new NotFoundException('Meta não encontrada');
     }
 
@@ -237,8 +237,9 @@ export class GoalsService {
       throw new ForbiddenException('Acesso negado');
     }
 
-    await this.prisma.goal.delete({
+    await this.prisma.goal.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     return { message: 'Meta removida com sucesso' };

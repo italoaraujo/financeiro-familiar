@@ -22,6 +22,7 @@ export class BudgetsService {
       where: {
         categoryId: dto.categoryId,
         periodMonth: dto.periodMonth,
+        deletedAt: null,
         ...(dto.familyId ? { familyId: dto.familyId } : { userId }),
       },
     });
@@ -56,6 +57,7 @@ export class BudgetsService {
     const budgets = await this.prisma.budget.findMany({
       where: {
         periodMonth: month,
+        deletedAt: null,
         ...(familyId ? { familyId } : { userId }),
       },
       include: {
@@ -75,6 +77,7 @@ export class BudgetsService {
             categoryId: budget.categoryId,
             type: TransactionType.EXPENSE,
             status: TransactionStatus.COMPLETED,
+            deletedAt: null,
             transactionDate: {
               gte: startDate,
               lte: endDate,
@@ -114,7 +117,7 @@ export class BudgetsService {
       where: { id },
     });
 
-    if (!budget) {
+    if (!budget || budget.deletedAt) {
       throw new NotFoundException('Orçamento não encontrado');
     }
 
@@ -139,7 +142,7 @@ export class BudgetsService {
       where: { id },
     });
 
-    if (!budget) {
+    if (!budget || budget.deletedAt) {
       throw new NotFoundException('Orçamento não encontrado');
     }
 
@@ -147,8 +150,9 @@ export class BudgetsService {
       throw new ForbiddenException('Acesso negado ao orçamento');
     }
 
-    await this.prisma.budget.delete({
+    await this.prisma.budget.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     return { message: 'Orçamento removido com sucesso' };

@@ -219,7 +219,7 @@ T7 → T8
 
 ### Phase 4: Metas, Orçamentos, Pessoas e Integração
 
-### T7: Soft Delete em Goals, Budgets e People (Families)
+### T7: Soft Delete em Goals, Budgets e People (Families) [DONE]
 
 **What**: Atualizar `GoalsService`, `BudgetsService` e `FamiliesService` (Person) para atualizar `deletedAt: new Date()` na remoção e filtrar `deletedAt: null` em listagens, com testes unitários atualizados.
 **Where**: `backend/src/modules/goals/goals.service.ts`
@@ -230,10 +230,10 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `remove` em Goals, Budgets e `removePerson` em Families utilizam exclusão lógica com `deletedAt`
-- [ ] Buscas e agregações de metas, orçamentos e pessoas filtram `deletedAt: null`
-- [ ] Testes unitários em `goals.service.spec.ts`, `budgets.service.spec.ts` e `families.service.spec.ts` passam com sucesso
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts test/unit/budgets.service.spec.ts test/unit/families.service.spec.ts`
+- [x] `remove` em Goals, Budgets e `removePerson` em Families utilizam exclusão lógica com `deletedAt`
+- [x] Buscas e agregações de metas, orçamentos e pessoas filtram `deletedAt: null`
+- [x] Testes unitários em `goals.service.spec.ts`, `budgets.service.spec.ts` e `families.service.spec.ts` passam com sucesso
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts test/unit/budgets.service.spec.ts test/unit/families.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
