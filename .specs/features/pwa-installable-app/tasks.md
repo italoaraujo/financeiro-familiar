@@ -147,16 +147,16 @@ T5 → T6 → T7
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-### T6: Criação do Componente de Registro do Service Worker
+### T6: Criação do Componente de Registro do Service Worker [DONE]
 
 **What**: Criar `frontend/src/components/pwa/ServiceWorkerRegister.tsx` para registrar `/sw.js` em escopo `/` de forma assíncrona após o carregamento inicial da página no navegador, tratando com segurança ambientes de SSR e navegadores sem suporte a Service Worker.
 **Where**: `frontend/src/components/pwa/ServiceWorkerRegister.tsx`
 **Depends on**: T5
 **Requirement**: PWA-05
 **Done when**:
-- [ ] Componente cliente React criado com registro em `useEffect`
-- [ ] Invocado no `RootLayout` sem quebrar SSR
-- [ ] Build do Next.js compila com sucesso
+- [x] Componente cliente React criado com registro em `useEffect`
+- [x] Invocado no `RootLayout` sem quebrar SSR
+- [x] Build do Next.js compila com sucesso
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
