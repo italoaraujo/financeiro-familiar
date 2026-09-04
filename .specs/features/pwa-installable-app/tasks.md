@@ -103,15 +103,15 @@ T5 → T6 → T7
 
 ### Phase 2: Service Worker e Resiliência Offline
 
-### T3: Criação da Página Estática de Fallback Offline
+### T3: Criação da Página Estática de Fallback Offline [DONE]
 
 **What**: Criar o arquivo `frontend/public/offline.html` estilizado em tema escuro (Slate 950) com mensagem amigável em português avisando que o dispositivo está desconectado da internet, além de botão para tentar reconectar.
 **Where**: `frontend/public/offline.html`
 **Depends on**: none
 **Requirement**: PWA-06
 **Done when**:
-- [ ] Arquivo `frontend/public/offline.html` criado com layout responsivo e cores Slate escuras
-- [ ] Mensagem de orientação offline e botão "Tentar novamente" implementados
+- [x] Arquivo `frontend/public/offline.html` criado com layout responsivo e cores Slate escuras
+- [x] Mensagem de orientação offline e botão "Tentar novamente" implementados
 **Tests**: `test -f frontend/public/offline.html && grep -q "Tentar novamente" frontend/public/offline.html`
 **Gate**: `test -f frontend/public/offline.html && grep -q "Tentar novamente" frontend/public/offline.html`
 
