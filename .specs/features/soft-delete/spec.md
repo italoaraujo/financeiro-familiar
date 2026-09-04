@@ -97,11 +97,11 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| SOFTDEL-01 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Pending |
-| SOFTDEL-02 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Pending |
-| SOFTDEL-03 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Pending |
+| SOFTDEL-01 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
+| SOFTDEL-02 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
+| SOFTDEL-03 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
 | SOFTDEL-04 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Pending |
-| SOFTDEL-05 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Pending |
+| SOFTDEL-05 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
 | SOFTDEL-06 | P1: Exclusão Lógica e Estorno de Transações com deleted_at | Tasks | Implementing |
 | SOFTDEL-07 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |
 | SOFTDEL-08 | P2: Exclusão Lógica das Entidades de Cadastro e Suporte | Tasks | Pending |

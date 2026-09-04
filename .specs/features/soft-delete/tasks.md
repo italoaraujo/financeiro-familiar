@@ -107,7 +107,7 @@ T7 → T8
 
 ### Phase 2: Transações e Relatórios
 
-### T2: Exclusão Lógica e Estorno em TransactionsService
+### T2: Exclusão Lógica e Estorno em TransactionsService [DONE]
 
 **What**: Atualizar o método `remove` do `TransactionsService` para preencher `deletedAt: new Date()` mantendo o estorno atômico de saldo, filtrar `deletedAt: null` em `findAll` e `findOne`, e atualizar a suíte de testes unitários.
 **Where**: `backend/src/modules/transactions/transactions.service.ts`
@@ -118,11 +118,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] `remove` substitui `tx.transaction.delete` por `tx.transaction.update` com `deletedAt: new Date()`
-- [ ] `remove` preserva integralmente o estorno de conta bancária e fatura de cartão
-- [ ] `findAll` e `findOne` filtram `deletedAt: null`
-- [ ] Testes unitários em `transactions.service.spec.ts` cobrem o cenário de soft delete e estorno
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] `remove` substitui `tx.transaction.delete` por `tx.transaction.update` com `deletedAt: new Date()`
+- [x] `remove` preserva integralmente o estorno de conta bancária e fatura de cartão
+- [x] `findAll` e `findOne` filtram `deletedAt: null`
+- [x] Testes unitários em `transactions.service.spec.ts` cobrem o cenário de soft delete e estorno
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
