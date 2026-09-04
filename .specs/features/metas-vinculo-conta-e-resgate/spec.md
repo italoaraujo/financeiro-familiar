@@ -104,8 +104,9 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 2. WHEN o card da meta for renderizado THEN the system SHALL exibir a identificação da conta bancária vinculada e o botão para realizar resgate. <!-- event-driven -->
 3. WHEN o usuário abrir o modal de resgate THEN the system SHALL limitar o valor máximo ao saldo atual acumulado na meta. <!-- event-driven -->
 4. WHEN o histórico da meta for visualizado THEN the system SHALL diferenciar claramente as operações de aporte e de resgate com suas respectivas datas e valores. <!-- event-driven -->
+5. WHEN o usuário abrir o modal de aporte THEN the system SHALL exibir o saldo disponível na conta bancária vinculada e limitar o valor do aporte a esse saldo. <!-- event-driven -->
 
-**Independent Test**: Acessar a tela `/goals`, verificar identificador da conta no card, acionar modal de resgate e checar preenchimento e restrição de valor máximo.
+**Independent Test**: Acessar a tela `/goals`, abrir o modal de aporte, conferir o saldo exibido da conta vinculada e verificar se aportes com valor superior ao saldo da conta são bloqueados.
 
 ---
 
@@ -114,6 +115,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 - IF ocorrer falha de infraestrutura durante o resgate THEN the system SHALL reverter todas as alterações de saldo via transação ACID no banco.
 - IF a conta bancária vinculada for inativada ou arquivada THEN the system SHALL ainda permitir o resgate do saldo para a conta antes de qualquer exclusão da meta.
 - WHEN múltiplos resgates concorrentes forem submetidos para a mesma meta THEN the system SHALL garantir consistência e impedir que o saldo fique negativo.
+- IF o usuário tentar realizar um aporte com valor superior ao saldo disponível na conta vinculada THEN the system SHALL rejeitar a operação com erro HTTP 400.
 
 ---
 
@@ -132,8 +134,9 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | GOAL-07 | P3: Exclusão com Saldo Zerado | Phase 3 | Verified |
 | GOAL-08 | P4: Seleção de Conta e Ações no Frontend | Phase 4 | Verified |
 | GOAL-09 | P4: Modal de Resgate e Histórico de Movimentações | Phase 4 | Verified |
+| GOAL-10 | P4: Exibição de Saldo e Limite de Aporte por Saldo da Conta | Phase 4 | Verified |
 
-**Coverage:** 9 total, 9 mapped to tasks, 0 unmapped
+**Coverage:** 10 total, 10 mapped to tasks, 0 unmapped
 
 ---
 
@@ -142,4 +145,6 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 - [x] Zero metas criadas sem conta bancária vinculada no sistema.
 - [x] 100% de sucesso na validação que impede exclusão de metas com saldo positivo.
 - [x] Fluxo bidirecional de Aporte e Resgate com reflexo exato no saldo da conta bancária e no saldo da meta.
+- [x] Bloqueio estrito de aporte com valor superior ao saldo disponível na conta vinculada com exibição de saldo no modal.
 - [x] Todos os testes automatizados de unidade, integração e fechamento de especificação aprovados com sucesso.
+

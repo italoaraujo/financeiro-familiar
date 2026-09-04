@@ -70,10 +70,10 @@ T5 → T6
 
 ### Phase 4: Frontend (Interface Web de Cofrinhos)
 
-Interface de criação de cofrinho vinculado, modal de resgate, histórico e bloqueio visual de exclusão com saldo.
+Interface de criação de cofrinho vinculado, modal de resgate, histórico, modal de aporte com saldo da conta e bloqueio visual de exclusão com saldo.
 
 ```
-T7 → T8
+T7 → T8 → T9
 ```
 
 ---
@@ -258,3 +258,26 @@ T7 → T8
 
 **Tests**: none
 **Gate**: build
+
+---
+
+### T9: Exibição de Saldo da Conta e Limite de Aporte no Frontend e Backend [DONE]
+
+**What**: Exibir saldo disponível da conta no modal de aporte com botão "Aportar Tudo", travar aporte acima do saldo e validar no backend.
+**Where**: `backend/src/modules/goals/goals.service.ts`, `frontend/src/app/goals/page.tsx`
+**Depends on**: T8
+**Requirement**: GOAL-10
+**Tools**:
+- MCP: `filesystem`
+- Skill: NONE
+
+**Done when**:
+- [x] GoalsService inclui `currentBalance` no select de conta ao buscar metas
+- [x] GoalsService rejeita aporte com `BadRequestException` se valor > saldo da conta
+- [x] Frontend exibe card destacado com Saldo Disponível na Conta Vinculada no modal de aporte
+- [x] Frontend adiciona atalho "Aportar Tudo" e limita input ao saldo disponível (`max`)
+- [x] Gate check passes: `npm --prefix backend test && npm --prefix frontend run build`
+
+**Tests**: `backend/test/unit/goals.service.spec.ts`, `backend/test/integration/goals-cofrinho-flow.spec.ts`
+**Gate**: full
+

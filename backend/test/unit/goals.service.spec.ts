@@ -209,6 +209,33 @@ describe('GoalsService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should throw BadRequestException if deposit amount exceeds account currentBalance', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        name: 'Reserva',
+        userId: 'user-1',
+        familyId: null,
+        accountId: 'acc-1',
+        targetAmount: new Prisma.Decimal(1000),
+        currentAmount: new Prisma.Decimal(200),
+        status: GoalStatus.IN_PROGRESS,
+        deletedAt: null,
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-1',
+        currentBalance: new Prisma.Decimal(100),
+        deletedAt: null,
+      });
+
+      await expect(
+        service.addDeposit('user-1', 'goal-1', {
+          amount: 250,
+          depositDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('withdraw', () => {

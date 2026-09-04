@@ -57,7 +57,7 @@ export class GoalsService {
       },
       include: {
         account: {
-          select: { id: true, name: true, color: true, icon: true },
+          select: { id: true, name: true, color: true, icon: true, currentBalance: true },
         },
       },
     });
@@ -72,7 +72,7 @@ export class GoalsService {
       where: familyId ? { familyId, deletedAt: null } : { userId, deletedAt: null },
       include: {
         account: {
-          select: { id: true, name: true, color: true, icon: true },
+          select: { id: true, name: true, color: true, icon: true, currentBalance: true },
         },
         deposits: {
           orderBy: { depositDate: 'desc' },
@@ -102,7 +102,7 @@ export class GoalsService {
       where: { id },
       include: {
         account: {
-          select: { id: true, name: true, color: true, icon: true },
+          select: { id: true, name: true, color: true, icon: true, currentBalance: true },
         },
         deposits: {
           orderBy: { depositDate: 'desc' },
@@ -163,6 +163,12 @@ export class GoalsService {
 
       if (!account || account.deletedAt) {
         throw new NotFoundException('Conta bancária de débito não encontrada');
+      }
+
+      if (depositAmount.gt(account.currentBalance)) {
+        throw new BadRequestException(
+          `Saldo insuficiente na conta bancária vinculada para realizar o aporte. Saldo disponível: R$ ${account.currentBalance.toFixed(2)}`
+        );
       }
 
       // Busca ou cria categoria para Aporte em Meta

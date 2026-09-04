@@ -234,4 +234,26 @@ describe('Goals Cofrinho Flow Integration Test', () => {
     expect(meta.currentAmount.toNumber()).toBe(300.0);
     expect(accounts[0].currentBalance.toNumber()).toBe(4700.0);
   });
+
+  it('deve impedir aporte de valor superior ao saldo da conta bancária vinculada', async () => {
+    const userId = 'user-teste';
+
+    const meta = await service.create(userId, {
+      name: 'Carro Novo',
+      targetAmount: 20000.0,
+      accountId: 'acc-nubank-1',
+    });
+
+    // Saldo atual da conta é 5000; tentativa de aportar 6000
+    await expect(
+      service.addDeposit(userId, meta.id, {
+        amount: 6000.0,
+        depositDate: '2026-09-04',
+      }),
+    ).rejects.toThrow(BadRequestException);
+
+    // Saldo da meta e da conta inalterados
+    expect(meta.currentAmount.toNumber()).toBe(0);
+    expect(accounts[0].currentBalance.toNumber()).toBe(5000.0);
+  });
 });

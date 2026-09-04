@@ -113,13 +113,25 @@ export default function GoalsPage() {
   const handleAddDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedGoal) return;
+
+    const amountNum = parseFloat(depositAmount);
+    const linkedAcc = accounts.find((acc) => acc.id === selectedGoal.accountId) || selectedGoal.account;
+    const accBalance = Number(linkedAcc?.currentBalance || 0);
+
+    if (amountNum > accBalance) {
+      alert(
+        `O valor do aporte (${formatCurrency(amountNum)}) não pode ser maior que o saldo disponível na conta vinculada (${formatCurrency(accBalance)}).`
+      );
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       await apiRequest(`/goals/${selectedGoal.id}/deposits`, {
         method: 'POST',
         body: JSON.stringify({
-          amount: parseFloat(depositAmount),
+          amount: amountNum,
           depositDate,
           notes: depositNotes || undefined,
         }),
@@ -472,71 +484,114 @@ export default function GoalsPage() {
         )}
 
         {/* Deposit Modal */}
-        {isDepositModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
-              <button
-                onClick={() => setIsDepositModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        {isDepositModalOpen && (() => {
+          const linkedAccount = accounts.find((acc) => acc.id === selectedGoal?.accountId) || selectedGoal?.account;
+          const currentAccountBalance = Number(linkedAccount?.currentBalance || 0);
+          const hasSufficientBalance = currentAccountBalance > 0;
+          const depositAmountNum = parseFloat(depositAmount || '0');
+          const isOverBalance = depositAmountNum > currentAccountBalance;
 
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-1 pr-6">Aporte no Cofrinho</h2>
-              <p className="text-xs text-slate-400 mb-4">
-                Meta: <strong className="text-white">{selectedGoal?.name}</strong> • Conta de Débito:{' '}
-                <strong className="text-emerald-400">{selectedGoal?.account?.name || 'Conta Vinculada'}</strong>
-              </p>
-
-              <form onSubmit={handleAddDeposit} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor do Aporte (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    min="0.01"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="0,00"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data do Aporte *</label>
-                  <input
-                    type="date"
-                    required
-                    value={depositDate}
-                    onChange={(e) => setDepositDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Observações</label>
-                  <input
-                    type="text"
-                    value={depositNotes}
-                    onChange={(e) => setDepositNotes(e.target.value)}
-                    placeholder="Ex: Economia do mês, bônus..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
+          return (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                  onClick={() => setIsDepositModalOpen(false)}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                  aria-label="Fechar"
                 >
-                  {submitting ? 'Registrando aporte...' : 'Confirmar Aporte'}
+                  <X className="h-5 w-5" />
                 </button>
-              </form>
+
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-1 pr-6">Aporte no Cofrinho</h2>
+                <p className="text-xs text-slate-400 mb-4">
+                  Meta: <strong className="text-white">{selectedGoal?.name}</strong> • Conta de Débito:{' '}
+                  <strong className="text-emerald-400">{linkedAccount?.name || selectedGoal?.account?.name || 'Conta Vinculada'}</strong>
+                </p>
+
+                {/* Saldo disponível na conta bancária vinculada */}
+                <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3.5 mb-4 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-emerald-300 font-medium">
+                      Saldo Disponível na Conta ({linkedAccount?.name || 'Vinculada'}):
+                    </span>
+                    <div className="text-lg font-bold text-white">
+                      {formatCurrency(currentAccountBalance)}
+                    </div>
+                  </div>
+                  {hasSufficientBalance && (
+                    <button
+                      type="button"
+                      onClick={() => setDepositAmount(String(currentAccountBalance))}
+                      className="px-2.5 py-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 rounded-lg transition-colors"
+                    >
+                      Aportar Tudo
+                    </button>
+                  )}
+                </div>
+
+                {!hasSufficientBalance && (
+                  <div className="flex items-center gap-2 p-3 bg-amber-950/30 border border-amber-500/30 rounded-xl text-xs text-amber-300 mb-4">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>A conta bancária vinculada não possui saldo disponível para realizar aportes.</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleAddDeposit} className="space-y-3.5 sm:space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor do Aporte (R$) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      min="0.01"
+                      max={currentAccountBalance}
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    {isOverBalance && (
+                      <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                        <span>O valor do aporte não pode exceder o saldo disponível na conta ({formatCurrency(currentAccountBalance)}).</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data do Aporte *</label>
+                    <input
+                      type="date"
+                      required
+                      value={depositDate}
+                      onChange={(e) => setDepositDate(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Observações</label>
+                    <input
+                      type="text"
+                      value={depositNotes}
+                      onChange={(e) => setDepositNotes(e.target.value)}
+                      placeholder="Ex: Economia do mês, bônus..."
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submitting || !hasSufficientBalance || isOverBalance}
+                    className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                  >
+                    {submitting ? 'Registrando aporte...' : 'Confirmar Aporte'}
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Withdraw Modal */}
         {isWithdrawModalOpen && (
