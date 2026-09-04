@@ -436,13 +436,24 @@ export default function TransactionsPage() {
                         </span>
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => handleDelete(tx.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          title="Excluir lançamento"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {tx.goalDeposits?.length > 0 ||
+                        tx.category?.name === 'Aporte em Meta' ||
+                        tx.category?.name === 'Resgate de Meta' ? (
+                          <span
+                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                            title="Lançamento de Cofrinho: gerencie através de aportes e resgates na tela de Metas"
+                          >
+                            <Trash2 className="h-4 w-4 opacity-30" />
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleDelete(tx.id)}
+                            className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                            title="Excluir lançamento"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

@@ -481,7 +481,7 @@ describe('TransactionsService', () => {
   });
 
   describe('remove', () => {
-    it('should revert account and goal balance when deleting a deposit transfer', async () => {
+    it('should throw BadRequestException when trying to delete a transaction linked to a goal', async () => {
       prisma.transaction.findUnique.mockResolvedValue({
         id: 'tx-1',
         userId: 'user-1',
@@ -490,98 +490,54 @@ describe('TransactionsService', () => {
         status: TransactionStatus.COMPLETED,
         type: TransactionType.TRANSFER,
         deletedAt: null,
-        goalDeposits: [
-          {
-            id: 'dep-1',
-            goalId: 'goal-1',
-            type: GoalMovementType.DEPOSIT,
-            amount: new Prisma.Decimal(500),
-            goal: {
-              id: 'goal-1',
-              currentAmount: new Prisma.Decimal(500),
-              targetAmount: new Prisma.Decimal(1000),
-              status: GoalStatus.IN_PROGRESS,
-            },
-          },
-        ],
+        goalDeposits: [{ id: 'dep-1', goalId: 'goal-1' }],
       });
 
-      prisma.account.update.mockResolvedValue({});
-      prisma.goal.update.mockResolvedValue({});
-      prisma.goalDeposit.delete.mockResolvedValue({});
-      prisma.transaction.update.mockResolvedValue({});
-
-      const result = await service.remove('user-1', 'tx-1');
-
-      expect(result.message).toContain('Transação excluída');
-      // Devolve dinheiro para a conta
-      expect(prisma.account.update).toHaveBeenCalledWith({
-        where: { id: 'acc-1' },
-        data: { currentBalance: { increment: new Prisma.Decimal(500) } },
-      });
-      // Debita dinheiro da meta
-      expect(prisma.goal.update).toHaveBeenCalledWith({
-        where: { id: 'goal-1' },
-        data: {
-          currentAmount: new Prisma.Decimal(0),
-          status: GoalStatus.IN_PROGRESS,
-        },
-      });
-      // Remove movimentação da meta
-      expect(prisma.goalDeposit.delete).toHaveBeenCalledWith({
-        where: { id: 'dep-1' },
-      });
+      await expect(service.remove('user-1', 'tx-1')).rejects.toThrow(BadRequestException);
     });
 
-    it('should revert account and goal balance when deleting a withdrawal transfer', async () => {
+    it('should throw BadRequestException when category is Aporte em Meta or Resgate de Meta', async () => {
       prisma.transaction.findUnique.mockResolvedValue({
         id: 'tx-2',
         userId: 'user-1',
         accountId: 'acc-1',
-        amount: new Prisma.Decimal(300),
+        amount: new Prisma.Decimal(500),
         status: TransactionStatus.COMPLETED,
         type: TransactionType.TRANSFER,
         deletedAt: null,
-        goalDeposits: [
-          {
-            id: 'dep-2',
-            goalId: 'goal-1',
-            type: GoalMovementType.WITHDRAWAL,
-            amount: new Prisma.Decimal(300),
-            goal: {
-              id: 'goal-1',
-              currentAmount: new Prisma.Decimal(200),
-              targetAmount: new Prisma.Decimal(500),
-              status: GoalStatus.IN_PROGRESS,
-            },
-          },
-        ],
+        category: { name: 'Aporte em Meta' },
+        goalDeposits: [],
+      });
+
+      await expect(service.remove('user-1', 'tx-2')).rejects.toThrow(BadRequestException);
+    });
+
+    it('should revert account balance and soft-delete regular transaction', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-3',
+        userId: 'user-1',
+        accountId: 'acc-1',
+        amount: new Prisma.Decimal(150),
+        status: TransactionStatus.COMPLETED,
+        type: TransactionType.EXPENSE,
+        deletedAt: null,
+        category: { name: 'Alimentação' },
+        goalDeposits: [],
       });
 
       prisma.account.update.mockResolvedValue({});
-      prisma.goal.update.mockResolvedValue({});
-      prisma.goalDeposit.delete.mockResolvedValue({});
       prisma.transaction.update.mockResolvedValue({});
 
-      const result = await service.remove('user-1', 'tx-2');
+      const result = await service.remove('user-1', 'tx-3');
 
       expect(result.message).toContain('Transação excluída');
-      // Retira dinheiro da conta
       expect(prisma.account.update).toHaveBeenCalledWith({
         where: { id: 'acc-1' },
-        data: { currentBalance: { decrement: new Prisma.Decimal(300) } },
+        data: { currentBalance: { increment: new Prisma.Decimal(150) } },
       });
-      // Devolve dinheiro para a meta
-      expect(prisma.goal.update).toHaveBeenCalledWith({
-        where: { id: 'goal-1' },
-        data: {
-          currentAmount: new Prisma.Decimal(500),
-          status: GoalStatus.COMPLETED,
-        },
-      });
-      // Remove movimentação da meta
-      expect(prisma.goalDeposit.delete).toHaveBeenCalledWith({
-        where: { id: 'dep-2' },
+      expect(prisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'tx-3' },
+        data: { deletedAt: expect.any(Date) },
       });
     });
   });
