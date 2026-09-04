@@ -129,7 +129,7 @@ T7 → T8
 
 ---
 
-### T3: Filtro de Soft Delete em ReportsService
+### T3: Filtro de Soft Delete em ReportsService [DONE]
 
 **What**: Atualizar os métodos agregadores de `ReportsService` (`getDashboardSummary`, `getCategoryExpenses`, `getIncomeVsExpense`) para ignorar transações marcadas com `deletedAt != null` e atualizar os testes unitários.
 **Where**: `backend/src/modules/reports/reports.service.ts`
@@ -140,10 +140,10 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Consultas de totais de receitas, despesas e faturas do dashboard incluem `{ deletedAt: null }`
-- [ ] Gráficos de categorias e receitas vs despesas desconsideram transações deletadas
-- [ ] Testes unitários em `reports.service.spec.ts` passam com sucesso
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/reports.service.spec.ts`
+- [x] Consultas de totais de receitas, despesas e faturas do dashboard incluem `{ deletedAt: null }`
+- [x] Gráficos de categorias e receitas vs despesas desconsideram transações deletadas
+- [x] Testes unitários em `reports.service.spec.ts` passam com sucesso
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/reports.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick

@@ -54,10 +54,34 @@ describe('ReportsService', () => {
       expect(summary.monthlyIncome).toEqual(new Prisma.Decimal(5000));
       expect(summary.monthlyExpense).toEqual(new Prisma.Decimal(3200));
       expect(summary.netBalance).toEqual(new Prisma.Decimal(1800));
+      expect(prisma.account.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
+          }),
+        }),
+      );
+      expect(prisma.transaction.aggregate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
+          }),
+        }),
+      );
       expect(prisma.creditCardInvoice.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             status: { in: [InvoiceStatus.OPEN, InvoiceStatus.CLOSED, InvoiceStatus.OVERDUE] },
+            creditCard: expect.objectContaining({
+              deletedAt: null,
+            }),
+          }),
+        }),
+      );
+      expect(prisma.transaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
           }),
         }),
       );
@@ -65,7 +89,7 @@ describe('ReportsService', () => {
   });
 
   describe('exportCsv', () => {
-    it('should generate valid CSV text from transactions', async () => {
+    it('should generate valid CSV text from transactions filtering deletedAt null', async () => {
       prisma.transaction.findMany.mockResolvedValue([
         {
           id: 'tx-1',
@@ -87,6 +111,13 @@ describe('ReportsService', () => {
       expect(csv).toContain('Supermercado');
       expect(csv).toContain('Alimentação');
       expect(csv).toContain('150.5');
+      expect(prisma.transaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
+          }),
+        }),
+      );
     });
   });
 });
