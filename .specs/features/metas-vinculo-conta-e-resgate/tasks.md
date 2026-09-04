@@ -194,7 +194,7 @@ T7 → T8
 
 ---
 
-### T6: Teste de Integração Ponta a Ponta do Fluxo de Cofrinho e Resgate
+### T6: Teste de Integração Ponta a Ponta do Fluxo de Cofrinho e Resgate [DONE]
 
 **What**: Criar teste de integração cobrindo criação da meta vinculada à conta, aporte, resgate, reflexo contábil e exclusão.
 **Where**: `backend/test/integration/goals-cofrinho-flow.spec.ts`
@@ -205,11 +205,11 @@ T7 → T8
 - Skill: NONE
 
 **Done when**:
-- [ ] Teste de integração executa o ciclo completo de cofrinho
-- [ ] Verifica saldo da conta bancária após aporte e após resgate
-- [ ] Valida rejeição de exclusão de meta com saldo positivo
-- [ ] Valida sucesso de exclusão após zeramento do saldo via resgate
-- [ ] Gate check passes: `npm --prefix backend test -- test/integration/goals-cofrinho-flow.spec.ts`
+- [x] Teste de integração executa o ciclo completo de cofrinho
+- [x] Verifica saldo da conta bancária após aporte e após resgate
+- [x] Valida rejeição de exclusão de meta com saldo positivo
+- [x] Valida sucesso de exclusão após zeramento do saldo via resgate
+- [x] Gate check passes: `npm --prefix backend test -- test/integration/goals-cofrinho-flow.spec.ts`
 
 **Tests**: `backend/test/integration/goals-cofrinho-flow.spec.ts`
 **Gate**: full
