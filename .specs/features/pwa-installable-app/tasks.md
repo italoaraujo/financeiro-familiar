@@ -115,17 +115,17 @@ T5 → T6 → T7
 **Tests**: `test -f frontend/public/offline.html && grep -q "Tentar novamente" frontend/public/offline.html`
 **Gate**: `test -f frontend/public/offline.html && grep -q "Tentar novamente" frontend/public/offline.html`
 
-### T4: Implementação do Service Worker com Políticas de Cache Seguras
+### T4: Implementação do Service Worker com Políticas de Cache Seguras [DONE]
 
 **What**: Criar `frontend/public/sw.js` com gerenciamento de ciclo de vida (`install`, `activate`, `fetch`), pré-cache de `/offline.html` e assets de ícones, estratégia Network-First com fallback para offline em navegação, e bypass estrito (Network-Only) para endpoints de API e mutações financeiras.
 **Where**: `frontend/public/sw.js`
 **Depends on**: T3
 **Requirement**: PWA-05, PWA-07, PWA-08
 **Done when**:
-- [ ] `sw.js` criado com `install` realizando precache seguro
-- [ ] `activate` limpando versões antigas do cache
-- [ ] `fetch` interceptando navegações com fallback para `/offline.html` e ignorando chamadas de API
-- [ ] Sintaxe verificada com `node --check`
+- [x] `sw.js` criado com `install` realizando precache seguro
+- [x] `activate` limpando versões antigas do cache
+- [x] `fetch` interceptando navegações com fallback para `/offline.html` e ignorando chamadas de API
+- [x] Sintaxe verificada com `node --check`
 **Tests**: `node --check frontend/public/sw.js && grep -q "CACHE_NAME" frontend/public/sw.js && grep -q "/offline.html" frontend/public/sw.js`
 **Gate**: `node --check frontend/public/sw.js && grep -q "CACHE_NAME" frontend/public/sw.js && grep -q "/offline.html" frontend/public/sw.js`
 
