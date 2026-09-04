@@ -19,6 +19,9 @@ describe('ReportsService', () => {
       creditCardInvoice: {
         findMany: jest.fn(),
       },
+      goal: {
+        aggregate: jest.fn(),
+      },
       familyMember: {
         findUnique: jest.fn(),
       },
@@ -45,12 +48,18 @@ describe('ReportsService', () => {
         .mockResolvedValueOnce({ _sum: { amount: new Prisma.Decimal(5000) } }) // income
         .mockResolvedValueOnce({ _sum: { amount: new Prisma.Decimal(3200) } }); // expense
 
+      prisma.goal.aggregate.mockResolvedValue({
+        _sum: { currentAmount: new Prisma.Decimal(1200) },
+      });
+
       prisma.creditCardInvoice.findMany.mockResolvedValue([]);
       prisma.transaction.findMany.mockResolvedValue([]);
 
       const summary = await service.getDashboardSummary('user-1', undefined, '2026-09');
 
       expect(summary.totalBalance).toEqual(new Prisma.Decimal(4000));
+      expect(summary.goalsBalance).toEqual(new Prisma.Decimal(1200));
+      expect(summary.netWorth).toEqual(new Prisma.Decimal(5200));
       expect(summary.monthlyIncome).toEqual(new Prisma.Decimal(5000));
       expect(summary.monthlyExpense).toEqual(new Prisma.Decimal(3200));
       expect(summary.netBalance).toEqual(new Prisma.Decimal(1800));
