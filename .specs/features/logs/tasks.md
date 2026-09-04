@@ -151,7 +151,7 @@ T5 → T6
 
 ### Phase 3: Interceptor Global de Auditoria
 
-### T4: Implementar AuditLogInterceptor
+### T4: Implementar AuditLogInterceptor [DONE]
 
 **What**: Criar `AuditLogInterceptor` interceptando requisições mutativas (`POST`, `PUT`, `PATCH`, `DELETE`), sanitizando o body e disparando gravação assíncrona em `AuditLogsService`.
 **Where**: `backend/src/common/interceptors/audit-log.interceptor.ts`
@@ -162,12 +162,12 @@ T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Métodos `POST`, `PUT`, `PATCH`, `DELETE` disparam registro de auditoria com cálculo de latência e status code
-- [ ] Métodos de leitura (`GET`, `OPTIONS`, `HEAD`) são ignorados pelo interceptor
-- [ ] Payload é sanitizado antes de enviar ao `AuditLogsService`
-- [ ] `userId` e `familyId` são capturados do request context quando disponíveis
-- [ ] Testes unitários em `audit-log.interceptor.spec.ts` passam com sucesso
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/audit-log.interceptor.spec.ts`
+- [x] Métodos `POST`, `PUT`, `PATCH`, `DELETE` disparam registro de auditoria com cálculo de latência e status code
+- [x] Métodos de leitura (`GET`, `OPTIONS`, `HEAD`) são ignorados pelo interceptor
+- [x] Payload é sanitizado antes de enviar ao `AuditLogsService`
+- [x] `userId` e `familyId` são capturados do request context quando disponíveis
+- [x] Testes unitários em `audit-log.interceptor.spec.ts` passam com sucesso
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/audit-log.interceptor.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
