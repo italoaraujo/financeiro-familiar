@@ -90,12 +90,12 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| EDIT-01 | P1: Edição de Metas Financeiras no Frontend | Execute | Pending |
-| EDIT-02 | P1: Edição de Metas Financeiras no Frontend | Execute | Pending |
-| EDIT-03 | P1: Edição de Metas Financeiras no Frontend | Execute | Pending |
-| EDIT-04 | P2: Atualização Segura e Recálculo no Backend | Execute | Pending |
-| EDIT-05 | P2: Atualização Segura e Recálculo no Backend | Execute | Pending |
-| EDIT-06 | P2: Atualização Segura e Recálculo no Backend | Execute | Pending |
+| EDIT-01 | P1: Edição de Metas Financeiras no Frontend | Execute | Verified |
+| EDIT-02 | P1: Edição de Metas Financeiras no Frontend | Execute | Verified |
+| EDIT-03 | P1: Edição de Metas Financeiras no Frontend | Execute | Verified |
+| EDIT-04 | P2: Atualização Segura e Recálculo no Backend | Execute | Verified |
+| EDIT-05 | P2: Atualização Segura e Recálculo no Backend | Execute | Verified |
+| EDIT-06 | P2: Atualização Segura e Recálculo no Backend | Execute | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 

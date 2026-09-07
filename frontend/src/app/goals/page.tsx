@@ -17,6 +17,7 @@ import {
   ArrowDownLeft,
   AlertCircle,
   History,
+  Pencil,
 } from 'lucide-react';
 
 export default function GoalsPage() {
@@ -27,10 +28,12 @@ export default function GoalsPage() {
 
   // Modals
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<any>(null);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
 
   // New Goal Form
   const [name, setName] = useState('');
@@ -38,6 +41,12 @@ export default function GoalsPage() {
   const [accountId, setAccountId] = useState('');
   const [deadline, setDeadline] = useState('');
   const [color, setColor] = useState('#10b981');
+
+  // Edit Goal Form
+  const [editName, setEditName] = useState('');
+  const [editTargetAmount, setEditTargetAmount] = useState('');
+  const [editDeadline, setEditDeadline] = useState('');
+  const [editColor, setEditColor] = useState('#10b981');
 
   // Deposit Form
   const [depositAmount, setDepositAmount] = useState('');
@@ -108,6 +117,47 @@ export default function GoalsPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleUpdateGoal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGoal) return;
+
+    const targetNum = parseFloat(editTargetAmount);
+    if (!targetNum || targetNum <= 0) {
+      alert('O valor alvo da meta deve ser maior que zero.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await apiRequest(`/goals/${editingGoal.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: editName,
+          targetAmount: targetNum,
+          deadline: editDeadline || null,
+          color: editColor,
+        }),
+      });
+
+      setIsEditModalOpen(false);
+      setEditingGoal(null);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar meta');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openEditModal = (goal: any) => {
+    setEditingGoal(goal);
+    setEditName(goal.name || '');
+    setEditTargetAmount(goal.targetAmount ? String(goal.targetAmount) : '');
+    setEditDeadline(goal.deadline ? goal.deadline.split('T')[0] : '');
+    setEditColor(goal.color || '#10b981');
+    setIsEditModalOpen(true);
   };
 
   const handleAddDeposit = async (e: React.FormEvent) => {
@@ -287,6 +337,14 @@ export default function GoalsPage() {
                       </div>
 
                       <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEditModal(goal)}
+                          className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
+                          title="Editar meta"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+
                         <button
                           onClick={() => openHistoryModal(goal)}
                           className="p-1.5 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
@@ -478,6 +536,115 @@ export default function GoalsPage() {
                 >
                   {submitting ? 'Criando cofrinho...' : 'Cadastrar Meta'}
                 </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Goal Modal */}
+        {isEditModalOpen && editingGoal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+              <button
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setEditingGoal(null);
+                }}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Editar Cofrinho / Meta</h2>
+
+              <form onSubmit={handleUpdateGoal} className="space-y-3.5 sm:space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Título da Meta *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Ex: Reserva de Emergência, Viagem..."
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Linked Account - Disabled / Readonly */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Conta Vinculada (Cofrinho)</label>
+                  <div className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-300 flex items-center justify-between">
+                    <div className="flex items-center gap-2 truncate">
+                      <Wallet className="h-4 w-4 text-teal-400 shrink-0" />
+                      <span className="font-medium truncate">{editingGoal.account?.name || 'Conta Vinculada'}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-2 py-0.5 rounded-md shrink-0 ml-2">
+                      Imutável
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-400/90 mt-1 flex items-start gap-1">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <span>A conta vinculada não pode ser alterada após a criação para manter a integridade contábil e dos saldos.</span>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor Alvo (R$) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    min="0.01"
+                    value={editTargetAmount}
+                    onChange={(e) => setEditTargetAmount(e.target.value)}
+                    placeholder="0,00"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Limite Estimada</label>
+                  <input
+                    type="date"
+                    value={editDeadline}
+                    onChange={(e) => setEditDeadline(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor Identificadora</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
+                    />
+                    <span className="text-xs text-slate-400">{editColor}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      setEditingGoal(null);
+                    }}
+                    className="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 sm:py-3 px-3 rounded-xl transition-all text-xs sm:text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-2/3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                  >
+                    {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
