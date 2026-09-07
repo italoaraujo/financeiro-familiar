@@ -368,15 +368,31 @@ export class GoalsService {
       throw new ForbiddenException('Acesso negado');
     }
 
+    let status = dto.status || goal.status;
+    const targetAmount = dto.targetAmount ? new Prisma.Decimal(dto.targetAmount) : goal.targetAmount;
+
+    if (dto.targetAmount !== undefined) {
+      if (goal.currentAmount.gte(targetAmount)) {
+        status = GoalStatus.COMPLETED;
+      } else if (goal.status === GoalStatus.COMPLETED && goal.currentAmount.lt(targetAmount)) {
+        status = GoalStatus.IN_PROGRESS;
+      }
+    }
+
     return this.prisma.goal.update({
       where: { id },
       data: {
         ...(dto.name && { name: dto.name }),
-        ...(dto.targetAmount && { targetAmount: new Prisma.Decimal(dto.targetAmount) }),
+        ...(dto.targetAmount !== undefined && { targetAmount }),
         ...(dto.deadline !== undefined && { deadline: dto.deadline ? new Date(dto.deadline) : null }),
-        ...(dto.status && { status: dto.status }),
+        status,
         ...(dto.color && { color: dto.color }),
         ...(dto.icon && { icon: dto.icon }),
+      },
+      include: {
+        account: {
+          select: { id: true, name: true, color: true, icon: true, currentBalance: true },
+        },
       },
     });
   }

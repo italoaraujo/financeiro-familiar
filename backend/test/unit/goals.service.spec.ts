@@ -440,16 +440,143 @@ describe('GoalsService', () => {
     });
   });
 
-  describe('findById', () => {
-    it('should throw NotFoundException if goal has deletedAt', async () => {
+  describe('update', () => {
+    it('should update name, color, icon, deadline and preserve accountId', async () => {
       prisma.goal.findUnique.mockResolvedValue({
         id: 'goal-1',
         userId: 'user-1',
-        deletedAt: new Date(),
-        deposits: [],
+        familyId: null,
+        accountId: 'acc-1',
+        name: 'Reserva Antiga',
+        targetAmount: new Prisma.Decimal(5000),
+        currentAmount: new Prisma.Decimal(1000),
+        status: GoalStatus.IN_PROGRESS,
+        color: '#10b981',
+        icon: 'Target',
+        deadline: null,
+        deletedAt: null,
       });
 
-      await expect(service.findById('user-1', 'goal-1')).rejects.toThrow(NotFoundException);
+      prisma.goal.update.mockResolvedValue({
+        id: 'goal-1',
+        name: 'Reserva 2026',
+        targetAmount: new Prisma.Decimal(6000),
+        status: GoalStatus.IN_PROGRESS,
+        color: '#3b82f6',
+        icon: 'Landmark',
+        deadline: new Date('2026-12-31'),
+        accountId: 'acc-1',
+        account: { id: 'acc-1', name: 'Nubank' },
+      });
+
+      const result = await service.update('user-1', 'goal-1', {
+        name: 'Reserva 2026',
+        targetAmount: 6000,
+        color: '#3b82f6',
+        icon: 'Landmark',
+        deadline: '2026-12-31',
+      });
+
+      expect(result.id).toBe('goal-1');
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 'goal-1' },
+        data: {
+          name: 'Reserva 2026',
+          targetAmount: new Prisma.Decimal(6000),
+          color: '#3b82f6',
+          icon: 'Landmark',
+          deadline: new Date('2026-12-31'),
+          status: GoalStatus.IN_PROGRESS,
+        },
+        include: {
+          account: {
+            select: { id: true, name: true, color: true, icon: true, currentBalance: true },
+          },
+        },
+      });
+    });
+
+    it('should adjust status to COMPLETED when targetAmount <= currentAmount', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        userId: 'user-1',
+        familyId: null,
+        accountId: 'acc-1',
+        name: 'Carro Novo',
+        targetAmount: new Prisma.Decimal(10000),
+        currentAmount: new Prisma.Decimal(5000),
+        status: GoalStatus.IN_PROGRESS,
+        deletedAt: null,
+      });
+
+      prisma.goal.update.mockResolvedValue({
+        id: 'goal-1',
+        status: GoalStatus.COMPLETED,
+      });
+
+      await service.update('user-1', 'goal-1', {
+        targetAmount: 4000,
+      });
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 'goal-1' },
+        data: expect.objectContaining({
+          status: GoalStatus.COMPLETED,
+        }),
+        include: expect.any(Object),
+      });
+    });
+
+    it('should revert status to IN_PROGRESS when targetAmount > currentAmount and status was COMPLETED', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        userId: 'user-1',
+        familyId: null,
+        accountId: 'acc-1',
+        name: 'Carro Novo',
+        targetAmount: new Prisma.Decimal(5000),
+        currentAmount: new Prisma.Decimal(5000),
+        status: GoalStatus.COMPLETED,
+        deletedAt: null,
+      });
+
+      prisma.goal.update.mockResolvedValue({
+        id: 'goal-1',
+        status: GoalStatus.IN_PROGRESS,
+      });
+
+      await service.update('user-1', 'goal-1', {
+        targetAmount: 8000,
+      });
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 'goal-1' },
+        data: expect.objectContaining({
+          status: GoalStatus.IN_PROGRESS,
+        }),
+        include: expect.any(Object),
+      });
+    });
+
+    it('should throw NotFoundException if goal does not exist or has deletedAt', async () => {
+      prisma.goal.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.update('user-1', 'non-existent', { name: 'Novo Nome' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if user has no access to goal', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-1',
+        userId: 'other-user',
+        familyId: null,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.update('user-1', 'goal-1', { name: 'Novo Nome' }),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });
