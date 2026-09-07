@@ -158,14 +158,14 @@ export default function AppShell({ children }: AppShellProps) {
       </aside>
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 border-r border-slate-800 bg-slate-900/60 backdrop-blur-xl flex-col fixed inset-y-0 z-30">
+      <aside className="hidden lg:flex w-64 border-r border-slate-800 bg-slate-900/60 backdrop-blur-xl flex-col fixed inset-y-0 z-20">
         <NavContent />
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen w-full min-w-0">
         {/* Top Header */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20 gap-2 sm:gap-4">
+        <header className="h-16 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-10 gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             {/* Hamburger Button on Mobile */}
             <button
@@ -209,7 +209,7 @@ export default function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 max-w-full">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 max-w-full relative z-30">
           {children}
         </main>
       </div>
