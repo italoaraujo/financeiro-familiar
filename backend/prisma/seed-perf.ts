@@ -204,10 +204,10 @@ export async function createBaseEntities() {
   const cards = [cardBlack, cardPlatinum];
   const invoices = [];
 
-  // Gerar faturas dos últimos 24 meses
+  // Gerar faturas dos últimos 24 meses + próximo mês (m = -1) para compras após o fechamento
   const now = new Date();
   for (const card of cards) {
-    for (let m = 23; m >= 0; m--) {
+    for (let m = 24; m >= -1; m--) {
       const refDate = new Date(now.getFullYear(), now.getMonth() - m, 1);
       const year = refDate.getFullYear();
       const month = String(refDate.getMonth() + 1).padStart(2, '0');
@@ -217,8 +217,8 @@ export async function createBaseEntities() {
       const dueMonth = card.dueDay < card.closingDay ? refDate.getMonth() + 1 : refDate.getMonth();
       const dueDate = new Date(year, dueMonth, card.dueDay);
 
-      const isCurrentMonth = m === 0;
-      const status = isCurrentMonth ? InvoiceStatus.OPEN : InvoiceStatus.PAID;
+      const isCurrentOrFuture = m <= 0;
+      const status = isCurrentOrFuture ? InvoiceStatus.OPEN : InvoiceStatus.PAID;
 
       const invoice = await prisma.creditCardInvoice.create({
         data: {
@@ -522,7 +522,11 @@ export async function generateMassTransactions(
           invMonth = String(nextMonthDate.getMonth() + 1).padStart(2, '0');
         }
         const refKey = `${card.id}_${invYear}-${invMonth}`;
-        invoiceId = invoiceMap.get(refKey) || null;
+        invoiceId =
+          invoiceMap.get(refKey) ||
+          invoiceMap.get(`${card.id}_${year}-${month}`) ||
+          invoices.find((inv) => inv.creditCardId === card.id)?.id ||
+          null;
       } else {
         // Conta bancária ou carteira
         accountId = pseudoRandom() < 0.85 ? accounts[0].id : accounts[2].id;
@@ -589,6 +593,42 @@ export async function generateMassTransactions(
   console.log(
     `✅ ${insertedTotal} transações persistidas com sucesso em ${(insertDuration / 1000).toFixed(2)}s!`,
   );
+
+  console.log('🔄 Calculando e sincronizando totais de cada fatura dos cartões de crédito...');
+  const syncStart = Date.now();
+  const invoiceSums = await prisma.transaction.groupBy({
+    by: ['invoiceId'],
+    where: {
+      userId: perfUser.id,
+      invoiceId: { not: null },
+      deletedAt: null,
+    },
+    _sum: {
+      amount: true,
+    },
+  });
+
+  const sumMap = new Map<string, Prisma.Decimal>();
+  for (const s of invoiceSums) {
+    if (s.invoiceId && s._sum.amount) {
+      sumMap.set(s.invoiceId, s._sum.amount);
+    }
+  }
+
+  for (const inv of invoices) {
+    const total = sumMap.get(inv.id) || new Prisma.Decimal(0);
+    const isPaid = inv.status === InvoiceStatus.PAID;
+    await prisma.creditCardInvoice.update({
+      where: { id: inv.id },
+      data: {
+        totalAmount: total,
+        paidAmount: isPaid ? total : new Prisma.Decimal(0),
+        paidAt: isPaid ? inv.dueDate : null,
+      },
+    });
+  }
+  const syncDuration = Date.now() - syncStart;
+  console.log(`✅ Faturas sincronizadas com sucesso em ${syncDuration}ms!`);
 
   return insertedTotal;
 }

@@ -475,11 +475,15 @@ export class CreditCardsService {
     const personBreakdown = Array.from(breakdownMap.values()).map((item) => ({
       ...item,
       totalAmount: item.totalAmount.toNumber(),
+      total: item.totalAmount.toNumber(),
+      personName: item.name,
+      personColor: item.color,
     }));
 
     return {
       ...invoice,
       personBreakdown,
+      personTotals: personBreakdown,
     };
   }
 
