@@ -148,10 +148,10 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `CategoriesService` e `BudgetsService` rejeitam com `ForbiddenException` operações mutativas familiares por usuário com papel `VIEWER`.
-- [ ] Consultas de categorias e orçamentos continuam permitidas para `VIEWER`.
-- [ ] Testes unitários passam no backend.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/categories.service.spec.ts test/unit/budgets.service.spec.ts`
+- [x] `CategoriesService` e `BudgetsService` rejeitam com `ForbiddenException` operações mutativas familiares por usuário com papel `VIEWER`.
+- [x] Consultas de categorias e orçamentos continuam permitidas para `VIEWER`.
+- [x] Testes unitários passam no backend.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/categories.service.spec.ts test/unit/budgets.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
