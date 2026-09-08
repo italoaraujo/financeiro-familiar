@@ -51,6 +51,7 @@ export class AccountsService {
     return this.prisma.account.findMany({
       where: {
         userId,
+        familyId: null,
         isArchived: false,
         deletedAt: null,
       },

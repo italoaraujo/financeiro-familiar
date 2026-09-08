@@ -429,7 +429,7 @@ describe('GoalsService', () => {
       const result = await service.findAll('user-1');
 
       expect(prisma.goal.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user-1', deletedAt: null },
+        where: { userId: 'user-1', familyId: null, deletedAt: null },
         include: {
           account: expect.any(Object),
           deposits: expect.any(Object),

@@ -53,7 +53,7 @@ export class CreditCardsService {
     const cards = await this.prisma.creditCard.findMany({
       where: familyId
         ? { familyId, isActive: true, deletedAt: null }
-        : { userId, isActive: true, deletedAt: null },
+        : { userId, familyId: null, isActive: true, deletedAt: null },
       include: {
         invoices: {
           orderBy: { referenceMonth: 'asc' },

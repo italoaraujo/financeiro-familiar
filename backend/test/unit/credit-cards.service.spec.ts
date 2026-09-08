@@ -276,7 +276,7 @@ describe('CreditCardsService', () => {
       const result = await service.findAll('user-1');
 
       expect(prisma.creditCard.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user-1', isActive: true, deletedAt: null },
+        where: { userId: 'user-1', familyId: null, isActive: true, deletedAt: null },
         include: {
           invoices: {
             orderBy: { referenceMonth: 'asc' },

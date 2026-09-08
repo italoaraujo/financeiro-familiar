@@ -47,13 +47,12 @@ export class CategoriesService {
       deletedAt: null,
       OR: [
         { isSystemDefault: true },
-        { userId },
+        familyId ? { familyId } : { userId, familyId: null },
       ],
     };
 
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId, false);
-      whereCondition.OR.push({ familyId });
     }
 
     if (type) {

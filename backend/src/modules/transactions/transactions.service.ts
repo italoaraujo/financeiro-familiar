@@ -343,6 +343,7 @@ export class TransactionsService {
       where.familyId = filter.familyId;
     } else {
       where.userId = userId;
+      where.familyId = null;
     }
 
     if (filter.startDate || filter.endDate) {

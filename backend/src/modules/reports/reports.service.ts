@@ -21,7 +21,7 @@ export class ReportsService {
     const startDate = new Date(year, m - 1, 1);
     const endDate = new Date(year, m, 0, 23, 59, 59);
 
-    const userOrFamilyFilter = familyId ? { familyId } : { userId };
+    const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
 
     // 1. Saldo Geral Consolidado
     const accounts = await this.prisma.account.findMany({
@@ -127,7 +127,7 @@ export class ReportsService {
     const startDate = new Date(year, m - 1, 1);
     const endDate = new Date(year, m, 0, 23, 59, 59);
 
-    const userOrFamilyFilter = familyId ? { familyId } : { userId };
+    const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
@@ -196,7 +196,7 @@ export class ReportsService {
       const startDate = new Date(year, m - 1, 1);
       const endDate = new Date(year, m, 0, 23, 59, 59);
 
-      const userOrFamilyFilter = familyId ? { familyId } : { userId };
+      const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
 
       const [incomeAgg, expenseAgg] = await Promise.all([
         this.prisma.transaction.aggregate({
@@ -241,7 +241,7 @@ export class ReportsService {
     }
 
     const where: any = {
-      ...(familyId ? { familyId } : { userId }),
+      ...(familyId ? { familyId } : { userId, familyId: null }),
       deletedAt: null,
     };
 

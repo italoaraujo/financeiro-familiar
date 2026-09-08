@@ -70,7 +70,7 @@ describe('CategoriesService', () => {
         where: {
           parentId: null,
           deletedAt: null,
-          OR: [{ isSystemDefault: true }, { userId: 'user-1' }],
+          OR: [{ isSystemDefault: true }, { userId: 'user-1', familyId: null }],
         },
         include: {
           subcategories: {

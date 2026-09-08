@@ -97,6 +97,7 @@ describe('BudgetsService', () => {
           periodMonth: '2026-09',
           deletedAt: null,
           userId: 'user-1',
+          familyId: null,
         },
         include: {
           category: true,
@@ -113,6 +114,7 @@ describe('BudgetsService', () => {
             lte: expect.any(Date),
           },
           userId: 'user-1',
+          familyId: null,
         },
         _sum: {
           amount: true,

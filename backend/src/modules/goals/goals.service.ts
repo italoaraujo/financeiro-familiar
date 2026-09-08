@@ -70,7 +70,7 @@ export class GoalsService {
     }
 
     const goals = await this.prisma.goal.findMany({
-      where: familyId ? { familyId, deletedAt: null } : { userId, deletedAt: null },
+      where: familyId ? { familyId, deletedAt: null } : { userId, familyId: null, deletedAt: null },
       include: {
         account: {
           select: { id: true, name: true, color: true, icon: true, currentBalance: true },

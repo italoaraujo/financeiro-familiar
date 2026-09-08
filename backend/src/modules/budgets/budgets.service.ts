@@ -23,7 +23,7 @@ export class BudgetsService {
         categoryId: dto.categoryId,
         periodMonth: dto.periodMonth,
         deletedAt: null,
-        ...(dto.familyId ? { familyId: dto.familyId } : { userId }),
+        ...(dto.familyId ? { familyId: dto.familyId } : { userId, familyId: null }),
       },
     });
 
@@ -58,7 +58,7 @@ export class BudgetsService {
       where: {
         periodMonth: month,
         deletedAt: null,
-        ...(familyId ? { familyId } : { userId }),
+        ...(familyId ? { familyId } : { userId, familyId: null }),
       },
       include: {
         category: true,
@@ -82,7 +82,7 @@ export class BudgetsService {
               gte: startDate,
               lte: endDate,
             },
-            ...(familyId ? { familyId } : { userId }),
+            ...(familyId ? { familyId } : { userId, familyId: null }),
           },
           _sum: {
             amount: true,
