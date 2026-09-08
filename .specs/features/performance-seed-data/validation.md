@@ -34,6 +34,7 @@
 - `c4bd253` feat(seed): add base entities provisioning for performance testing
 - `a9257aa` feat(seed): implement mass transaction generation with batch insertion
 - `24c499b` feat(seed): configure npm script and execute performance data population
+- `37e50f3` fix(seed): synchronize invoice totals and card transactions linkage
 
 ---
 
