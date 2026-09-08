@@ -213,9 +213,8 @@ export default function DashboardPage() {
             </div>
             <div className="mt-3">
               <h3
-                className={`text-lg sm:text-xl font-bold truncate ${
-                  summary && Number(summary.netBalance) >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                }`}
+                className={`text-lg sm:text-xl font-bold truncate ${summary && Number(summary.netBalance) >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  }`}
               >
                 {summary ? formatCurrency(summary.netBalance) : '...'}
               </h3>
@@ -242,14 +241,15 @@ export default function DashboardPage() {
                   <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
                   <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
                   <Tooltip
+                    cursor={false}
                     contentStyle={{
                       backgroundColor: '#0f172a',
                       borderColor: '#334155',
                       borderRadius: '12px',
                       color: '#f8fafc',
                     }}
-                    itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
-                    labelStyle={{ color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}
+                    itemStyle={{ fontSize: '12px' }}
+                    labelStyle={{ fontSize: '12px' }}
                     formatter={(val: any) => [formatCurrency(val), '']}
                   />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -354,13 +354,12 @@ export default function DashboardPage() {
                   <div key={tx.id} className="py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl flex items-center justify-center shrink-0 ${
-                          tx.type === 'INCOME'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : tx.type === 'EXPENSE'
+                        className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl flex items-center justify-center shrink-0 ${tx.type === 'INCOME'
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : tx.type === 'EXPENSE'
                             ? 'bg-rose-500/10 text-rose-400'
                             : 'bg-blue-500/10 text-blue-400'
-                        }`}
+                          }`}
                       >
                         {tx.type === 'INCOME' ? (
                           <ArrowUpRight className="h-4 w-4" />
@@ -378,13 +377,12 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-xs sm:text-sm font-bold shrink-0 ${
-                        tx.type === 'INCOME'
-                          ? 'text-emerald-400'
-                          : tx.type === 'TRANSFER'
+                      className={`text-xs sm:text-sm font-bold shrink-0 ${tx.type === 'INCOME'
+                        ? 'text-emerald-400'
+                        : tx.type === 'TRANSFER'
                           ? 'text-blue-400'
                           : 'text-rose-400'
-                      }`}
+                        }`}
                     >
                       {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'} {formatCurrency(tx.amount)}
                     </span>
@@ -425,9 +423,8 @@ export default function DashboardPage() {
                       <p className="text-xs sm:text-sm font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
                       <div className="mt-0.5">
                         <span
-                          className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${
-                            (INVOICE_STATUS_MAP[inv.status] || { className: 'bg-slate-700/50 text-slate-300 border border-slate-600' }).className
-                          }`}
+                          className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${(INVOICE_STATUS_MAP[inv.status] || { className: 'bg-slate-700/50 text-slate-300 border border-slate-600' }).className
+                            }`}
                         >
                           {(INVOICE_STATUS_MAP[inv.status] || { label: inv.status }).label}
                         </span>
