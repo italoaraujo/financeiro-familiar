@@ -6,11 +6,11 @@ Membros associados a um grupo familiar com o papel de Visualizador (`VIEWER`) co
 
 ## Goals
 
-- [ ] Bloquear no backend (HTTP 403 Forbidden) todas as operações de escrita/mutação (criação, alteração, exclusão, transferência, aporte, resgate e pagamento de fatura) executadas por membros com papel `VIEWER` no contexto do grupo familiar.
-- [ ] Garantir que todas as consultas de leitura (GET) continuem funcionando normalmente para o `VIEWER` em todos os módulos (dashboard, transações, relatórios, contas, cartões, metas, orçamentos, categorias e membros da família).
-- [ ] Atualizar o frontend para identificar o papel `VIEWER` no contexto familiar ativo e ocultar/desabilitar botões de ação mutativa (novos lançamentos, edição, exclusão, aportes, etc.), exibindo sinalização visual de modo somente leitura.
-- [ ] Assegurar que as operações no contexto individual (`selectedFamilyId = null`) do usuário permaneçam totalmente funcionais e independentes de seus vínculos familiares.
-- [ ] Cobrir as novas regras de autorização com testes automatizados no backend.
+- [x] Bloquear no backend (HTTP 403 Forbidden) todas as operações de escrita/mutação (criação, alteração, exclusão, transferência, aporte, resgate e pagamento de fatura) executadas por membros com papel `VIEWER` no contexto do grupo familiar.
+- [x] Garantir que todas as consultas de leitura (GET) continuem funcionando normalmente para o `VIEWER` em todos os módulos (dashboard, transações, relatórios, contas, cartões, metas, orçamentos, categorias e membros da família).
+- [x] Atualizar o frontend para identificar o papel `VIEWER` no contexto familiar ativo e ocultar/desabilitar botões de ação mutativa (novos lançamentos, edição, exclusão, aportes, etc.), exibindo sinalização visual de modo somente leitura.
+- [x] Assegurar que as operações no contexto individual (`selectedFamilyId = null`) do usuário permaneçam totalmente funcionais e independentes de seus vínculos familiares.
+- [x] Cobrir as novas regras de autorização com testes automatizados no backend.
 
 ## Out of Scope
 
@@ -90,17 +90,17 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| RBAC-01 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-02 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-03 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-04 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-05 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-06 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-07 | P1: Proteção e Bloqueio de Mutações no Backend | Specify | Pending |
-| RBAC-08 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Specify | Pending |
-| RBAC-09 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Specify | Pending |
-| RBAC-10 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Specify | Pending |
-| RBAC-11 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Specify | Pending |
+| RBAC-01 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-02 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-03 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-04 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-05 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-06 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-07 | P1: Proteção e Bloqueio de Mutações no Backend | Execute | Verified |
+| RBAC-08 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Execute | Verified |
+| RBAC-09 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Execute | Verified |
+| RBAC-10 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Execute | Verified |
+| RBAC-11 | P2: Experiência Visual e Modo Somente Leitura no Frontend | Execute | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 
@@ -112,8 +112,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] Todas as mutações no contexto de família executadas por usuário com papel `VIEWER` são rejeitadas com HTTP 403.
-- [ ] Todas as leituras e relatórios continuam acessíveis e íntegros para usuários `VIEWER`.
-- [ ] Interface reflete o papel `VIEWER` com badge informativo e botões de ação desabilitados/ocultados.
-- [ ] Contexto individual do usuário continua funcionando sem restrições.
-- [ ] Todos os testes automatizados do backend passam com 100% de sucesso.
+- [x] Todas as mutações no contexto de família executadas por usuário com papel `VIEWER` são rejeitadas com HTTP 403.
+- [x] Todas as leituras e relatórios continuam acessíveis e íntegros para usuários `VIEWER`.
+- [x] Interface reflete o papel `VIEWER` com badge informativo e botões de ação desabilitados/ocultados.
+- [x] Contexto individual do usuário continua funcionando sem restrições.
+- [x] Todos os testes automatizados do backend passam com 100% de sucesso.

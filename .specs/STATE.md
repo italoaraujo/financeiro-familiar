@@ -98,23 +98,31 @@
 - **Date**: 2026-09-04
 - **Status**: active
 
+### AD-014
+- **Decision**: Bloquear operações de mutação (criação, edição, exclusão, transferências, aportes, resgates e pagamento de faturas) para membros com papel `VIEWER` no contexto familiar no backend (`HTTP 403 ForbiddenException`) em todos os serviços (`accounts`, `credit-cards`, `transactions`, `categories`, `budgets`, `goals`), disponibilizar flag `isViewer` no `AuthContext` do frontend e ocultar elementos de ação mutativa em todas as telas com exibição de badge "Somente Leitura" no `AppShell`.
+- **Reason**: Garante controle de acesso baseado em papéis (RBAC) seguro e consistente, prevenindo modificações acidentais ou não autorizadas no patrimônio familiar por usuários que possuem acesso estritamente de visualização.
+- **Trade-off**: Usuários com perfil `VIEWER` necessitam que um `ADMIN` ou `OWNER` altere seu papel para `MEMBER` caso precisem realizar lançamentos no contexto familiar.
+- **Scope**: Backend services e testes unitários de autorização; Frontend AuthContext, AppShell e páginas financeiras.
+- **Date**: 2026-09-07
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `pwa-installable-app`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
+- **Active Feature**: `rbac-viewer-permissao-leitura`
+- **Total Tasks**: 8
+- **Completed Tasks**: 8 / 8 (100%)
 - **Status**: **COMPLETE / VERIFIED**
-- **Build Status**: 100% Success
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), discrimination sensor (3/3 killed)
+- **Build Status**: 100% Success (148 backend tests passed, Next.js build clean)
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/pwa-installable-app
+- **Feature**: .specs/features/rbac-viewer-permissao-leitura
 - **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6, T7
+- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
 - **In-progress**: None
-- **Next step**: Finalização da branch `feature/pwa-installable-app` com merge para `develop`
+- **Next step**: Revisão do Walkthrough pelo usuário e merge da branch `feature/rbac-viewer-permissao-leitura`
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/pwa-installable-app
+- **Branch**: feature/rbac-viewer-permissao-leitura
 
