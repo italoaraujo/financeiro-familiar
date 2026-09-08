@@ -222,10 +222,10 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Em `/transactions`, botões "Nova Transação", "Nova Transferência", edição e exclusão ficam ocultos/bloqueados para `VIEWER` em contexto familiar.
-- [ ] Em `/accounts`, botões "Nova Conta", editar e arquivar/excluir ficam ocultos para `VIEWER`.
-- [ ] Em `/cards`, botões "Novo Cartão", editar, excluir e "Pagar Fatura" ficam ocultos para `VIEWER`.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/frontend && npm run build`
+- [x] Em `/transactions`, botões "Nova Transação", "Nova Transferência", edição e exclusão ficam ocultos/bloqueados para `VIEWER` em contexto familiar.
+- [x] Em `/accounts`, botões "Nova Conta", editar e arquivar/excluir ficam ocultos para `VIEWER`.
+- [x] Em `/cards`, botões "Novo Cartão", editar, excluir e "Pagar Fatura" ficam ocultos para `VIEWER`.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/frontend && npm run build`
 
 **Tests**: none
 **Gate**: build
