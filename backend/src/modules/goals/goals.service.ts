@@ -15,6 +15,7 @@ import {
   Prisma,
   TransactionStatus,
   TransactionType,
+  FamilyMemberRole,
 } from '@prisma/client';
 
 @Injectable()
@@ -23,7 +24,7 @@ export class GoalsService {
 
   async create(userId: string, dto: CreateGoalDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const account = await this.prisma.account.findUnique({
@@ -65,7 +66,7 @@ export class GoalsService {
 
   async findAll(userId: string, familyId?: string) {
     if (familyId) {
-      await this.verifyFamilyAccess(userId, familyId);
+      await this.verifyFamilyAccess(userId, familyId, false);
     }
 
     const goals = await this.prisma.goal.findMany({
@@ -115,7 +116,7 @@ export class GoalsService {
     }
 
     if (goal.userId !== userId && goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId);
+      await this.verifyFamilyAccess(userId, goal.familyId, false);
     } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado à meta especificada');
     }
@@ -140,8 +141,8 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId !== userId && goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId);
+    if (goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId, true);
     } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado à meta especificada');
     }
@@ -253,8 +254,8 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId !== userId && goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId);
+    if (goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId, true);
     } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado à meta especificada');
     }
@@ -362,8 +363,8 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId !== userId && goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId);
+    if (goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId, true);
     } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado');
     }
@@ -406,8 +407,8 @@ export class GoalsService {
       throw new NotFoundException('Meta não encontrada');
     }
 
-    if (goal.userId !== userId && goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId);
+    if (goal.familyId) {
+      await this.verifyFamilyAccess(userId, goal.familyId, true);
     } else if (goal.userId !== userId) {
       throw new ForbiddenException('Acesso negado');
     }
@@ -426,7 +427,7 @@ export class GoalsService {
     return { message: 'Meta removida com sucesso' };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -436,5 +437,13 @@ export class GoalsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado ao grupo familiar');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 }

@@ -173,10 +173,10 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `GoalsService` rejeita com `ForbiddenException` criação, edição, exclusão, aportes e resgates de metas familiares por usuário com papel `VIEWER`.
-- [ ] Consultas de metas continuam permitidas para `VIEWER`.
-- [ ] Testes unitários cobrindo o bloqueio de `VIEWER` passam no backend.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/goals.service.spec.ts`
+- [x] `GoalsService` rejeita com `ForbiddenException` criação, edição, exclusão, aportes e resgates de metas familiares por usuário com papel `VIEWER`.
+- [x] Consultas de metas continuam permitidas para `VIEWER`.
+- [x] Testes unitários cobrindo o bloqueio de `VIEWER` passam no backend.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/goals.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
