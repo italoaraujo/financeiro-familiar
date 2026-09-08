@@ -198,9 +198,9 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `useAuth()` disponibiliza `isViewer: boolean` indicando se o usuário é `VIEWER` na família selecionada no momento (`selectedFamilyId`).
-- [ ] `AppShell` exibe badge claro indicando "Visualizador (Somente Leitura)" quando aplicável.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/frontend && npm run build`
+- [x] `useAuth()` disponibiliza `isViewer: boolean` indicando se o usuário é `VIEWER` na família selecionada no momento (`selectedFamilyId`).
+- [x] `AppShell` exibe badge claro indicando "Visualizador (Somente Leitura)" quando aplicável.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/frontend && npm run build`
 
 **Tests**: none
 **Gate**: build

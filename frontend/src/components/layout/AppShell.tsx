@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Eye,
 } from 'lucide-react';
 
 interface AppShellProps {
@@ -25,7 +26,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
-  const { user, selectedFamilyId, setSelectedFamilyId, logout, isLoading } = useAuth();
+  const { user, selectedFamilyId, setSelectedFamilyId, logout, isLoading, isViewer } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -199,6 +200,13 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {isViewer && (
+              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Eye className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden xs:inline">Somente Leitura</span>
+                <span className="xs:hidden">Leitura</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
               <span className="truncate max-w-[90px] sm:max-w-[140px] md:max-w-none">
