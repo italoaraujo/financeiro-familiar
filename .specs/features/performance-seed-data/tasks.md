@@ -87,10 +87,10 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Função geradora produz 30.000 registros de transações com valores, categorias, contas/cartões, faturas e pessoas associadas.
-- [ ] Inserção utiliza chunks de `createMany` para alto desempenho (inserção em poucos segundos).
-- [ ] Orçamentos (budgets) e metas (goals com depósitos) são inseridos para a família de teste.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test`
+- [x] Função geradora produz 30.000 registros de transações com valores, categorias, contas/cartões, faturas e pessoas associadas.
+- [x] Inserção utiliza chunks de `createMany` para alto desempenho (inserção em poucos segundos).
+- [x] Orçamentos (budgets) e metas (goals com depósitos) são inseridos para a família de teste.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test`
 
 **Tests**: unit
 **Gate**: quick
