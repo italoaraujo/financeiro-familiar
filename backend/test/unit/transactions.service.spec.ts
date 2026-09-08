@@ -82,6 +82,7 @@ describe('TransactionsService', () => {
     it('should create expense and decrement currentBalance of account', async () => {
       prisma.account.findUnique.mockResolvedValue({
         id: 'acc-1',
+        userId: 'user-1',
         currentBalance: new Prisma.Decimal(1000),
       });
 
@@ -127,8 +128,8 @@ describe('TransactionsService', () => {
 
     it('should debit source and credit destination in atomic transaction', async () => {
       prisma.account.findUnique
-        .mockResolvedValueOnce({ id: 'acc-src' })
-        .mockResolvedValueOnce({ id: 'acc-dst' });
+        .mockResolvedValueOnce({ id: 'acc-src', userId: 'user-1' })
+        .mockResolvedValueOnce({ id: 'acc-dst', userId: 'user-1' });
 
       prisma.category.findFirst.mockResolvedValue({ id: 'cat-transf' });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-transf' });
@@ -539,6 +540,78 @@ describe('TransactionsService', () => {
         where: { id: 'tx-3' },
         data: { deletedAt: expect.any(Date) },
       });
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family transaction', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          type: TransactionType.EXPENSE,
+          amount: 100,
+          description: 'Despesa Proibida',
+          transactionDate: '2026-09-01',
+          accountId: 'acc-1',
+          categoryId: 'cat-1',
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to transfer in family context', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.transfer('user-viewer', {
+          sourceAccountId: 'acc-1',
+          destinationAccountId: 'acc-2',
+          amount: 200,
+          description: 'Transferência Proibida',
+          transactionDate: '2026-09-01',
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to list family transactions via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.transaction.count.mockResolvedValue(1);
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: 'tx-fam-1',
+          description: 'Supermercado',
+          familyId: 'family-1',
+          userId: 'user-owner',
+          amount: new Prisma.Decimal(100),
+          isPrivate: false,
+          category: { name: 'Alimentação' },
+        },
+      ]);
+
+      const result = await service.findAll('user-viewer', { familyId: 'family-1' });
+      expect(result.data).toHaveLength(1);
+      expect(result.meta.total).toBe(1);
     });
   });
 });
