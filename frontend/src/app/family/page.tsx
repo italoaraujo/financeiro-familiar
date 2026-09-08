@@ -16,6 +16,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 
 export default function FamilyPage() {
   const { user, selectedFamilyId, setSelectedFamilyId, refreshUserData } = useAuth();
@@ -400,179 +401,173 @@ export default function FamilyPage() {
         )}
 
         {/* Create Family Modal */}
-        {isFamilyModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+        <Modal isOpen={isFamilyModalOpen} onClose={() => setIsFamilyModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setIsFamilyModalOpen(false)}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Criar Novo Grupo Familiar</h2>
+
+            <form onSubmit={handleCreateFamily} className="space-y-3.5 sm:space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Grupo *</label>
+                <input
+                  type="text"
+                  required
+                  value={familyName}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  placeholder="Ex: Família Silva, Casa da Praia..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Descrição</label>
+                <textarea
+                  value={familyDesc}
+                  onChange={(e) => setFamilyDesc(e.target.value)}
+                  placeholder="Descrição opcional do grupo familiar..."
+                  rows={3}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                />
+              </div>
+
               <button
-                onClick={() => setIsFamilyModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
               >
-                <X className="h-5 w-5" />
+                {submitting ? 'Criando grupo...' : 'Criar Grupo Familiar'}
               </button>
-
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Criar Novo Grupo Familiar</h2>
-
-              <form onSubmit={handleCreateFamily} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Grupo *</label>
-                  <input
-                    type="text"
-                    required
-                    value={familyName}
-                    onChange={(e) => setFamilyName(e.target.value)}
-                    placeholder="Ex: Família Silva, Casa da Praia..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Descrição</label>
-                  <textarea
-                    value={familyDesc}
-                    onChange={(e) => setFamilyDesc(e.target.value)}
-                    placeholder="Descrição opcional do grupo familiar..."
-                    rows={3}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
-                >
-                  {submitting ? 'Criando grupo...' : 'Criar Grupo Familiar'}
-                </button>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
+        </Modal>
 
         {/* Add Member Modal */}
-        {isMemberModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
-              <button
-                onClick={() => setIsMemberModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <Modal isOpen={isMemberModalOpen} onClose={() => setIsMemberModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setIsMemberModalOpen(false)}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-2 pr-6">Convidar Integrante</h2>
-              <p className="text-xs text-slate-400 mb-4">
-                Grupo: <strong>{currentFamily?.name}</strong>
-              </p>
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-2 pr-6">Convidar Integrante</h2>
+            <p className="text-xs text-slate-400 mb-4">
+              Grupo: <strong>{currentFamily?.name}</strong>
+            </p>
 
-              <form onSubmit={handleAddMember} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">E-mail do Usuário *</label>
-                  <input
-                    type="email"
-                    required
-                    value={memberEmail}
-                    onChange={(e) => setMemberEmail(e.target.value)}
-                    placeholder="usuario@email.com"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">O usuário já deve possuir cadastro prévio na plataforma.</p>
-                </div>
+            <form onSubmit={handleAddMember} className="space-y-3.5 sm:space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">E-mail do Usuário *</label>
+                <input
+                  type="email"
+                  required
+                  value={memberEmail}
+                  onChange={(e) => setMemberEmail(e.target.value)}
+                  placeholder="usuario@email.com"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">O usuário já deve possuir cadastro prévio na plataforma.</p>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Papel / Permissão *</label>
-                  <select
-                    value={memberRole}
-                    onChange={(e) => setMemberRole(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  >
-                    <option value="MEMBER">Membro (Lança e visualiza finanças da família)</option>
-                    <option value="ADMIN">Administrador (Gerencia membros, contas e tetos)</option>
-                    <option value="VIEWER">Visualizador (Apenas leitura dos relatórios)</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Papel / Permissão *</label>
+                <select
+                  value={memberRole}
+                  onChange={(e) => setMemberRole(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
-                  {submitting ? 'Adicionando...' : 'Adicionar Membro ao Grupo'}
-                </button>
-              </form>
-            </div>
+                  <option value="MEMBER">Membro (Lança e visualiza finanças da família)</option>
+                  <option value="ADMIN">Administrador (Gerencia membros, contas e tetos)</option>
+                  <option value="VIEWER">Visualizador (Apenas leitura dos relatórios)</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              >
+                {submitting ? 'Adicionando...' : 'Adicionar Membro ao Grupo'}
+              </button>
+            </form>
           </div>
-        )}
+        </Modal>
 
         {/* Add Person (sem login) Modal */}
-        {isPersonModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+        <Modal isOpen={isPersonModalOpen} onClose={() => setIsPersonModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setIsPersonModalOpen(false)}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5 pr-6">Nova Pessoa da Família</h2>
+            <p className="text-xs text-slate-400 mb-4">
+              Cadastre dependentes ou familiares para identificar quem realizou lançamentos ou compras no cartão emprestado.
+            </p>
+
+            <form onSubmit={handleCreatePerson} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome ou Apelido *</label>
+                <input
+                  type="text"
+                  required
+                  value={personName}
+                  onChange={(e) => setPersonName(e.target.value)}
+                  placeholder="Ex: Filho Pedro, Esposa, Mãe..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">Não requer e-mail ou senha.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-2">Cor da Tag</label>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {[
+                    '#8b5cf6', // purple
+                    '#3b82f6', // blue
+                    '#10b981', // emerald
+                    '#f59e0b', // amber
+                    '#ec4899', // pink
+                    '#06b6d4', // cyan
+                    '#f43f5e', // rose
+                    '#6366f1', // indigo
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setPersonColor(color)}
+                      className={`h-8 w-8 rounded-full transition-transform ${
+                        personColor === color ? 'scale-125 ring-2 ring-white ring-offset-2 ring-offset-slate-900 shadow-lg' : 'hover:scale-110 opacity-80'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <button
-                onClick={() => setIsPersonModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-purple-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
               >
-                <X className="h-5 w-5" />
+                {submitting ? 'Cadastrando...' : 'Cadastrar Pessoa'}
               </button>
-
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5 pr-6">Nova Pessoa da Família</h2>
-              <p className="text-xs text-slate-400 mb-4">
-                Cadastre dependentes ou familiares para identificar quem realizou lançamentos ou compras no cartão emprestado.
-              </p>
-
-              <form onSubmit={handleCreatePerson} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome ou Apelido *</label>
-                  <input
-                    type="text"
-                    required
-                    value={personName}
-                    onChange={(e) => setPersonName(e.target.value)}
-                    placeholder="Ex: Filho Pedro, Esposa, Mãe..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">Não requer e-mail ou senha.</p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-2">Cor da Tag</label>
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    {[
-                      '#8b5cf6', // purple
-                      '#3b82f6', // blue
-                      '#10b981', // emerald
-                      '#f59e0b', // amber
-                      '#ec4899', // pink
-                      '#06b6d4', // cyan
-                      '#f43f5e', // rose
-                      '#6366f1', // indigo
-                    ].map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setPersonColor(color)}
-                        className={`h-8 w-8 rounded-full transition-transform ${
-                          personColor === color ? 'scale-125 ring-2 ring-white ring-offset-2 ring-offset-slate-900 shadow-lg' : 'hover:scale-110 opacity-80'
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-purple-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
-                >
-                  {submitting ? 'Cadastrando...' : 'Cadastrar Pessoa'}
-                </button>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
+        </Modal>
       </div>
     </AppShell>
   );

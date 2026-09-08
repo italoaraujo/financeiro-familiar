@@ -19,6 +19,7 @@ import {
   History,
   Pencil,
 } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 
 export default function GoalsPage() {
   const { user, selectedFamilyId } = useAuth();
@@ -446,104 +447,108 @@ export default function GoalsPage() {
         </div>
 
         {/* Create Goal Modal */}
-        {isGoalModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
-              <button
-                onClick={() => setIsGoalModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setIsGoalModalOpen(false)}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Novo Cofrinho / Meta</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Novo Cofrinho / Meta</h2>
 
-              <form onSubmit={handleCreateGoal} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Título da Meta *</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Reserva de Emergência, Viagem Europa..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+            <form onSubmit={handleCreateGoal} className="space-y-3.5 sm:space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Título da Meta *</label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ex: Reserva de Emergência, Viagem Europa..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Conta Vinculada (Cofrinho) *</label>
-                  <select
-                    required
-                    value={accountId}
-                    onChange={(e) => setAccountId(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  >
-                    <option value="">Selecione a conta bancária de custódia...</option>
-                    {accounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.name} ({formatCurrency(acc.currentBalance)})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Todos os aportes e resgates desta meta movimentarão o saldo desta conta bancária.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor Alvo (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    min="1"
-                    value={targetAmount}
-                    onChange={(e) => setTargetAmount(e.target.value)}
-                    placeholder="0,00"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Limite Estimada</label>
-                  <input
-                    type="date"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor Identificadora</label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
-                    />
-                    <span className="text-xs text-slate-400">{color}</span>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Conta Vinculada (Cofrinho) *</label>
+                <select
+                  required
+                  value={accountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
-                  {submitting ? 'Criando cofrinho...' : 'Cadastrar Meta'}
-                </button>
-              </form>
-            </div>
+                  <option value="">Selecione a conta bancária de custódia...</option>
+                  {accounts.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name} ({formatCurrency(acc.currentBalance)})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Todos os aportes e resgates desta meta movimentarão o saldo desta conta bancária.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor Alvo (R$) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  min="1"
+                  value={targetAmount}
+                  onChange={(e) => setTargetAmount(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Limite Estimada</label>
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor Identificadora</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
+                  />
+                  <span className="text-xs text-slate-400">{color}</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              >
+                {submitting ? 'Criando cofrinho...' : 'Cadastrar Meta'}
+              </button>
+            </form>
           </div>
-        )}
+        </Modal>
 
         {/* Edit Goal Modal */}
-        {isEditModalOpen && editingGoal && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <Modal
+          isOpen={isEditModalOpen && !!editingGoal}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingGoal(null);
+          }}
+        >
+          {editingGoal && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => {
@@ -647,19 +652,25 @@ export default function GoalsPage() {
                 </div>
               </form>
             </div>
-          </div>
-        )}
+          )}
+        </Modal>
 
         {/* Deposit Modal */}
-        {isDepositModalOpen && (() => {
-          const linkedAccount = accounts.find((acc) => acc.id === selectedGoal?.accountId) || selectedGoal?.account;
-          const currentAccountBalance = Number(linkedAccount?.currentBalance || 0);
-          const hasSufficientBalance = currentAccountBalance > 0;
-          const depositAmountNum = parseFloat(depositAmount || '0');
-          const isOverBalance = depositAmountNum > currentAccountBalance;
+        <Modal
+          isOpen={isDepositModalOpen && !!selectedGoal}
+          onClose={() => {
+            setIsDepositModalOpen(false);
+            setSelectedGoal(null);
+          }}
+        >
+          {selectedGoal && (() => {
+            const linkedAccount = accounts.find((acc) => acc.id === selectedGoal?.accountId) || selectedGoal?.account;
+            const currentAccountBalance = Number(linkedAccount?.currentBalance || 0);
+            const hasSufficientBalance = currentAccountBalance > 0;
+            const depositAmountNum = parseFloat(depositAmount || '0');
+            const isOverBalance = depositAmountNum > currentAccountBalance;
 
-          return (
-            <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            return (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
                 <button
                   onClick={() => setIsDepositModalOpen(false)}
@@ -756,13 +767,19 @@ export default function GoalsPage() {
                   </button>
                 </form>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
+        </Modal>
 
         {/* Withdraw Modal */}
-        {isWithdrawModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <Modal
+          isOpen={isWithdrawModalOpen && !!selectedGoal}
+          onClose={() => {
+            setIsWithdrawModalOpen(false);
+            setSelectedGoal(null);
+          }}
+        >
+          {selectedGoal && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => setIsWithdrawModalOpen(false)}
@@ -842,12 +859,18 @@ export default function GoalsPage() {
                 </button>
               </form>
             </div>
-          </div>
-        )}
+          )}
+        </Modal>
 
         {/* History Modal */}
-        {isHistoryModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <Modal
+          isOpen={isHistoryModalOpen && !!selectedGoal}
+          onClose={() => {
+            setIsHistoryModalOpen(false);
+            setSelectedGoal(null);
+          }}
+        >
+          {selectedGoal && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => setIsHistoryModalOpen(false)}
@@ -922,8 +945,8 @@ export default function GoalsPage() {
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </Modal>
       </div>
     </AppShell>
   );

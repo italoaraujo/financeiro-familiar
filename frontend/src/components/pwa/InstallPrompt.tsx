@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Download, Share, PlusSquare, X, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Modal } from '../ui/Modal';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -134,12 +135,10 @@ export function InstallPrompt() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Modal didático de instalação para iOS Safari */}
-      {showIOSModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-slate-100 relative">
+        {/* Modal didático de instalação para iOS Safari */}
+        <Modal isOpen={showIOSModal} onClose={() => setShowIOSModal(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-slate-100 relative my-auto">
             <button
               onClick={() => setShowIOSModal(false)}
               className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors"
@@ -164,9 +163,8 @@ export function InstallPrompt() {
                   1
                 </span>
                 <p className="leading-snug">
-                  Toque no botão de <strong className="text-white">Compartilhar</strong>{' '}
-                  <Share className="w-4 h-4 inline-block text-blue-400 align-text-bottom" /> na
-                  barra inferior do Safari.
+                  No Safari, toque no botão <strong className="text-white">Compartilhar</strong>{' '}
+                  <Share className="w-4 h-4 inline-block text-blue-400 align-text-bottom" /> na barra inferior.
                 </p>
               </div>
 
@@ -202,8 +200,8 @@ export function InstallPrompt() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </Modal>
+      </div>
     </>
   );
 }

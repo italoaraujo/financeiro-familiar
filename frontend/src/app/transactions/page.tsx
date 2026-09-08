@@ -18,6 +18,7 @@ import {
   User,
   X,
 } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 
 export default function TransactionsPage() {
   const { user, selectedFamilyId } = useAuth();
@@ -491,9 +492,8 @@ export default function TransactionsPage() {
         </div>
 
         {/* Create Transaction Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
@@ -806,8 +806,7 @@ export default function TransactionsPage() {
                 </button>
               </form>
             </div>
-          </div>
-        )}
+        </Modal>
       </div>
     </AppShell>
   );
