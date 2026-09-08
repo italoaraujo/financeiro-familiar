@@ -6,9 +6,9 @@ Para avaliar o desempenho do sistema financeiro sob carga real (consultas, relat
 
 ## Goals
 
-- [ ] Disponibilizar script de seed de alta performance (`backend/prisma/seed-perf.ts` ou script npm) capaz de inserir entre 20.000 e 50.000 transações em lotes (`createMany`).
-- [ ] Criar um usuário (`perf@exemplo.com`) e família dedicados ("Família Performance") com múltiplas contas, cartões de crédito, faturas mensais, pessoas, metas, orçamentos e transações coerentes distribuídas nos últimos 24 meses.
-- [ ] Garantir idempotência ou capacidade de execução segura sem apagar ou corromper dados de outros usuários/famílias já existentes.
+- [x] Disponibilizar script de seed de alta performance (`backend/prisma/seed-perf.ts` ou script npm) capaz de inserir entre 20.000 e 50.000 transações em lotes (`createMany`).
+- [x] Criar um usuário (`perf@exemplo.com`) e família dedicados ("Família Performance") com múltiplas contas, cartões de crédito, faturas mensais, pessoas, metas, orçamentos e transações coerentes distribuídas nos últimos 24 meses.
+- [x] Garantir idempotência ou capacidade de execução segura sem apagar ou corromper dados de outros usuários/famílias já existentes.
 
 ## Out of Scope
 
@@ -85,14 +85,14 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| SEED-01 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-02 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-03 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-04 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-05 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-06 | P1: Geração de Carga de Dados em Lote | Tasks | Pending |
-| SEED-07 | P2: Automação e Facilidade de Execução | Tasks | Pending |
-| SEED-08 | P2: Automação e Facilidade de Execução | Tasks | Pending |
+| SEED-01 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-02 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-03 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-04 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-05 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-06 | P1: Geração de Carga de Dados em Lote | Execute | Verified |
+| SEED-07 | P2: Automação e Facilidade de Execução | Execute | Verified |
+| SEED-08 | P2: Automação e Facilidade de Execução | Execute | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 
@@ -104,6 +104,6 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] Pelo menos 30.000 transações criadas e persistidas no PostgreSQL para a família de teste.
-- [ ] Tempo total de inserção inferior a 30 segundos usando inserção em batch.
-- [ ] Login do usuário `perf@exemplo.com` funcional no sistema com todos os dashboards e relatórios renderizando dados históricos.
+- [x] Pelo menos 30.000 transações criadas e persistidas no PostgreSQL para a família de teste.
+- [x] Tempo total de inserção inferior a 30 segundos usando inserção em batch (atingido: 10.86s).
+- [x] Login do usuário `perf@exemplo.com` funcional no sistema com todos os dashboards e relatórios renderizando dados históricos.

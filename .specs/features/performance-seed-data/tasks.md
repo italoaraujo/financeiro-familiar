@@ -112,11 +112,11 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Script `prisma:seed:perf` configurado no `backend/package.json`.
-- [ ] Execução `npm run prisma:seed:perf` conclui com sucesso (código 0).
-- [ ] Relatório impresso no console detalha contagem de registros por tabela e tempo total decorrido.
-- [ ] Contagem no banco confirma mais de 30.000 transações inseridas sem afetar dados do usuário admin demo.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm run prisma:seed:perf && npm test`
+- [x] Script `prisma:seed:perf` configurado no `backend/package.json`.
+- [x] Execução `npm run prisma:seed:perf` conclui com sucesso (código 0).
+- [x] Relatório impresso no console detalha contagem de registros por tabela e tempo total decorrido.
+- [x] Contagem no banco confirma mais de 30.000 transações inseridas sem afetar dados do usuário admin demo.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm run prisma:seed:perf && npm test`
 
 **Tests**: integration
 **Gate**: full
