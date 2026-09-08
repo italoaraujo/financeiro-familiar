@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { TransactionType } from '@prisma/client';
+import { FamilyMemberRole, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
@@ -15,7 +15,7 @@ export class CategoriesService {
 
   async create(userId: string, dto: CreateCategoryDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     if (dto.parentId) {
@@ -47,13 +47,12 @@ export class CategoriesService {
       deletedAt: null,
       OR: [
         { isSystemDefault: true },
-        { userId },
+        familyId ? { familyId } : { userId, familyId: null },
       ],
     };
 
     if (familyId) {
-      await this.verifyFamilyAccess(userId, familyId);
-      whereCondition.OR.push({ familyId });
+      await this.verifyFamilyAccess(userId, familyId, false);
     }
 
     if (type) {
@@ -97,7 +96,9 @@ export class CategoriesService {
       throw new BadRequestException('Não é permitido alterar categorias padrão do sistema');
     }
 
-    if (category.userId && category.userId !== userId) {
+    if (category.familyId) {
+      await this.verifyFamilyAccess(userId, category.familyId, true);
+    } else if (category.userId && category.userId !== userId) {
       throw new ForbiddenException('Acesso negado para modificar esta categoria');
     }
 
@@ -119,7 +120,9 @@ export class CategoriesService {
       throw new BadRequestException('Não é permitido excluir categorias padrão do sistema');
     }
 
-    if (category.userId && category.userId !== userId) {
+    if (category.familyId) {
+      await this.verifyFamilyAccess(userId, category.familyId, true);
+    } else if (category.userId && category.userId !== userId) {
       throw new ForbiddenException('Acesso negado para excluir esta categoria');
     }
 
@@ -144,7 +147,7 @@ export class CategoriesService {
     return { message: 'Categoria removida com sucesso' };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -154,5 +157,13 @@ export class CategoriesService {
     if (!member) {
       throw new ForbiddenException('Acesso negado à família especificada');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 }

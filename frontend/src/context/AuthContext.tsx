@@ -24,6 +24,8 @@ interface AuthContextType {
   selectedFamilyId: string | null;
   setSelectedFamilyId: (id: string | null) => void;
   isLoading: boolean;
+  isViewer: boolean;
+  currentFamilyRole: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -122,6 +124,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/login';
   };
 
+  const currentMembership = user?.memberships?.find(
+    (m) => m.family.id === selectedFamilyId
+  );
+  const currentFamilyRole = currentMembership?.role || null;
+  const isViewer = Boolean(selectedFamilyId && currentFamilyRole === 'VIEWER');
+
   return (
     <AuthContext.Provider
       value={{
@@ -130,6 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         selectedFamilyId,
         setSelectedFamilyId: handleFamilyChange,
         isLoading,
+        isViewer,
+        currentFamilyRole,
         login,
         register,
         logout,

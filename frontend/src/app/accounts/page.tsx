@@ -9,7 +9,7 @@ import { Plus, Wallet, Archive, Trash2, X } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
 export default function AccountsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,13 +120,15 @@ export default function AccountsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Nova Conta</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Nova Conta</span>
+            </button>
+          )}
         </div>
 
         {/* Total Summary Banner */}
@@ -172,22 +174,24 @@ export default function AccountsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => handleArchive(acc.id)}
-                        title="Arquivar conta"
-                        className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
-                      >
-                        <Archive className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(acc.id)}
-                        title="Excluir conta"
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {!isViewer && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => handleArchive(acc.id)}
+                          title="Arquivar conta"
+                          className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        >
+                          <Archive className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(acc.id)}
+                          title="Excluir conta"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-800/80">

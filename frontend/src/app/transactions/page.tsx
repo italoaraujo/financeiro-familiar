@@ -21,7 +21,7 @@ import {
 import { Modal } from '../../components/ui/Modal';
 
 export default function TransactionsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>({ total: 0, page: 1, limit: 15, totalPages: 1 });
@@ -218,13 +218,15 @@ export default function TransactionsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Novo Lançamento</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Novo Lançamento</span>
+            </button>
+          )}
         </div>
 
         {/* Search & Filters Bar */}
@@ -437,7 +439,14 @@ export default function TransactionsPage() {
                         </span>
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-right">
-                        {tx.goalDeposits?.length > 0 ||
+                        {isViewer ? (
+                          <span
+                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                            title="Modo somente leitura"
+                          >
+                            <Trash2 className="h-4 w-4 opacity-20" />
+                          </span>
+                        ) : tx.goalDeposits?.length > 0 ||
                         tx.category?.name === 'Aporte em Meta' ||
                         tx.category?.name === 'Resgate de Meta' ? (
                           <span

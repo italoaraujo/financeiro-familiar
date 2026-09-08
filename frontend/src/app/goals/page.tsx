@@ -22,7 +22,7 @@ import {
 import { Modal } from '../../components/ui/Modal';
 
 export default function GoalsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [goals, setGoals] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -282,13 +282,15 @@ export default function GoalsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsGoalModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Novo Cofrinho / Meta</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsGoalModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Novo Cofrinho / Meta</span>
+            </button>
+          )}
         </div>
 
         {/* Goals Grid */}
@@ -338,13 +340,15 @@ export default function GoalsPage() {
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => openEditModal(goal)}
-                          className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
-                          title="Editar meta"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
+                        {!isViewer && (
+                          <button
+                            onClick={() => openEditModal(goal)}
+                            className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
+                            title="Editar meta"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
 
                         <button
                           onClick={() => openHistoryModal(goal)}
@@ -354,21 +358,23 @@ export default function GoalsPage() {
                           <History className="h-4 w-4" />
                         </button>
 
-                        <button
-                          onClick={() => handleDelete(goal)}
-                          className={`p-1.5 rounded-lg transition-colors shrink-0 ${
-                            hasBalance
-                              ? 'text-slate-600 hover:text-amber-400 hover:bg-slate-800 cursor-help'
-                              : 'text-slate-500 hover:text-rose-400 hover:bg-slate-800'
-                          }`}
-                          title={
-                            hasBalance
-                              ? `Saldo acumulado de ${formatCurrency(current)}. Resgate antes de excluir.`
-                              : 'Excluir meta'
-                          }
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {!isViewer && (
+                          <button
+                            onClick={() => handleDelete(goal)}
+                            className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+                              hasBalance
+                                ? 'text-slate-600 hover:text-amber-400 hover:bg-slate-800 cursor-help'
+                                : 'text-slate-500 hover:text-rose-400 hover:bg-slate-800'
+                            }`}
+                            title={
+                              hasBalance
+                                ? `Saldo acumulado de ${formatCurrency(current)}. Resgate antes de excluir.`
+                                : 'Excluir meta'
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -416,29 +422,31 @@ export default function GoalsPage() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => openDepositModal(goal)}
-                        className="inline-flex items-center justify-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-400 font-semibold py-2 px-2.5 rounded-xl text-xs transition-all border border-emerald-500/30 shadow-sm"
-                      >
-                        <ArrowDownLeft className="h-3.5 w-3.5 shrink-0" />
-                        <span>Aportar</span>
-                      </button>
+                    {!isViewer && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => openDepositModal(goal)}
+                          className="inline-flex items-center justify-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-400 font-semibold py-2 px-2.5 rounded-xl text-xs transition-all border border-emerald-500/30 shadow-sm"
+                        >
+                          <ArrowDownLeft className="h-3.5 w-3.5 shrink-0" />
+                          <span>Aportar</span>
+                        </button>
 
-                      <button
-                        onClick={() => openWithdrawModal(goal)}
-                        disabled={!hasBalance}
-                        className={`inline-flex items-center justify-center gap-1.5 font-semibold py-2 px-2.5 rounded-xl text-xs transition-all border shadow-sm ${
-                          hasBalance
-                            ? 'bg-teal-950/40 hover:bg-teal-900/50 text-teal-300 border-teal-500/30'
-                            : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-                        }`}
-                        title={hasBalance ? 'Resgatar valor para a conta vinculada' : 'Sem saldo disponível para resgate'}
-                      >
-                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
-                        <span>Resgatar</span>
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => openWithdrawModal(goal)}
+                          disabled={!hasBalance}
+                          className={`inline-flex items-center justify-center gap-1.5 font-semibold py-2 px-2.5 rounded-xl text-xs transition-all border shadow-sm ${
+                            hasBalance
+                              ? 'bg-teal-950/40 hover:bg-teal-900/50 text-teal-300 border-teal-500/30'
+                              : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+                          }`}
+                          title={hasBalance ? 'Resgatar valor para a conta vinculada' : 'Sem saldo disponível para resgate'}
+                        >
+                          <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+                          <span>Resgatar</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

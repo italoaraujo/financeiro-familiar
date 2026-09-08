@@ -16,6 +16,7 @@ import {
   Prisma,
   TransactionStatus,
   TransactionType,
+  FamilyMemberRole,
 } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
@@ -28,7 +29,7 @@ export class TransactionsService {
 
   async create(userId: string, dto: CreateTransactionDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     if (dto.personId) {
@@ -74,7 +75,7 @@ export class TransactionsService {
         }
 
         if (card.userId !== userId && card.familyId) {
-          await this.verifyFamilyAccess(userId, card.familyId);
+          await this.verifyFamilyAccess(userId, card.familyId, true);
         } else if (card.userId !== userId) {
           throw new ForbiddenException('Acesso negado ao cartão de crédito');
         }
@@ -208,6 +209,12 @@ export class TransactionsService {
         throw new NotFoundException('Conta bancária não encontrada');
       }
 
+      if (account.userId !== userId && account.familyId) {
+        await this.verifyFamilyAccess(userId, account.familyId, true);
+      } else if (account.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária');
+      }
+
       const transaction = await tx.transaction.create({
         data: {
           userId,
@@ -249,7 +256,7 @@ export class TransactionsService {
     }
 
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const amount = new Prisma.Decimal(dto.amount);
@@ -261,6 +268,18 @@ export class TransactionsService {
 
       if (!source || !dest) {
         throw new NotFoundException('Conta de origem ou destino não encontrada');
+      }
+
+      if (source.userId !== userId && source.familyId) {
+        await this.verifyFamilyAccess(userId, source.familyId, true);
+      } else if (source.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária de origem');
+      }
+
+      if (dest.userId !== userId && dest.familyId) {
+        await this.verifyFamilyAccess(userId, dest.familyId, true);
+      } else if (dest.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária de destino');
       }
 
       // Busca ou cria categoria padrão para Transferência
@@ -320,10 +339,11 @@ export class TransactionsService {
     };
 
     if (filter.familyId) {
-      await this.verifyFamilyAccess(userId, filter.familyId);
+      await this.verifyFamilyAccess(userId, filter.familyId, false);
       where.familyId = filter.familyId;
     } else {
       where.userId = userId;
+      where.familyId = null;
     }
 
     if (filter.startDate || filter.endDate) {
@@ -411,6 +431,10 @@ export class TransactionsService {
         throw new ForbiddenException('Apenas o autor pode excluir o lançamento');
       }
 
+      if (transaction.familyId) {
+        await this.verifyFamilyAccess(userId, transaction.familyId, true);
+      }
+
       // Bloqueio de exclusão avulsa de movimentações de Metas e Cofrinhos
       if (
         (transaction.goalDeposits && transaction.goalDeposits.length > 0) ||
@@ -464,7 +488,7 @@ export class TransactionsService {
     });
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -474,6 +498,14 @@ export class TransactionsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado ao grupo familiar');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 
   private parseTransactionDate(dateInput: string | Date): Date {

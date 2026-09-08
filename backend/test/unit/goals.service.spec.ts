@@ -429,7 +429,7 @@ describe('GoalsService', () => {
       const result = await service.findAll('user-1');
 
       expect(prisma.goal.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user-1', deletedAt: null },
+        where: { userId: 'user-1', familyId: null, deletedAt: null },
         include: {
           account: expect.any(Object),
           deposits: expect.any(Object),
@@ -577,6 +577,102 @@ describe('GoalsService', () => {
       await expect(
         service.update('user-1', 'goal-1', { name: 'Novo Nome' }),
       ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family goal', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          name: 'Meta Familiar',
+          targetAmount: 5000,
+          accountId: 'acc-1',
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to deposit into family goal', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-fam-1',
+        familyId: 'family-1',
+        name: 'Meta Familiar',
+        targetAmount: new Prisma.Decimal(5000),
+        currentAmount: new Prisma.Decimal(0),
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.addDeposit('user-viewer', 'goal-fam-1', {
+          amount: 500,
+          depositDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to withdraw from family goal', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-fam-1',
+        familyId: 'family-1',
+        name: 'Meta Familiar',
+        targetAmount: new Prisma.Decimal(5000),
+        currentAmount: new Prisma.Decimal(1000),
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.withdraw('user-viewer', 'goal-fam-1', {
+          amount: 500,
+          withdrawalDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to list family goals via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.goal.findMany.mockResolvedValue([
+        {
+          id: 'goal-fam-1',
+          name: 'Meta Familiar',
+          familyId: 'family-1',
+          targetAmount: new Prisma.Decimal(5000),
+          currentAmount: new Prisma.Decimal(1000),
+          deposits: [],
+        },
+      ]);
+
+      const result = await service.findAll('user-viewer', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

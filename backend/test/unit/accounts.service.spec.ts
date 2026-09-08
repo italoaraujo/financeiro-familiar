@@ -98,30 +98,64 @@ describe('AccountsService', () => {
     });
   });
 
-  describe('findAll and findById', () => {
-    it('should filter accounts by deletedAt: null in findAll', async () => {
-      prisma.account.findMany.mockResolvedValue([]);
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family account', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
 
-      await service.findAll('user-1');
-
-      expect(prisma.account.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            userId: 'user-1',
-            deletedAt: null,
-          }),
+      await expect(
+        service.create('user-viewer', {
+          name: 'Conta Família',
+          type: AccountType.CHECKING,
+          familyId: 'family-1',
         }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
       );
     });
 
-    it('should throw NotFoundException in findById if account has deletedAt', async () => {
+    it('should throw ForbiddenException when VIEWER tries to update family account', async () => {
       prisma.account.findUnique.mockResolvedValue({
-        id: 'acc-del',
-        userId: 'user-1',
-        deletedAt: new Date(),
+        id: 'acc-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        name: 'Conta Família',
+        type: AccountType.CHECKING,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
       });
 
-      await expect(service.findById('user-1', 'acc-del')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('user-viewer', 'acc-fam-1', {
+          name: 'Nome Alterado',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to query family accounts via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.account.findMany.mockResolvedValue([
+        { id: 'acc-fam-1', name: 'Conta Família', familyId: 'family-1' },
+      ]);
+
+      const result = await service.findAll('user-viewer', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

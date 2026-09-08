@@ -50,7 +50,7 @@ function renderInvoiceStatusBadge(status: string) {
 }
 
 export default function CreditCardsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -256,13 +256,15 @@ export default function CreditCardsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsCardModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Novo Cartão</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsCardModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Novo Cartão</span>
+            </button>
+          )}
         </div>
 
         {/* Cards Grid */}
@@ -306,14 +308,16 @@ export default function CreditCardsPage() {
                           <p>Fechamento: dia <strong className="text-white">{card.closingDay}</strong></p>
                           <p>Vencimento: dia <strong className="text-white">{card.dueDay}</strong></p>
                         </div>
-                        <button
-                          onClick={() => openEditModal(card)}
-                          className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
-                          title="Editar Cartão"
-                          aria-label="Editar Cartão"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
+                        {!isViewer && (
+                          <button
+                            onClick={() => openEditModal(card)}
+                            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                            title="Editar Cartão"
+                            aria-label="Editar Cartão"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -380,7 +384,7 @@ export default function CreditCardsPage() {
                                     <span>Divisão por Pessoa</span>
                                   </button>
 
-                                  {inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
+                                  {!isViewer && inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
                                     <button
                                       onClick={() => openPayModal(inv)}
                                       className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"

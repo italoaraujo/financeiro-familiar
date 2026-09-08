@@ -70,7 +70,7 @@ describe('CategoriesService', () => {
         where: {
           parentId: null,
           deletedAt: null,
-          OR: [{ isSystemDefault: true }, { userId: 'user-1' }],
+          OR: [{ isSystemDefault: true }, { userId: 'user-1', familyId: null }],
         },
         include: {
           subcategories: {
@@ -142,6 +142,72 @@ describe('CategoriesService', () => {
         data: { deletedAt: expect.any(Date) },
       });
       expect(result.message).toContain('removida com sucesso');
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family category', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          name: 'Categoria Familiar',
+          type: TransactionType.EXPENSE,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to update family category', async () => {
+      prisma.category.findUnique.mockResolvedValue({
+        id: 'cat-fam-1',
+        familyId: 'family-1',
+        name: 'Categoria Familiar',
+        type: TransactionType.EXPENSE,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('user-viewer', 'cat-fam-1', {
+          name: 'Nome Atualizado',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to query family categories via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.category.findMany.mockResolvedValue([
+        {
+          id: 'cat-fam-1',
+          name: 'Categoria Familiar',
+          familyId: 'family-1',
+          subcategories: [],
+        },
+      ]);
+
+      const result = await service.findAll('user-viewer', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

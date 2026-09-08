@@ -97,6 +97,7 @@ describe('BudgetsService', () => {
           periodMonth: '2026-09',
           deletedAt: null,
           userId: 'user-1',
+          familyId: null,
         },
         include: {
           category: true,
@@ -113,6 +114,7 @@ describe('BudgetsService', () => {
             lte: expect.any(Date),
           },
           userId: 'user-1',
+          familyId: null,
         },
         _sum: {
           amount: true,
@@ -152,6 +154,79 @@ describe('BudgetsService', () => {
       });
 
       await expect(service.remove('user-1', 'b-1')).rejects.toThrow();
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family budget', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          categoryId: 'cat-1',
+          periodMonth: '2026-09',
+          targetAmount: 1000,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to update family budget', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'budget-fam-1',
+        familyId: 'family-1',
+        categoryId: 'cat-1',
+        periodMonth: '2026-09',
+        targetAmount: new Prisma.Decimal(1000),
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('user-viewer', 'budget-fam-1', {
+          targetAmount: 1500,
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to list family budgets via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.budget.findMany.mockResolvedValue([
+        {
+          id: 'budget-fam-1',
+          familyId: 'family-1',
+          categoryId: 'cat-1',
+          periodMonth: '2026-09',
+          targetAmount: new Prisma.Decimal(1000),
+          alertPercentage: 80,
+          category: { name: 'Alimentação' },
+        },
+      ]);
+      prisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: new Prisma.Decimal(200) },
+      });
+
+      const result = await service.findAll('user-viewer', '2026-09', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

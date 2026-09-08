@@ -16,7 +16,7 @@ import {
 import { Modal } from '../../components/ui/Modal';
 
 export default function BudgetsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -113,13 +113,15 @@ export default function BudgetsPage() {
               onChange={(e) => setPeriodMonth(e.target.value)}
               className="bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer w-full sm:w-auto"
             />
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span>Novo Teto de Gastos</span>
-            </button>
+            {!isViewer && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Novo Teto de Gastos</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -166,13 +168,15 @@ export default function BudgetsPage() {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => handleDelete(b.id)}
-                        className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
-                        title="Excluir orçamento"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {!isViewer && (
+                        <button
+                          onClick={() => handleDelete(b.id)}
+                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
+                          title="Excluir orçamento"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Progress Bar & Amounts */}

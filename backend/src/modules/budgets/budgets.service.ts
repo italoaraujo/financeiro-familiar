@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
-import { Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { FamilyMemberRole, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class BudgetsService {
@@ -15,7 +15,7 @@ export class BudgetsService {
 
   async create(userId: string, dto: CreateBudgetDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const existing = await this.prisma.budget.findFirst({
@@ -23,7 +23,7 @@ export class BudgetsService {
         categoryId: dto.categoryId,
         periodMonth: dto.periodMonth,
         deletedAt: null,
-        ...(dto.familyId ? { familyId: dto.familyId } : { userId }),
+        ...(dto.familyId ? { familyId: dto.familyId } : { userId, familyId: null }),
       },
     });
 
@@ -48,7 +48,7 @@ export class BudgetsService {
 
   async findAll(userId: string, periodMonth?: string, familyId?: string) {
     if (familyId) {
-      await this.verifyFamilyAccess(userId, familyId);
+      await this.verifyFamilyAccess(userId, familyId, false);
     }
 
     const now = new Date();
@@ -58,7 +58,7 @@ export class BudgetsService {
       where: {
         periodMonth: month,
         deletedAt: null,
-        ...(familyId ? { familyId } : { userId }),
+        ...(familyId ? { familyId } : { userId, familyId: null }),
       },
       include: {
         category: true,
@@ -82,7 +82,7 @@ export class BudgetsService {
               gte: startDate,
               lte: endDate,
             },
-            ...(familyId ? { familyId } : { userId }),
+            ...(familyId ? { familyId } : { userId, familyId: null }),
           },
           _sum: {
             amount: true,
@@ -121,7 +121,9 @@ export class BudgetsService {
       throw new NotFoundException('Orçamento não encontrado');
     }
 
-    if (budget.userId && budget.userId !== userId) {
+    if (budget.familyId) {
+      await this.verifyFamilyAccess(userId, budget.familyId, true);
+    } else if (budget.userId && budget.userId !== userId) {
       throw new ForbiddenException('Acesso negado ao orçamento');
     }
 
@@ -146,7 +148,9 @@ export class BudgetsService {
       throw new NotFoundException('Orçamento não encontrado');
     }
 
-    if (budget.userId && budget.userId !== userId) {
+    if (budget.familyId) {
+      await this.verifyFamilyAccess(userId, budget.familyId, true);
+    } else if (budget.userId && budget.userId !== userId) {
       throw new ForbiddenException('Acesso negado ao orçamento');
     }
 
@@ -158,7 +162,7 @@ export class BudgetsService {
     return { message: 'Orçamento removido com sucesso' };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -168,5 +172,13 @@ export class BudgetsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado ao grupo familiar');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 }
