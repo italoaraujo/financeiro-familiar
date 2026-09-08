@@ -247,11 +247,11 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Em `/goals`, botões "Nova Meta", "Aportar", "Resgatar", "Editar" e "Excluir" ficam ocultos para `VIEWER`.
-- [ ] Em `/budgets`, botões "Novo Orçamento", editar e excluir ficam ocultos para `VIEWER`.
-- [ ] Em `/family`, ações de convite e gerenciamento de pessoas ficam restritas para `ADMIN`/`OWNER`.
-- [ ] No Dashboard (`/`), botões de ação rápida são ocultados quando `isViewer` estiver ativo.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test && cd /opt/projetos/financeiro-familiar/frontend && npm run build`
+- [x] Em `/goals`, botões "Nova Meta", "Aportar", "Resgatar", "Editar" e "Excluir" ficam ocultos para `VIEWER`.
+- [x] Em `/budgets`, botões "Novo Orçamento", editar e excluir ficam ocultos para `VIEWER`.
+- [x] Em `/family`, ações de convite e gerenciamento de pessoas ficam restritas para `ADMIN`/`OWNER`.
+- [x] No Dashboard (`/`), botões de ação rápida são ocultados quando `isViewer` estiver ativo.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test && cd /opt/projetos/financeiro-familiar/frontend && npm run build`
 
 **Tests**: none
 **Gate**: build

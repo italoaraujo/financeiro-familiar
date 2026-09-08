@@ -19,11 +19,13 @@ import {
 import { Modal } from '../../components/ui/Modal';
 
 export default function FamilyPage() {
-  const { user, selectedFamilyId, setSelectedFamilyId, refreshUserData } = useAuth();
+  const { user, selectedFamilyId, setSelectedFamilyId, refreshUserData, isViewer, currentFamilyRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [families, setFamilies] = useState<any[]>([]);
   const [currentFamily, setCurrentFamily] = useState<any>(null);
   const [people, setPeople] = useState<any[]>([]);
+
+  const canManageFamily = !isViewer && (currentFamilyRole === 'OWNER' || currentFamilyRole === 'ADMIN' || !selectedFamilyId);
 
   // Modals
   const [isFamilyModalOpen, setIsFamilyModalOpen] = useState(false);
@@ -211,7 +213,7 @@ export default function FamilyPage() {
               <span>Criar Novo Grupo</span>
             </button>
 
-            {currentFamily && (
+            {currentFamily && canManageFamily && (
               <>
                 <button
                   onClick={() => setIsPersonModalOpen(true)}
@@ -291,13 +293,15 @@ export default function FamilyPage() {
                   </p>
                 </div>
 
-                <button
-                  onClick={() => setIsPersonModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Cadastrar pessoa sem login</span>
-                </button>
+                {canManageFamily && (
+                  <button
+                    onClick={() => setIsPersonModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Cadastrar pessoa sem login</span>
+                  </button>
+                )}
               </div>
 
               {people?.length === 0 ? (
@@ -335,7 +339,7 @@ export default function FamilyPage() {
                         </div>
                       </div>
 
-                      {!p.userId && (
+                      {!p.userId && canManageFamily && (
                         <button
                           onClick={() => handleRemovePerson(p.id, p.name)}
                           className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors shrink-0"
@@ -383,7 +387,7 @@ export default function FamilyPage() {
                         <span>{m.role}</span>
                       </div>
 
-                      {m.role !== 'OWNER' && (
+                      {m.role !== 'OWNER' && canManageFamily && (
                         <button
                           onClick={() => handleRemoveMember(m.user?.id)}
                           className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"

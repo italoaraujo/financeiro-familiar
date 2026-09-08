@@ -54,7 +54,7 @@ const INVOICE_STATUS_MAP: Record<string, { label: string; className: string }> =
 };
 
 export default function DashboardPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<any>(null);
   const [categoryExpenses, setCategoryExpenses] = useState<any[]>([]);
@@ -115,13 +115,15 @@ export default function DashboardPage() {
                 className="w-full sm:w-auto bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
               />
             </div>
-            <Link
-              href="/transactions"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span>Novo Lançamento</span>
-            </Link>
+            {!isViewer && (
+              <Link
+                href="/transactions"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
+              >
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Novo Lançamento</span>
+              </Link>
+            )}
           </div>
         </div>
 
