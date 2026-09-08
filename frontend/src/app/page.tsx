@@ -248,6 +248,8 @@ export default function DashboardPage() {
                       borderRadius: '12px',
                       color: '#f8fafc',
                     }}
+                    itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}
                     formatter={(val: any) => [formatCurrency(val), '']}
                   />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -301,6 +303,8 @@ export default function DashboardPage() {
                           borderRadius: '12px',
                           color: '#f8fafc',
                         }}
+                        itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+                        labelStyle={{ color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}
                         formatter={(val: any, name: any, item: any) => [
                           `${val}% (${formatCurrency(item.payload.amount)})`,
                           name,
