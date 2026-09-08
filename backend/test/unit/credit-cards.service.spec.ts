@@ -521,4 +521,105 @@ describe('CreditCardsService', () => {
       await expect(service.remove('user-1', 'card-1')).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family credit card', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          name: 'Cartão Familiar',
+          creditLimit: 5000,
+          closingDay: 10,
+          dueDay: 17,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to update family credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        name: 'Cartão Familiar',
+        creditLimit: new Prisma.Decimal(5000),
+        closingDay: 10,
+        dueDay: 17,
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('user-viewer', 'card-fam-1', {
+          name: 'Nome Alterado',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to pay family credit card invoice', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-1',
+        creditCard: {
+          id: 'card-fam-1',
+          userId: 'user-owner',
+          familyId: 'family-1',
+          name: 'Cartão Familiar',
+        },
+        status: InvoiceStatus.OPEN,
+        totalAmount: new Prisma.Decimal(500),
+        paidAmount: new Prisma.Decimal(0),
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.payInvoice('user-viewer', 'inv-1', {
+          accountId: 'acc-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to list family credit cards via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.creditCard.findMany.mockResolvedValue([
+        {
+          id: 'card-fam-1',
+          name: 'Cartão Familiar',
+          familyId: 'family-1',
+          creditLimit: new Prisma.Decimal(5000),
+          invoices: [],
+        },
+      ]);
+
+      const result = await service.findAll('user-viewer', 'family-1');
+      expect(result).toHaveLength(1);
+    });
+  });
 });

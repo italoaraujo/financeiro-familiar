@@ -8,7 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
 import { UpdateCreditCardDto } from './dto/update-credit-card.dto';
 import { PayInvoiceDto } from './dto/pay-invoice.dto';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { FamilyMemberRole, InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class CreditCardsService {
@@ -16,7 +16,7 @@ export class CreditCardsService {
 
   async create(userId: string, dto: CreateCreditCardDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const creditLimit = new Prisma.Decimal(dto.creditLimit);
@@ -116,8 +116,12 @@ export class CreditCardsService {
   async update(userId: string, id: string, dto: UpdateCreditCardDto) {
     const card = await this.findById(userId, id);
 
-    if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    if (dto.familyId && dto.familyId !== card.familyId) {
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     if (dto.creditLimit !== undefined && dto.creditLimit <= 0) {
@@ -138,7 +142,7 @@ export class CreditCardsService {
       (dto.closingDay !== undefined && dto.closingDay !== card.closingDay) ||
       (dto.dueDay !== undefined && dto.dueDay !== card.dueDay);
 
-    await this.prisma.creditCard.update({
+    const updated = await this.prisma.creditCard.update({
       where: { id: card.id },
       data: {
         name: dto.name ?? card.name,
@@ -332,7 +336,7 @@ export class CreditCardsService {
       }
 
       if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
-        await this.verifyFamilyAccess(userId, invoice.creditCard.familyId);
+        await this.verifyFamilyAccess(userId, invoice.creditCard.familyId, true);
       }
 
       if (invoice.status === InvoiceStatus.PAID) {
@@ -440,7 +444,7 @@ export class CreditCardsService {
     }
 
     if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
-      await this.verifyFamilyAccess(userId, invoice.creditCard.familyId);
+      await this.verifyFamilyAccess(userId, invoice.creditCard.familyId, false);
     } else if (invoice.creditCard.userId !== userId) {
       throw new ForbiddenException('Acesso negado à fatura');
     }
@@ -479,7 +483,7 @@ export class CreditCardsService {
     };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -489,6 +493,14 @@ export class CreditCardsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado à família especificada');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 
   async syncInvoiceStatuses(creditCardId?: string): Promise<void> {

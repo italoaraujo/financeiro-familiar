@@ -98,10 +98,10 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `CreditCardsService` rejeita com `ForbiddenException` tentativas de criação, edição ou exclusão de cartões familiares por usuário com papel `VIEWER`.
-- [ ] Consultas de cartões e faturas continuam permitidas para `VIEWER`.
-- [ ] Testes unitários cobrindo o bloqueio de `VIEWER` passam no backend.
-- [ ] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/credit-cards.service.spec.ts`
+- [x] `CreditCardsService` rejeita com `ForbiddenException` tentativas de criação, edição ou exclusão de cartões familiares por usuário com papel `VIEWER`.
+- [x] Consultas de cartões e faturas continuam permitidas para `VIEWER`.
+- [x] Testes unitários cobrindo o bloqueio de `VIEWER` passam no backend.
+- [x] Gate check passes: `cd /opt/projetos/financeiro-familiar/backend && npm test -- test/unit/credit-cards.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
