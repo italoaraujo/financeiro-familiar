@@ -64,7 +64,7 @@ T4 -> T5 -> T6
 **Tests**: `backend/test/unit/auth.service.spec.ts`
 **Gate**: `npm --prefix backend test -- test/unit/auth.service.spec.ts && npm --prefix backend run build`
 
-#### T3: Endpoint de Status no AuthController [PENDING]
+#### T3: Endpoint de Status no AuthController [DONE]
 
 **What**: Criar a rota `GET /auth/status` pública no `AuthController` retornando objeto com `{ registrationEnabled: boolean }` a partir do serviço de autenticação.
 **Where**: `backend/src/modules/auth/auth.controller.ts`
