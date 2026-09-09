@@ -95,7 +95,7 @@ T4 -> T5 -> T6
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T6: Alerta Informativo e Bloqueio na Página de Registro [PENDING]
+#### T6: Alerta Informativo e Bloqueio na Página de Registro [DONE]
 
 **What**: Na página `/register`, verificar o status do cadastro. Caso esteja desabilitado, renderizar um alerta amigável informando que novos cadastros estão suspensos no momento, acompanhado de botão de retorno ao login e bloqueio do formulário.
 **Where**: `frontend/src/app/register/page.tsx`
