@@ -86,7 +86,7 @@ T4 -> T5 -> T6
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T5: Ocultação Condicional do Link de Cadastro no Login [PENDING]
+#### T5: Ocultação Condicional do Link de Cadastro no Login [DONE]
 
 **What**: Atualizar a página de login para consultar o status de registro e ocultar a seção "Não possui uma conta? Cadastre-se gratuitamente" quando `registrationEnabled` for falso.
 **Where**: `frontend/src/app/login/page.tsx`

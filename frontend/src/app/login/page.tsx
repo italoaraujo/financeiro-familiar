@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { getAuthStatus } from '../../lib/api';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -12,8 +13,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const { login } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    let isMounted = true;
+    getAuthStatus().then((status) => {
+      if (isMounted) {
+        setRegistrationEnabled(status.registrationEnabled);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,14 +127,16 @@ export default function LoginPage() {
 
           {/* Quick Demo Credentials Help */}
           <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-slate-800/80 text-center">
-            <p className="text-xs text-slate-400">
-              Não possui uma conta?{' '}
-              <Link href="/register" className="text-emerald-400 font-semibold hover:underline">
-                Cadastre-se gratuitamente
-              </Link>
-            </p>
+            {registrationEnabled && (
+              <p className="text-xs text-slate-400">
+                Não possui uma conta?{' '}
+                <Link href="/register" className="text-emerald-400 font-semibold hover:underline">
+                  Cadastre-se gratuitamente
+                </Link>
+              </p>
+            )}
             {((process.env.NEXT_PUBLIC_APP_ENV || 'development').toLowerCase() === 'development') && (
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-2">
+              <p className={`text-[11px] sm:text-xs text-slate-500 ${registrationEnabled ? 'mt-2' : ''}`}>
                 Conta de demonstração: <span className="text-slate-400">admin@exemplo.com</span> / <span className="text-slate-400">123456</span>
               </p>
             )}
