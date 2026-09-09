@@ -11,6 +11,15 @@ import { GetUser } from '../../common/decorators/get-user.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('status')
+  @ApiOperation({ summary: 'Obter status público das funcionalidades de autenticação' })
+  @ApiResponse({ status: 200, description: 'Status retornado com sucesso' })
+  async getStatus() {
+    return {
+      registrationEnabled: this.authService.isRegistrationEnabled(),
+    };
+  }
+
   @Post('register')
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
