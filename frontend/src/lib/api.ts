@@ -61,3 +61,17 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
 
   return data as T;
 }
+
+export interface AuthStatusResponse {
+  registrationEnabled: boolean;
+}
+
+export async function getAuthStatus(): Promise<AuthStatusResponse> {
+  try {
+    return await apiRequest<AuthStatusResponse>('/auth/status');
+  } catch (error) {
+    console.error('Falha ao consultar status de autenticação:', error);
+    return { registrationEnabled: true };
+  }
+}
+

@@ -77,7 +77,7 @@ T4 -> T5 -> T6
 
 ### Phase 2: Frontend UI e Experiência do Usuário
 
-#### T4: Método de Consulta de Status no API Client [PENDING]
+#### T4: Método de Consulta de Status no API Client [DONE]
 
 **What**: Implementar função de consulta `getAuthStatus` no cliente de API do frontend para obter o estado de liberação de novos cadastros.
 **Where**: `frontend/src/lib/api.ts`
