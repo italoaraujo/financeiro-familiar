@@ -55,7 +55,7 @@ T4 -> T5 -> T6
 **Tests**: `npm --prefix backend run build`
 **Gate**: `npm --prefix backend run build`
 
-#### T2: Bloqueio de Registro no AuthService [PENDING]
+#### T2: Bloqueio de Registro no AuthService [DONE]
 
 **What**: Implementar verificação da variável de ambiente `DISABLE_REGISTRATION` no método `register` do `AuthService`. Se configurada como verdadeira (`true`, `1`), lançar `ForbiddenException` com mensagem explicativa. Adicionar método para consulta de status.
 **Where**: `backend/src/modules/auth/auth.service.ts`

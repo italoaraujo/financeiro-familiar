@@ -88,8 +88,8 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| REG-01 | P1: Bloqueio no Backend e Endpoint de Consulta | Specify | Pending |
-| REG-02 | P1: Bloqueio no Backend e Endpoint de Consulta | Specify | Pending |
+| REG-01 | P1: Bloqueio no Backend e Endpoint de Consulta | Tasks | Verified |
+| REG-02 | P1: Bloqueio no Backend e Endpoint de Consulta | Tasks | Verified |
 | REG-03 | P1: Bloqueio no Backend e Endpoint de Consulta | Specify | Pending |
 | REG-04 | P1: Bloqueio no Backend e Endpoint de Consulta | Tasks | Verified |
 | REG-05 | P2: Experiência Visual no Frontend (Login e Registro) | Specify | Pending |
