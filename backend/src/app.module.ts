@@ -13,6 +13,7 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     GoalsModule,
     ReportsModule,
     AuditLogsModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

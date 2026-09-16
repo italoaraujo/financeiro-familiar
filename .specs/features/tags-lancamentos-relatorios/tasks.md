@@ -106,12 +106,12 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `GET /tags` retorna tags ativas filtradas por `familyId` ou `userId` pessoal.
-- [ ] `findOrCreateMany` busca tags existentes e cria dinamicamente novas tags dentro do mesmo escopo.
-- [ ] Nomes de tags vazios ou com mais de 50 caracteres são validados.
-- [ ] Membros `VIEWER` são bloqueados de criar tags no escopo familiar.
-- [ ] Testes unitários para `TagsService` criados e passando.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/tags.service.spec.ts`
+- [x] `GET /tags` retorna tags ativas filtradas por `familyId` ou `userId` pessoal.
+- [x] `findOrCreateMany` busca tags existentes e cria dinamicamente novas tags dentro do mesmo escopo.
+- [x] Nomes de tags vazios ou com mais de 50 caracteres são validados.
+- [x] Membros `VIEWER` são bloqueados de criar tags no escopo familiar.
+- [x] Testes unitários para `TagsService` criados e passando.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/tags.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
