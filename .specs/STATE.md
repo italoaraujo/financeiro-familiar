@@ -106,23 +106,32 @@
 - **Date**: 2026-09-07
 - **Status**: active
 
+### AD-015
+- **Decision**: Modelar tags financeiras usando entidade relacional `Tag` vinculada ao escopo pessoal/familiar com relação N:N explícita (`TransactionTag`) com `Transaction`. Suportar atribuição de múltiplas tags com normalização dinâmica e autocomplete no modal de lançamento, propagar automaticamente as tags para todas as parcelas de compras parceladas no cartão de crédito, exibir badges no extrato e habilitar filtros analíticos por tag em relatórios (fluxo de caixa, categorias, exportação CSV e distribuição de gastos por tag).
+- **Reason**: Atende à necessidade de categorização transversal e rastreamento de projetos/eventos financeiros específicos pelo usuário, preservando a integridade referencial, isolamento de tenancy e regras de privacidade familiar.
+- **Trade-off**: Requer tabela intermediária no PostgreSQL e inclusão relacional em consultas de extrato e relatórios.
+- **Scope**: Prisma schema, módulo `tags`, módulo `transactions`, módulo `reports`, componentes de frontend e testes de integração.
+- **Date**: 2026-09-16
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `rbac-viewer-permissao-leitura`
+- **Active Feature**: `tags-lancamentos-relatorios`
 - **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
-- **Status**: **COMPLETE / VERIFIED**
-- **Build Status**: 100% Success (148 backend tests passed, Next.js build clean)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Completed Tasks**: 0 / 8 (0%)
+- **Status**: **READY FOR EXECUTION**
+- **Build Status**: 100% Success (152 backend tests passed, Next.js build clean)
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/rbac-viewer-permissao-leitura
-- **Phase / Task**: Completed & Verified
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **Feature**: .specs/features/tags-lancamentos-relatorios
+- **Phase / Task**: Phase 1 - T1: Modelagem Prisma de Tags e Migração do Banco de Dados
+- **Completed**: None
 - **In-progress**: None
-- **Next step**: Revisão do Walkthrough pelo usuário e merge da branch `feature/rbac-viewer-permissao-leitura`
+- **Next step**: Executar T1 (Modelagem Prisma de Tags e Migração do Banco de Dados)
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/rbac-viewer-permissao-leitura
+- **Branch**: develop
+
 
