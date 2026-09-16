@@ -13,7 +13,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [registrationEnabled, setRegistrationEnabled] = useState(true);
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(() => {
+    if (
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === 'true' ||
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === '1'
+    ) {
+      return false;
+    }
+
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null) {
+        return cached === 'true';
+      }
+    }
+
+    return false;
+  });
   const { login } = useAuth();
   const router = useRouter();
 
@@ -22,6 +38,9 @@ export default function LoginPage() {
     getAuthStatus().then((status) => {
       if (isMounted) {
         setRegistrationEnabled(status.registrationEnabled);
+        try {
+          sessionStorage.setItem('registrationEnabled', String(status.registrationEnabled));
+        } catch (_) {}
       }
     });
     return () => {

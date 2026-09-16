@@ -71,7 +71,22 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
     return await apiRequest<AuthStatusResponse>('/auth/status');
   } catch (error) {
     console.error('Falha ao consultar status de autenticação:', error);
-    return { registrationEnabled: true };
+    const envDisabled =
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === 'true' ||
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === '1';
+
+    if (envDisabled) {
+      return { registrationEnabled: false };
+    }
+
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null) {
+        return { registrationEnabled: cached === 'true' };
+      }
+    }
+
+    return { registrationEnabled: false };
   }
 }
 

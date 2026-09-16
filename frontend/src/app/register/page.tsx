@@ -15,7 +15,23 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null);
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(() => {
+    if (
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === 'true' ||
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === '1'
+    ) {
+      return false;
+    }
+
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null) {
+        return cached === 'true';
+      }
+    }
+
+    return null;
+  });
   const { register } = useAuth();
   const router = useRouter();
 
@@ -24,6 +40,9 @@ export default function RegisterPage() {
     getAuthStatus().then((status) => {
       if (isMounted) {
         setRegistrationEnabled(status.registrationEnabled);
+        try {
+          sessionStorage.setItem('registrationEnabled', String(status.registrationEnabled));
+        } catch (_) {}
       }
     });
     return () => {
@@ -80,7 +99,12 @@ export default function RegisterPage() {
 
         {/* Card */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
-          {registrationEnabled === false ? (
+          {registrationEnabled === null ? (
+            <div className="text-center py-10">
+              <div className="inline-block h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3" />
+              <p className="text-xs text-slate-400">Verificando disponibilidade...</p>
+            </div>
+          ) : registrationEnabled === false ? (
             <div className="text-center py-4">
               <div className="inline-flex items-center justify-center p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400 mb-4">
                 <AlertCircle className="h-8 w-8" />
