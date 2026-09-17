@@ -194,10 +194,10 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Componente renderiza chips com cores das tags e botão de remoção.
-- [ ] Digitação permite adicionar novas tags via Enter ou vírgula.
-- [ ] Sugestões do autocomplete carregam tags do backend conforme o usuário digita.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Componente renderiza chips com cores das tags e botão de remoção.
+- [x] Digitação permite adicionar novas tags via Enter ou vírgula.
+- [x] Sugestões do autocomplete carregam tags do backend conforme o usuário digita.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build
