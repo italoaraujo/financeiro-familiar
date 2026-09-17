@@ -248,16 +248,16 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Seletor de tag adicionado na barra de filtros da tela de relatórios.
-- [ ] Gráficos de evolução mensal e categorias são atualizados com a tag filtrada.
-- [ ] Seção/gráfico de distribuição de gastos por tag exibe totais e percentuais.
-- [ ] Botão de exportação CSV envia o parâmetro `tagId` e gera arquivo com a coluna Tags.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Seletor de tag adicionado na barra de filtros da tela de relatórios.
+- [x] Gráficos de evolução mensal e categorias são atualizados com a tag filtrada.
+- [x] Seção/gráfico de distribuição de gastos por tag exibe totais e percentuais.
+- [x] Botão de exportação CSV envia o parâmetro `tagId` e gera arquivo com a coluna Tags.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build
 
-**Commit**: `feat(reports-ui): add tag filter, expenses by tag visualization and csv support`
+**Commit**: `feat(reports-ui): add tag filter, expenses by tag and csv export`
 
 ---
 

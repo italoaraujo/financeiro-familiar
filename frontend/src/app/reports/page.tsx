@@ -10,6 +10,7 @@ import {
   Filter,
   PieChart as PieIcon,
   BarChart2,
+  Tag as TagIcon,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -34,26 +35,44 @@ export default function ReportsPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [monthsCount, setMonthsCount] = useState(6);
+  const [filterTagId, setFilterTagId] = useState('');
 
   // Data
   const [cashFlow, setCashFlow] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [tagExpenses, setTagExpenses] = useState<any[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]);
 
   const loadReportData = async () => {
     setLoading(true);
     try {
-      const params: any = {
+      const flowParams: any = {
         familyId: selectedFamilyId || undefined,
         months: monthsCount,
+        tagId: filterTagId || undefined,
+      };
+      const catParams: any = {
+        familyId: selectedFamilyId || undefined,
+        tagId: filterTagId || undefined,
+      };
+      const tagParams: any = {
+        familyId: selectedFamilyId || undefined,
+      };
+      const auxParams: any = {
+        familyId: selectedFamilyId || undefined,
       };
 
-      const [flow, cats] = await Promise.all([
-        apiRequest('/reports/cash-flow', { params }),
-        apiRequest('/reports/categories', { params: { familyId: selectedFamilyId || undefined } }),
+      const [flow, cats, tagExps, tgs] = await Promise.all([
+        apiRequest('/reports/cash-flow', { params: flowParams }),
+        apiRequest('/reports/categories', { params: catParams }),
+        apiRequest('/reports/tags', { params: tagParams }),
+        apiRequest('/tags', { params: auxParams }).catch(() => []),
       ]);
 
       setCashFlow(flow || []);
       setCategories(cats || []);
+      setTagExpenses(tagExps || []);
+      setAvailableTags(Array.isArray(tgs) ? tgs : []);
     } catch (err) {
       console.error('Error loading reports data:', err);
     } finally {
@@ -65,7 +84,7 @@ export default function ReportsPage() {
     if (user) {
       loadReportData();
     }
-  }, [user, selectedFamilyId, monthsCount]);
+  }, [user, selectedFamilyId, monthsCount, filterTagId]);
 
   const handleExportCsv = async () => {
     setDownloading(true);
@@ -74,6 +93,7 @@ export default function ReportsPage() {
         familyId: selectedFamilyId || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        tagId: filterTagId || undefined,
       };
 
       const blob = await apiRequest<Blob>('/reports/export/csv', { params });
@@ -123,7 +143,7 @@ export default function ReportsPage() {
             <span>Filtros do Relatório & Exportação</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Inicial</label>
               <input
@@ -154,6 +174,22 @@ export default function ReportsPage() {
                 <option value={3}>Últimos 3 meses</option>
                 <option value={6}>Últimos 6 meses</option>
                 <option value={12}>Últimos 12 meses</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Filtrar por Tag</label>
+              <select
+                value={filterTagId}
+                onChange={(e) => setFilterTagId(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              >
+                <option value="">Todas as Tags</option>
+                {availableTags.map((tag) => (
+                  <option key={tag.id} value={tag.id}>
+                    #{tag.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -270,6 +306,67 @@ export default function ReportsPage() {
               </>
             )}
           </div>
+        </div>
+
+        {/* Tags Distribution Section */}
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <TagIcon className="h-4 w-4 sm:h-5 sm:w-5 text-teal-400 shrink-0" />
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white">Distribuição de Gastos por Tag</h3>
+                <p className="text-xs text-slate-400">Total acumulado e percentual por marcador temático</p>
+              </div>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">
+              {tagExpenses.length} {tagExpenses.length === 1 ? 'tag com gastos' : 'tags com gastos'}
+            </span>
+          </div>
+
+          {tagExpenses.length === 0 ? (
+            <div className="h-32 flex items-center justify-center text-slate-500 text-xs sm:text-sm">
+              Nenhum gasto com tags associadas para o período selecionado.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-2">
+              {tagExpenses.map((tExp, idx) => (
+                <div
+                  key={tExp.id || idx}
+                  className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3.5 flex flex-col justify-between hover:border-slate-600 transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="h-3 w-3 rounded-full shrink-0"
+                        style={{ backgroundColor: tExp.color || '#10b981' }}
+                      />
+                      <span className="text-white font-bold text-xs sm:text-sm truncate">
+                        #{tExp.name}
+                      </span>
+                    </div>
+                    <span className="text-emerald-400 font-bold text-xs sm:text-sm shrink-0">
+                      {formatCurrency(tExp.amount)}
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden mb-2">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${tExp.percentage}%`,
+                        backgroundColor: tExp.color || '#10b981',
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <span>{tExp.count} {tExp.count === 1 ? 'lançamento' : 'lançamentos'}</span>
+                    <span className="font-semibold text-slate-300">{tExp.percentage}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </AppShell>
