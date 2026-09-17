@@ -221,15 +221,15 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Modal de lançamento permite informar tags usando `TagInput`.
-- [ ] Tabela de transações renderiza badges visuais para as tags do lançamento.
-- [ ] Barra de filtros inclui seletor de tag recarregando o extrato com o filtro aplicado.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Modal de lançamento permite informar tags usando `TagInput`.
+- [x] Tabela de transações renderiza badges visuais para as tags do lançamento.
+- [x] Barra de filtros inclui seletor de tag recarregando o extrato com o filtro aplicado.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build
 
-**Commit**: `feat(transactions-ui): add tag input in modal, badges in list and filter by tag`
+**Commit**: `feat(transactions-ui): add tag input, badges and tag filter`
 
 ---
 
