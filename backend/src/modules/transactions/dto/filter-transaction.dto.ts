@@ -54,6 +54,11 @@ export class FilterTransactionDto {
   @IsOptional()
   personId?: string;
 
+  @ApiProperty({ required: false, description: 'Filtrar por tag específica (ID ou nome)' })
+  @IsString()
+  @IsOptional()
+  tagId?: string;
+
   @ApiProperty({ required: false, default: 1 })
   @Type(() => Number)
   @IsInt()

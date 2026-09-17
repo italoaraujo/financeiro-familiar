@@ -135,17 +135,17 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `create` associa tags à transação dentro da transação ACID do Prisma.
-- [ ] Compras parceladas replicam as tags para todas as parcelas do grupo.
-- [ ] `findAll` filtra transações por `tagId` e retorna array de tags associadas.
-- [ ] Transações privadas de outros membros retornam tags vazias (`tags: []`).
-- [ ] Testes unitários em `transactions.service.spec.ts` cobrem associação de tags e filtros.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] `create` associa tags à transação dentro da transação ACID do Prisma.
+- [x] Compras parceladas replicam as tags para todas as parcelas do grupo.
+- [x] `findAll` filtra transações por `tagId` e retorna array de tags associadas.
+- [x] Transações privadas de outros membros retornam tags vazias (`tags: []`).
+- [x] Testes unitários em `transactions.service.spec.ts` cobrem associação de tags e filtros.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
 
-**Commit**: `feat(transactions): integrate tags in transaction creation, installments and listing`
+**Commit**: `feat(transactions): add tags in creation, installments and listing`
 
 ---
 
