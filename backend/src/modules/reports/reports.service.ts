@@ -235,7 +235,7 @@ export class ReportsService {
       },
     });
 
-    const tagMap = new Map<string, { id: string; name: string; color: string; total: Prisma.Decimal }>();
+    const tagMap = new Map<string, { id: string; name: string; color: string; total: Prisma.Decimal; count: number }>();
 
     for (const tx of transactions) {
       const isPrivateHidden = tx.isPrivate && tx.userId !== userId;
@@ -249,10 +249,12 @@ export class ReportsService {
             name: tag.name,
             color: tag.color || '#64748b',
             total: new Prisma.Decimal(0),
+            count: 0,
           });
         }
         const item = tagMap.get(tag.id)!;
         item.total = item.total.add(tx.amount);
+        item.count += 1;
       }
     }
 
@@ -267,6 +269,7 @@ export class ReportsService {
         name: item.name,
         color: item.color,
         amount: item.total,
+        count: item.count,
         percentage: totalExpense.gt(0)
           ? Number(item.total.dividedBy(totalExpense).times(100).toFixed(1))
           : 0,

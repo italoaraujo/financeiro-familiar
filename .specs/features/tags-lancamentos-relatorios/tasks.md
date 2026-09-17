@@ -276,17 +276,17 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste automatizado cria transação avulsa e compra parcelada com tags.
-- [ ] Verifica que todas as parcelas receberam as tags no banco.
-- [ ] Verifica que filtro por tag retorna apenas as transações corretas.
-- [ ] Verifica que relatório e CSV refletem o filtro de tag.
-- [ ] Suite completa de testes passa sem falhas.
-- [ ] Gate check passes: `npm --prefix backend test && npm --prefix frontend run build`
+- [x] Teste automatizado cria transação avulsa e compra parcelada com tags.
+- [x] Verifica que todas as parcelas receberam as tags no banco.
+- [x] Verifica que filtro por tag retorna apenas as transações corretas.
+- [x] Verifica que relatório e CSV refletem o filtro de tag.
+- [x] Suite completa de testes passa sem falhas.
+- [x] Gate check passes: `npm --prefix backend test && npm --prefix frontend run build`
 
 **Tests**: integration
 **Gate**: full
 
-**Commit**: `test(tags): add comprehensive integration flow for tags, transactions and reports`
+**Commit**: `test(tags): add integration flow for tags, transactions and reports`
 
 ---
 

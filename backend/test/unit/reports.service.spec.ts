@@ -199,6 +199,7 @@ describe('ReportsService', () => {
         name: 'viagem',
         color: '#10b981',
         amount: new Prisma.Decimal(300),
+        count: 1,
         percentage: 75,
       });
       expect(result[1]).toEqual({
@@ -206,6 +207,7 @@ describe('ReportsService', () => {
         name: 'trabalho',
         color: '#3b82f6',
         amount: new Prisma.Decimal(100),
+        count: 1,
         percentage: 25,
       });
     });
