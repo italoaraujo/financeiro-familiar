@@ -10,7 +10,21 @@ import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@pris
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDashboardSummary(userId: string, familyId?: string, periodMonth?: string) {
+  private buildTagFilter(tagId?: string) {
+    if (!tagId) return {};
+    return {
+      tags: {
+        some: {
+          OR: [
+            { tagId },
+            { tag: { name: { equals: tagId, mode: 'insensitive' as Prisma.QueryMode } } },
+          ],
+        },
+      },
+    };
+  }
+
+  async getDashboardSummary(userId: string, familyId?: string, periodMonth?: string, tagId?: string) {
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId);
     }
@@ -22,8 +36,9 @@ export class ReportsService {
     const endDate = new Date(year, m, 0, 23, 59, 59);
 
     const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
+    const tagFilter = this.buildTagFilter(tagId);
 
-    // 1. Saldo Geral Consolidado
+    // 1. Saldo Geral Consolidado (contas não são filtradas por tag)
     const accounts = await this.prisma.account.findMany({
       where: {
         ...userOrFamilyFilter,
@@ -42,6 +57,7 @@ export class ReportsService {
     const incomeAgg = await this.prisma.transaction.aggregate({
       where: {
         ...userOrFamilyFilter,
+        ...tagFilter,
         deletedAt: null,
         type: TransactionType.INCOME,
         status: TransactionStatus.COMPLETED,
@@ -55,6 +71,7 @@ export class ReportsService {
     const expenseAgg = await this.prisma.transaction.aggregate({
       where: {
         ...userOrFamilyFilter,
+        ...tagFilter,
         deletedAt: null,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.COMPLETED,
@@ -96,9 +113,15 @@ export class ReportsService {
     const recentTransactions = await this.prisma.transaction.findMany({
       where: {
         ...userOrFamilyFilter,
+        ...tagFilter,
         deletedAt: null,
       },
-      include: { category: true, account: true, creditCard: true },
+      include: {
+        category: true,
+        account: true,
+        creditCard: true,
+        tags: { include: { tag: true } },
+      },
       orderBy: { transactionDate: 'desc' },
       take: 5,
     });
@@ -116,7 +139,7 @@ export class ReportsService {
     };
   }
 
-  async getExpensesByCategory(userId: string, familyId?: string, periodMonth?: string) {
+  async getExpensesByCategory(userId: string, familyId?: string, periodMonth?: string, tagId?: string) {
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId);
     }
@@ -128,10 +151,12 @@ export class ReportsService {
     const endDate = new Date(year, m, 0, 23, 59, 59);
 
     const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
+    const tagFilter = this.buildTagFilter(tagId);
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
         ...userOrFamilyFilter,
+        ...tagFilter,
         deletedAt: null,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.COMPLETED,
@@ -179,13 +204,84 @@ export class ReportsService {
     })).sort((a, b) => b.percentage - a.percentage);
   }
 
-  async getCashFlow(userId: string, familyId?: string, monthsCount: number = 6) {
+  async getExpensesByTag(userId: string, familyId?: string, periodMonth?: string) {
+    if (familyId) {
+      await this.verifyFamilyAccess(userId, familyId);
+    }
+
+    const now = new Date();
+    const month = periodMonth || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const [year, m] = month.split('-').map(Number);
+    const startDate = new Date(year, m - 1, 1);
+    const endDate = new Date(year, m, 0, 23, 59, 59);
+
+    const userOrFamilyFilter = familyId ? { familyId } : { userId, familyId: null };
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        ...userOrFamilyFilter,
+        deletedAt: null,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.COMPLETED,
+        transactionDate: { gte: startDate, lte: endDate },
+        tags: { some: {} },
+      },
+      include: {
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    const tagMap = new Map<string, { id: string; name: string; color: string; total: Prisma.Decimal }>();
+
+    for (const tx of transactions) {
+      const isPrivateHidden = tx.isPrivate && tx.userId !== userId;
+      if (isPrivateHidden) continue;
+
+      for (const tt of tx.tags) {
+        const tag = tt.tag;
+        if (!tagMap.has(tag.id)) {
+          tagMap.set(tag.id, {
+            id: tag.id,
+            name: tag.name,
+            color: tag.color || '#64748b',
+            total: new Prisma.Decimal(0),
+          });
+        }
+        const item = tagMap.get(tag.id)!;
+        item.total = item.total.add(tx.amount);
+      }
+    }
+
+    const totalExpense = Array.from(tagMap.values()).reduce(
+      (acc, item) => acc.add(item.total),
+      new Prisma.Decimal(0),
+    );
+
+    return Array.from(tagMap.values())
+      .map((item) => ({
+        tagId: item.id,
+        name: item.name,
+        color: item.color,
+        amount: item.total,
+        percentage: totalExpense.gt(0)
+          ? Number(item.total.dividedBy(totalExpense).times(100).toFixed(1))
+          : 0,
+      }))
+      .sort((a, b) => b.percentage - a.percentage);
+  }
+
+  async getCashFlow(userId: string, familyId?: string, monthsCount: number = 6, tagId?: string) {
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId);
     }
 
     const result = [];
     const now = new Date();
+    const tagFilter = this.buildTagFilter(tagId);
 
     for (let i = monthsCount - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -202,6 +298,7 @@ export class ReportsService {
         this.prisma.transaction.aggregate({
           where: {
             ...userOrFamilyFilter,
+            ...tagFilter,
             deletedAt: null,
             type: TransactionType.INCOME,
             status: TransactionStatus.COMPLETED,
@@ -212,6 +309,7 @@ export class ReportsService {
         this.prisma.transaction.aggregate({
           where: {
             ...userOrFamilyFilter,
+            ...tagFilter,
             deletedAt: null,
             type: TransactionType.EXPENSE,
             status: TransactionStatus.COMPLETED,
@@ -235,13 +333,16 @@ export class ReportsService {
     return result;
   }
 
-  async exportCsv(userId: string, familyId?: string, startDate?: string, endDate?: string) {
+  async exportCsv(userId: string, familyId?: string, startDate?: string, endDate?: string, tagId?: string) {
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId);
     }
 
+    const tagFilter = this.buildTagFilter(tagId);
+
     const where: any = {
       ...(familyId ? { familyId } : { userId, familyId: null }),
+      ...tagFilter,
       deletedAt: null,
     };
 
@@ -258,6 +359,11 @@ export class ReportsService {
         account: true,
         creditCard: true,
         user: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
       },
       orderBy: { transactionDate: 'desc' },
     });
@@ -268,6 +374,7 @@ export class ReportsService {
       { label: 'Tipo', value: 'type' },
       { label: 'Descrição', value: 'description' },
       { label: 'Categoria', value: 'category' },
+      { label: 'Tags', value: 'tags' },
       { label: 'Conta/Cartão', value: 'paymentSource' },
       { label: 'Valor (R$)', value: 'amount' },
       { label: 'Status', value: 'status' },
@@ -275,14 +382,19 @@ export class ReportsService {
       { label: 'Observações', value: 'notes' },
     ];
 
-    const data = transactions.map((t) => {
+    const data = transactions.map((t: any) => {
       const isPrivateHidden = t.isPrivate && t.userId !== userId;
+      const tagNames = isPrivateHidden
+        ? ''
+        : (t.tags || []).map((tt: any) => tt.tag.name).join(', ');
+
       return {
         id: t.id,
         date: t.transactionDate.toISOString().split('T')[0],
         type: t.type,
         description: isPrivateHidden ? 'Lançamento Privado' : t.description,
         category: isPrivateHidden ? 'Privado' : t.category?.name || '-',
+        tags: tagNames,
         paymentSource: t.account?.name || t.creditCard?.name || '-',
         amount: Number(t.amount.toString()),
         status: t.status,

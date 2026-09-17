@@ -164,11 +164,11 @@ T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `getCashFlow` e `getExpensesByCategory` aplicam filtro condicional por `tagId`.
-- [ ] `exportCsv` inclui coluna `Tags` e filtra por `tagId` quando fornecido.
-- [ ] `getExpensesByTag` retorna distribuição percentual e total de despesas por tag no mês.
-- [ ] Testes unitários em `reports.service.spec.ts` cobrem filtro por tag e novo endpoint.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/reports.service.spec.ts`
+- [x] `getCashFlow` e `getExpensesByCategory` aplicam filtro condicional por `tagId`.
+- [x] `exportCsv` inclui coluna `Tags` e filtra por `tagId` quando fornecido.
+- [x] `getExpensesByTag` retorna distribuição percentual e total de despesas por tag no mês.
+- [x] Testes unitários em `reports.service.spec.ts` cobrem filtro por tag e novo endpoint.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/reports.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
