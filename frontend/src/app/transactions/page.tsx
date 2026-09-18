@@ -405,18 +405,27 @@ export default function TransactionsPage() {
                         </div>
                         {tx.tags && tx.tags.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1 mt-1">
-                            {tx.tags.map((tItem: any) => (
-                              <span
-                                key={tItem.tag?.id || tItem.id}
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700"
-                              >
+                            {tx.tags.map((tItem: any, idx: number) => {
+                              const tagObj = tItem?.tag || tItem;
+                              const tagName = typeof tagObj === 'string' ? tagObj : tagObj?.name;
+                              const tagColor = tagObj?.color || '#10b981';
+                              const tagKey = tagObj?.id || `${tagName}-${idx}`;
+
+                              if (!tagName) return null;
+
+                              return (
                                 <span
-                                  className="h-1.5 w-1.5 rounded-full"
-                                  style={{ backgroundColor: tItem.tag?.color || '#10b981' }}
-                                />
-                                #{tItem.tag?.name}
-                              </span>
-                            ))}
+                                  key={tagKey}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700 shadow-sm"
+                                >
+                                  <span
+                                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                                    style={{ backgroundColor: tagColor }}
+                                  />
+                                  #{tagName}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                       </td>
