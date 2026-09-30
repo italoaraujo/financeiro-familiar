@@ -142,7 +142,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | SECH-02 | P2: Proteção contra Exaustão de Recursos por Parcelamento (SECH-02) | Tasks | Verified |
 | SECH-03 | P3: Limitação de Taxa (Rate Limiting) em Rotas de Autenticação (SECH-03) | Tasks | Verified |
 | SECH-04 | P4: Restrição Segura de Origens CORS (SECH-04) | Tasks | Verified |
-| SECH-05 | P5: Proteção BOLA em Vínculo de Contas a Metas Familiares (SECH-05) | Tasks | Pending |
+| SECH-05 | P5: Proteção BOLA em Vínculo de Contas a Metas Familiares (SECH-05) | Tasks | Verified |
 
 **Coverage:** 5 total, 5 mapped to tasks, 0 unmapped
 

@@ -36,11 +36,11 @@ export class GoalsService {
     }
 
     if (dto.familyId) {
-      if (account.familyId && account.familyId !== dto.familyId) {
-        throw new ForbiddenException('A conta bancária informada não pertence ao grupo familiar da meta');
+      if (account.familyId !== dto.familyId) {
+        throw new ForbiddenException('A conta bancária informada deve pertencer a este grupo familiar');
       }
-    } else if (account.userId !== userId) {
-      throw new ForbiddenException('A conta bancária informada não pertence ao usuário');
+    } else if (account.userId !== userId || account.familyId !== null) {
+      throw new ForbiddenException('A conta bancária informada deve ser uma conta pessoal sua');
     }
 
     return this.prisma.goal.create({

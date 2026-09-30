@@ -168,11 +168,11 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Tentativas de associar contas pessoais a metas familiares são rejeitadas com `ForbiddenException`.
-- [ ] Tentativas de associar contas de terceiros a metas pessoais são rejeitadas com `ForbiddenException`.
-- [ ] Criação de metas com contas legítimas do mesmo escopo continua funcionando perfeitamente.
-- [ ] Testes unitários cobrindo as novas regras de autorização passam com 100% de sucesso.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
+- [x] Tentativas de associar contas pessoais a metas familiares são rejeitadas com `ForbiddenException`.
+- [x] Tentativas de associar contas de terceiros a metas pessoais são rejeitadas com `ForbiddenException`.
+- [x] Criação de metas com contas legítimas do mesmo escopo continua funcionando perfeitamente.
+- [x] Testes unitários cobrindo as novas regras de autorização passam com 100% de sucesso.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick

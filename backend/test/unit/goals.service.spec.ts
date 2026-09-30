@@ -143,6 +143,51 @@ describe('GoalsService', () => {
         include: expect.any(Object),
       });
     });
+
+    it('should throw ForbiddenException when creating family goal with personal account of another user (SEC-HIGH-05)', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        familyId: 'family-1',
+        userId: 'user-1',
+        role: 'MEMBER',
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-victim-personal',
+        userId: 'user-victim',
+        familyId: null,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Meta Familiar Fraudulenta',
+          targetAmount: 5000,
+          familyId: 'family-1',
+          accountId: 'acc-victim-personal',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('A conta bancária informada deve pertencer a este grupo familiar'),
+      );
+    });
+
+    it('should throw ForbiddenException when creating personal goal with family account or account of another user (SEC-HIGH-05)', async () => {
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-family-or-other',
+        userId: 'user-1',
+        familyId: 'family-1',
+        deletedAt: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Meta Pessoal com Conta Familiar',
+          targetAmount: 3000,
+          accountId: 'acc-family-or-other',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('A conta bancária informada deve ser uma conta pessoal sua'),
+      );
+    });
   });
 
   describe('addDeposit', () => {
