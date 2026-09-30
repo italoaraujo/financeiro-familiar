@@ -38,6 +38,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: 1d
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
       - "3001:3001"

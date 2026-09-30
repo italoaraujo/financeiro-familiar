@@ -143,10 +143,10 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `main.ts` utiliza lista explícita de origens permitidas via `ALLOWED_ORIGINS`.
-- [ ] `origin: '*'` com `credentials: true` é completamente removido.
-- [ ] Arquivos de configuração de ambiente (`.env`, `.env.example`, `docker-compose.yml`) incluem a variável `ALLOWED_ORIGINS`.
-- [ ] Gate check passes: `npm --prefix backend test` e `npm --prefix backend run build`
+- [x] `main.ts` utiliza lista explícita de origens permitidas via `ALLOWED_ORIGINS`.
+- [x] `origin: '*'` com `credentials: true` é completamente removido.
+- [x] Arquivos de configuração de ambiente (`.env`, `.env.example`, `docker-compose.yml`) incluem a variável `ALLOWED_ORIGINS`.
+- [x] Gate check passes: `npm --prefix backend test` e `npm --prefix backend run build`
 
 **Tests**: unit
 **Gate**: quick
