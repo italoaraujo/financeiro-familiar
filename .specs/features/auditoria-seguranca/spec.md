@@ -115,9 +115,9 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | SEC-05 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
 | SEC-06 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
 | SEC-07 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
-| SEC-08 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
-| SEC-09 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
-| SEC-10 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
+| SEC-08 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Verified |
+| SEC-09 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Verified |
+| SEC-10 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Verified |
 
 **Coverage:** 10 total, 10 mapped to tasks, 0 unmapped
 

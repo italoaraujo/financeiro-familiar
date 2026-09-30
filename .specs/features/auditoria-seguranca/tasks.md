@@ -118,10 +118,10 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] `AuthModule` e `JwtStrategy` recusam iniciar se `JWT_SECRET` for indefinido, menor que 32 caracteres ou contiver 'supersecret'.
-- [ ] Fallback hardcoded `supersecretjwtkey1234567890` é totalmente eliminado de código e configurações.
-- [ ] Testes automatizados validam a recusa fatal para chaves fracas e a aceitação de chaves com entropia suficiente.
-- [ ] Gate check passes: `npm --prefix backend test` e `npm --prefix backend run build`
+- [x] `AuthModule` e `JwtStrategy` recusam iniciar se `JWT_SECRET` for indefinido, menor que 32 caracteres ou contiver 'supersecret'.
+- [x] Fallback hardcoded `supersecretjwtkey1234567890` é totalmente eliminado de código e configurações.
+- [x] Testes automatizados validam a recusa fatal para chaves fracas e a aceitação de chaves com entropia suficiente.
+- [x] Gate check passes: `npm --prefix backend test` e `npm --prefix backend run build`
 
 **Tests**: unit
 **Gate**: quick
