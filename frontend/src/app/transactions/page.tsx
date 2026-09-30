@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
+import { TagInput } from '../../components/ui/TagInput';
 
 export default function TransactionsPage() {
   const { user, selectedFamilyId, isViewer } = useAuth();
@@ -32,6 +33,7 @@ export default function TransactionsPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filterPersonId, setFilterPersonId] = useState('');
+  const [filterTagId, setFilterTagId] = useState('');
   const [page, setPage] = useState(1);
 
   // Aux data for modals & filters
@@ -39,6 +41,7 @@ export default function TransactionsPage() {
   const [cards, setCards] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [people, setPeople] = useState<any[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,6 +58,7 @@ export default function TransactionsPage() {
   const [creditCardId, setCreditCardId] = useState('');
   const [totalInstallments, setTotalInstallments] = useState(1);
   const [personId, setPersonId] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [isPrivate, setIsPrivate] = useState(false);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -69,18 +73,20 @@ export default function TransactionsPage() {
   const loadAuxData = async () => {
     try {
       const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
-      const [accs, cds, cats, ppl] = await Promise.all([
+      const [accs, cds, cats, ppl, tgs] = await Promise.all([
         apiRequest('/accounts', { params }),
         apiRequest('/credit-cards', { params }),
         apiRequest('/categories', { params }),
         selectedFamilyId
           ? apiRequest(`/families/${selectedFamilyId}/people`).catch(() => [])
           : Promise.resolve([]),
+        apiRequest('/tags', { params }).catch(() => []),
       ]);
       setAccounts(accs || []);
       setCards(cds || []);
       setCategories(cats || []);
       setPeople(ppl || []);
+      setAvailableTags(Array.isArray(tgs) ? tgs : []);
 
       if (accs && accs.length > 0) setAccountId(accs[0].id);
       if (cds && cds.length > 0) setCreditCardId(cds[0].id);
@@ -101,6 +107,7 @@ export default function TransactionsPage() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         personId: filterPersonId || undefined,
+        tagId: filterTagId || undefined,
         familyId: selectedFamilyId || undefined,
       };
 
@@ -124,7 +131,7 @@ export default function TransactionsPage() {
     if (user) {
       loadTransactions();
     }
-  }, [user, selectedFamilyId, page, type, startDate, endDate, filterPersonId]);
+  }, [user, selectedFamilyId, page, type, startDate, endDate, filterPersonId, filterTagId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,6 +177,7 @@ export default function TransactionsPage() {
             creditCardId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? creditCardId : undefined,
             totalInstallments: modalType === 'EXPENSE' && paymentMode === 'CARD' ? totalInstallments : 1,
             personId: personId || undefined,
+            tags: tags.length > 0 ? tags : undefined,
             isPrivate,
             notes: notes || undefined,
             familyId: selectedFamilyId || undefined,
@@ -183,9 +191,11 @@ export default function TransactionsPage() {
       setDescription('');
       setNotes('');
       setPersonId('');
+      setTags([]);
       setTotalInstallments(1);
       setIsPrivate(false);
       loadTransactions();
+      loadAuxData();
     } catch (err: any) {
       alert(err.message || 'Erro ao criar transação');
     } finally {
@@ -231,7 +241,7 @@ export default function TransactionsPage() {
 
         {/* Search & Filters Bar */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 sm:p-4">
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-3">
             {/* Search query */}
             <div className="relative sm:col-span-2 lg:col-span-2">
               <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -307,6 +317,27 @@ export default function TransactionsPage() {
                 </select>
               </div>
             )}
+
+            {/* Tag Filter */}
+            {availableTags.length > 0 && (
+              <div>
+                <select
+                  value={filterTagId}
+                  onChange={(e) => {
+                    setFilterTagId(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="">Todas as Tags</option>
+                  {availableTags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      #{tag.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </form>
         </div>
 
@@ -372,6 +403,31 @@ export default function TransactionsPage() {
                             </span>
                           )}
                         </div>
+                        {tx.tags && tx.tags.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1 mt-1">
+                            {tx.tags.map((tItem: any, idx: number) => {
+                              const tagObj = tItem?.tag || tItem;
+                              const tagName = typeof tagObj === 'string' ? tagObj : tagObj?.name;
+                              const tagColor = tagObj?.color || '#10b981';
+                              const tagKey = tagObj?.id || `${tagName}-${idx}`;
+
+                              if (!tagName) return null;
+
+                              return (
+                                <span
+                                  key={tagKey}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700 shadow-sm"
+                                >
+                                  <span
+                                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                                    style={{ backgroundColor: tagColor }}
+                                  />
+                                  #{tagName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
                         <span
@@ -762,6 +818,21 @@ export default function TransactionsPage() {
                       </div>
                     )}
                   </>
+                )}
+
+                {/* Tags */}
+                {modalType !== 'TRANSFER' && (
+                  <div className="pt-1">
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Tags (opcional)
+                    </label>
+                    <TagInput
+                      value={tags}
+                      onChange={setTags}
+                      familyId={selectedFamilyId}
+                      placeholder="Adicionar tags (ex: #viagem, #festa)..."
+                    />
+                  </div>
                 )}
 
                 {/* Person Attribution */}

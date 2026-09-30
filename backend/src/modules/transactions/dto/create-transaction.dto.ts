@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsEnum,
@@ -84,4 +85,10 @@ export class CreateTransactionDto {
   @IsUUID('4', { message: 'ID da pessoa inválido' })
   @IsOptional()
   personId?: string;
+
+  @ApiProperty({ required: false, type: [String], description: 'Tags para categorização transversal' })
+  @IsArray({ message: 'Tags deve ser uma lista de textos' })
+  @IsString({ each: true, message: 'Cada tag deve ser um texto' })
+  @IsOptional()
+  tags?: string[];
 }

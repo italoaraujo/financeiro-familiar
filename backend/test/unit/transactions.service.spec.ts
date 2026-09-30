@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreditCardsService } from '../../src/modules/credit-cards/credit-cards.service';
+import { TagsService } from '../../src/modules/tags/tags.service';
 import {
   GoalMovementType,
   GoalStatus,
@@ -16,6 +17,7 @@ describe('TransactionsService', () => {
   let service: TransactionsService;
   let prisma: any;
   let creditCardsService: any;
+  let tagsService: any;
 
   beforeEach(async () => {
     prisma = {
@@ -49,6 +51,9 @@ describe('TransactionsService', () => {
         count: jest.fn(),
         findMany: jest.fn(),
       },
+      transactionTag: {
+        create: jest.fn(),
+      },
       familyMember: {
         findUnique: jest.fn(),
       },
@@ -67,11 +72,16 @@ describe('TransactionsService', () => {
       determineInvoiceForDate: jest.fn(),
     };
 
+    tagsService = {
+      findOrCreateMany: jest.fn().mockResolvedValue([]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TransactionsService,
         { provide: PrismaService, useValue: prisma },
         { provide: CreditCardsService, useValue: creditCardsService },
+        { provide: TagsService, useValue: tagsService },
       ],
     }).compile();
 
@@ -612,6 +622,138 @@ describe('TransactionsService', () => {
       const result = await service.findAll('user-viewer', { familyId: 'family-1' });
       expect(result.data).toHaveLength(1);
       expect(result.meta.total).toBe(1);
+    });
+  });
+
+  describe('Tags support in transactions', () => {
+    it('should associate tags with single transaction', async () => {
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-1',
+        userId: 'user-1',
+        currentBalance: new Prisma.Decimal(1000),
+      });
+      prisma.transaction.create.mockResolvedValue({
+        id: 'tx-with-tags',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(100),
+        status: TransactionStatus.COMPLETED,
+      });
+      tagsService.findOrCreateMany.mockResolvedValue([
+        { id: 'tag-1', name: 'viagem' },
+        { id: 'tag-2', name: 'ferias' },
+      ]);
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 100,
+        description: 'Passagem',
+        transactionDate: '2026-09-01',
+        categoryId: 'cat-1',
+        accountId: 'acc-1',
+        tags: ['#viagem', 'ferias'],
+      });
+
+      expect(tagsService.findOrCreateMany).toHaveBeenCalledWith(
+        'user-1',
+        undefined,
+        ['#viagem', 'ferias'],
+        expect.anything(),
+      );
+      expect(prisma.transactionTag.create).toHaveBeenCalledWith({
+        data: { transactionId: 'tx-with-tags', tagId: 'tag-1' },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenCalledWith({
+        data: { transactionId: 'tx-with-tags', tagId: 'tag-2' },
+      });
+    });
+
+    it('should replicate tags to all installments in credit card purchase', async () => {
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({ id: 'inv-1' });
+      prisma.transaction.create
+        .mockResolvedValueOnce({ id: 'tx-inst-1' })
+        .mockResolvedValueOnce({ id: 'tx-inst-2' });
+
+      tagsService.findOrCreateMany.mockResolvedValue([{ id: 'tag-reforma', name: 'reforma' }]);
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 300,
+        description: 'Tinta',
+        transactionDate: '2026-09-01',
+        categoryId: 'cat-1',
+        creditCardId: 'card-1',
+        totalInstallments: 2,
+        tags: ['reforma'],
+      });
+
+      expect(prisma.transactionTag.create).toHaveBeenCalledWith({
+        data: { transactionId: 'tx-inst-1', tagId: 'tag-reforma' },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenCalledWith({
+        data: { transactionId: 'tx-inst-2', tagId: 'tag-reforma' },
+      });
+    });
+
+    it('should filter transactions by tagId and return formatted tags in findAll', async () => {
+      prisma.transaction.count.mockResolvedValue(1);
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: 'tx-1',
+          description: 'Passagem aérea',
+          userId: 'user-1',
+          amount: new Prisma.Decimal(500),
+          isPrivate: false,
+          category: { name: 'Viagem' },
+          tags: [
+            { tag: { id: 'tag-1', name: 'viagem', color: '#10b981' } },
+          ],
+        },
+      ]);
+
+      const result = await service.findAll('user-1', { tagId: 'tag-1' });
+
+      expect(prisma.transaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            tags: {
+              some: {
+                OR: [
+                  { tagId: 'tag-1' },
+                  { tag: { name: { equals: 'tag-1', mode: 'insensitive' } } },
+                ],
+              },
+            },
+          }),
+        }),
+      );
+      expect(result.data[0].tags).toEqual([{ id: 'tag-1', name: 'viagem', color: '#10b981' }]);
+    });
+
+    it('should sanitize tags to empty array for private transactions of other users', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'fm-1',
+        userId: 'user-2',
+        familyId: 'fam-1',
+        role: 'MEMBER',
+      });
+      prisma.transaction.count.mockResolvedValue(1);
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: 'tx-priv',
+          description: 'Presente Secreto',
+          userId: 'user-1',
+          familyId: 'fam-1',
+          amount: new Prisma.Decimal(200),
+          isPrivate: true,
+          category: { name: 'Compras' },
+          tags: [{ tag: { id: 'tag-sec', name: 'secreto' } }],
+        },
+      ]);
+
+      const result = await service.findAll('user-2', { familyId: 'fam-1' });
+
+      expect(result.data[0].description).toBe('Lançamento Privado');
+      expect(result.data[0].tags).toEqual([]);
     });
   });
 });

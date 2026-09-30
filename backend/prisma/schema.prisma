@@ -79,6 +79,7 @@ model User {
   goals         Goal[]
   personProfiles Person[]
   auditLogs     AuditLog[]
+  tags          Tag[]
 
   @@map("users")
 }
@@ -102,6 +103,7 @@ model Family {
   goals       Goal[]
   people      Person[]
   auditLogs   AuditLog[]
+  tags        Tag[]
 
   @@map("families")
 }
@@ -256,6 +258,7 @@ model Transaction {
   recurrence           Recurrence?       @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
   person               Person?           @relation(fields: [personId], references: [id], onDelete: SetNull)
   goalDeposits         GoalDeposit[]
+  tags                 TransactionTag[]
 
   @@index([userId, transactionDate])
   @@index([familyId, transactionDate])
@@ -412,4 +415,36 @@ model AuditLog {
   @@index([action, createdAt])
   @@map("audit_logs")
 }
+
+model Tag {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  familyId  String?          @map("family_id") @db.Uuid
+  name      String           @db.VarChar(50)
+  color     String?          @db.VarChar(7)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime?        @map("deleted_at") @db.Timestamptz
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family          Family?          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  transactionTags TransactionTag[]
+
+  @@unique([name, userId, familyId])
+  @@index([userId, deletedAt])
+  @@index([familyId, deletedAt])
+  @@map("tags")
+}
+
+model TransactionTag {
+  transactionId String      @map("transaction_id") @db.Uuid
+  tagId         String      @map("tag_id") @db.Uuid
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+  @@map("transaction_tags")
+}
+
 

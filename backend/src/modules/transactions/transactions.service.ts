@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreditCardsService } from '../credit-cards/credit-cards.service';
+import { TagsService } from '../tags/tags.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
@@ -25,6 +26,7 @@ export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly creditCardsService: CreditCardsService,
+    private readonly tagsService: TagsService,
   ) {}
 
   async create(userId: string, dto: CreateTransactionDto) {
@@ -59,6 +61,29 @@ export class TransactionsService {
     const baseDate = this.parseTransactionDate(dto.transactionDate);
 
     return this.prisma.$transaction(async (tx) => {
+      let resolvedTags: any[] = [];
+      if (dto.tags && dto.tags.length > 0) {
+        resolvedTags = await this.tagsService.findOrCreateMany(
+          userId,
+          dto.familyId,
+          dto.tags,
+          tx,
+        );
+      }
+
+      const linkTags = async (transactionId: string) => {
+        if (resolvedTags.length > 0) {
+          for (const tag of resolvedTags) {
+            await tx.transactionTag.create({
+              data: {
+                transactionId,
+                tagId: tag.id,
+              },
+            });
+          }
+        }
+      };
+
       // Validação de limite e status do cartão de crédito
       if (dto.creditCardId) {
         const card = await tx.creditCard.findUnique({
@@ -160,6 +185,8 @@ export class TransactionsService {
             data: { totalAmount: { increment: instAmount } },
           });
 
+          await linkTags(transaction.id);
+
           createdTransactions.push(transaction);
         }
 
@@ -196,6 +223,8 @@ export class TransactionsService {
           where: { id: invoice.id },
           data: { totalAmount: { increment: totalAmount } },
         });
+
+        await linkTags(transaction.id);
 
         return transaction;
       }
@@ -245,6 +274,8 @@ export class TransactionsService {
           },
         });
       }
+
+      await linkTags(transaction.id);
 
       return transaction;
     });
@@ -363,6 +394,17 @@ export class TransactionsService {
       where.description = { contains: filter.search, mode: 'insensitive' };
     }
 
+    if (filter.tagId) {
+      where.tags = {
+        some: {
+          OR: [
+            { tagId: filter.tagId },
+            { tag: { name: { equals: filter.tagId, mode: 'insensitive' } } },
+          ],
+        },
+      };
+    }
+
     const [total, transactions] = await Promise.all([
       this.prisma.transaction.count({ where }),
       this.prisma.transaction.findMany({
@@ -381,6 +423,11 @@ export class TransactionsService {
           user: {
             select: { id: true, name: true, email: true },
           },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
         },
         orderBy: { transactionDate: 'desc' },
         skip,
@@ -390,16 +437,21 @@ export class TransactionsService {
 
     // Aplica regra de privacidade familiar (RN06):
     // Se isPrivate = true e usuário não é o autor, omite descrição e detalhes
-    const sanitized = transactions.map((tx) => {
+    const sanitized = transactions.map((tx: any) => {
+      const flatTags = tx.tags ? tx.tags.map((tt: any) => tt.tag) : [];
       if (tx.isPrivate && tx.userId !== userId) {
         return {
           ...tx,
           description: 'Lançamento Privado',
           notes: null,
           category: { ...tx.category, name: 'Privado' },
+          tags: [],
         };
       }
-      return tx;
+      return {
+        ...tx,
+        tags: flatTags,
+      };
     });
 
     return {
