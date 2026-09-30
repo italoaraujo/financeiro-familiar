@@ -92,11 +92,11 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Aporte em meta usando conta de outro usuário sem acesso familiar lança `ForbiddenException` ('Acesso negado à conta bancária de débito selecionada').
-- [ ] Aporte com conta inexistente ou soft-deleted lança `NotFoundException` ('Conta bancária de débito não encontrada').
-- [ ] Aportes legítimos com contas próprias ou autorizadas na família continuam funcionando normalmente.
-- [ ] Testes unitários cobrindo autorização e fluxos de aporte passam.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
+- [x] Aporte em meta usando conta de outro usuário sem acesso familiar lança `ForbiddenException` ('Acesso negado à conta bancária de débito selecionada').
+- [x] Aporte com conta inexistente ou soft-deleted lança `NotFoundException` ('Conta bancária de débito não encontrada').
+- [x] Aportes legítimos com contas próprias ou autorizadas na família continuam funcionando normalmente.
+- [x] Testes unitários cobrindo autorização e fluxos de aporte passam.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick

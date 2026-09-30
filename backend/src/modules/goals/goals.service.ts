@@ -166,6 +166,12 @@ export class GoalsService {
         throw new NotFoundException('Conta bancária de débito não encontrada');
       }
 
+      if (account.userId !== userId && account.familyId) {
+        await this.verifyFamilyAccess(userId, account.familyId, true);
+      } else if (account.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária de débito selecionada');
+      }
+
       if (depositAmount.gt(account.currentBalance)) {
         throw new BadRequestException(
           `Saldo insuficiente na conta bancária vinculada para realizar o aporte. Saldo disponível: R$ ${account.currentBalance.toFixed(2)}`

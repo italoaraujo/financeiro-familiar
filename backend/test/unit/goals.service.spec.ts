@@ -160,6 +160,7 @@ describe('GoalsService', () => {
 
       prisma.account.findUnique.mockResolvedValue({
         id: 'acc-1',
+        userId: 'user-1',
         currentBalance: new Prisma.Decimal(2000),
         deletedAt: null,
       });
@@ -234,6 +235,7 @@ describe('GoalsService', () => {
 
       prisma.account.findUnique.mockResolvedValue({
         id: 'acc-1',
+        userId: 'user-1',
         currentBalance: new Prisma.Decimal(100),
         deletedAt: null,
       });
@@ -244,6 +246,68 @@ describe('GoalsService', () => {
           depositDate: '2026-09-01',
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject deposit if account belongs to another user (SEC-CRIT-02)', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-attacker',
+        name: 'Meta Atacante',
+        userId: 'user-attacker',
+        familyId: null,
+        accountId: 'acc-attacker',
+        targetAmount: new Prisma.Decimal(1000),
+        currentAmount: new Prisma.Decimal(0),
+        status: GoalStatus.IN_PROGRESS,
+        deletedAt: null,
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-victim',
+        userId: 'user-victim',
+        familyId: null,
+        currentBalance: new Prisma.Decimal(5000),
+        deletedAt: null,
+      });
+
+      await expect(
+        service.addDeposit('user-attacker', 'goal-attacker', {
+          accountId: 'acc-victim',
+          amount: 1000,
+          depositDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('Acesso negado à conta bancária de débito selecionada'),
+      );
+    });
+
+    it('should reject deposit if account does not exist or is soft-deleted (SEC-CRIT-02)', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-attacker',
+        name: 'Meta Atacante',
+        userId: 'user-attacker',
+        familyId: null,
+        accountId: 'acc-deleted',
+        targetAmount: new Prisma.Decimal(1000),
+        currentAmount: new Prisma.Decimal(0),
+        status: GoalStatus.IN_PROGRESS,
+        deletedAt: null,
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-deleted',
+        userId: 'user-attacker',
+        deletedAt: new Date(),
+      });
+
+      await expect(
+        service.addDeposit('user-attacker', 'goal-attacker', {
+          accountId: 'acc-deleted',
+          amount: 500,
+          depositDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(
+        new NotFoundException('Conta bancária de débito não encontrada'),
+      );
     });
   });
 

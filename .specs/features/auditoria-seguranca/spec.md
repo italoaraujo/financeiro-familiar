@@ -112,9 +112,9 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | SEC-02 | P1: Correção de BOLA/IDOR em Pagamento de Faturas de Cartão (SEC-CRIT-01) | Tasks | Verified |
 | SEC-03 | P1: Correção de BOLA/IDOR em Pagamento de Faturas de Cartão (SEC-CRIT-01) | Tasks | Verified |
 | SEC-04 | P1: Correção de BOLA/IDOR em Pagamento de Faturas de Cartão (SEC-CRIT-01) | Tasks | Verified |
-| SEC-05 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Pending |
-| SEC-06 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Pending |
-| SEC-07 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Pending |
+| SEC-05 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
+| SEC-06 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
+| SEC-07 | P2: Correção de BOLA/IDOR em Aportes de Metas Financeiras (SEC-CRIT-02) | Tasks | Verified |
 | SEC-08 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
 | SEC-09 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
 | SEC-10 | P3: Proteção Estrita e Eliminação de Fallbacks Hardcoded de JWT (SEC-CRIT-03) | Tasks | Pending |
