@@ -5,6 +5,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { Parser } from 'json2csv';
 import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { sanitizeCsvField } from '../../common/utils/csv-sanitizer.util';
 
 @Injectable()
 export class ReportsService {
@@ -395,14 +396,14 @@ export class ReportsService {
         id: t.id,
         date: t.transactionDate.toISOString().split('T')[0],
         type: t.type,
-        description: isPrivateHidden ? 'Lançamento Privado' : t.description,
-        category: isPrivateHidden ? 'Privado' : t.category?.name || '-',
-        tags: tagNames,
-        paymentSource: t.account?.name || t.creditCard?.name || '-',
+        description: isPrivateHidden ? 'Lançamento Privado' : sanitizeCsvField(t.description),
+        category: isPrivateHidden ? 'Privado' : sanitizeCsvField(t.category?.name || '-'),
+        tags: sanitizeCsvField(tagNames),
+        paymentSource: sanitizeCsvField(t.account?.name || t.creditCard?.name || '-'),
         amount: Number(t.amount.toString()),
         status: t.status,
-        author: t.user.name,
-        notes: isPrivateHidden ? '' : t.notes || '',
+        author: sanitizeCsvField(t.user?.name || ''),
+        notes: isPrivateHidden ? '' : sanitizeCsvField(t.notes || ''),
       };
     });
 

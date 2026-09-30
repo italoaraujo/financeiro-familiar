@@ -170,6 +170,33 @@ describe('ReportsService', () => {
         }),
       );
     });
+
+    it('should disarm CSV formulas by prefixing formula triggers with single quote (SEC-HIGH-01)', async () => {
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: 'tx-malicious',
+          transactionDate: new Date('2026-09-01'),
+          type: 'EXPENSE',
+          description: "=cmd|'/C calc'!A0",
+          category: { name: '+Promo' },
+          account: { name: '@Bank' },
+          creditCard: null,
+          amount: new Prisma.Decimal(100),
+          status: 'COMPLETED',
+          user: { name: 'Atacante' },
+          notes: '-1000 desconto',
+          isPrivate: false,
+          tags: [{ tag: { id: 'tag-1', name: '=malicious_tag' } }],
+        },
+      ]);
+
+      const csv = await service.exportCsv('user-1');
+      expect(csv).toContain("'=cmd|'/C calc'!A0");
+      expect(csv).toContain("'+Promo");
+      expect(csv).toContain("'@Bank");
+      expect(csv).toContain("'-1000 desconto");
+      expect(csv).toContain("'=malicious_tag");
+    });
   });
 
   describe('getExpensesByTag', () => {
