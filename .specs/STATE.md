@@ -122,25 +122,34 @@
 - **Date**: 2026-09-30
 - **Status**: active
 
+### AD-017
+- **Decision**: Implementar conjunto defensivo contra vulnerabilidades de severidade Alta: (1) Sanitizar todos os campos de texto exportados em CSV (`ReportsService.exportCsv`) prefixando gatilhos de fórmula (`=`, `+`, `-`, `@`, `\t`, `\r`) com apóstrofo `'` contra CSV Formula Injection; (2) Limitar o número de parcelas no DTO e serviço de transações a no máximo 72x (`@Max(72)`) contra ataques de DoS por exaustão de conexões transacionais; (3) Proteger rotas críticas de login e cadastro com `@nestjs/throttler` (limite estrito de 5 requisições por minuto) contra ataques de força bruta e enumeração; (4) Restringir origens de CORS baseadas em lista explícita (`ALLOWED_ORIGINS`) sem curinga `*` associado a `credentials: true`; (5) Bloquear vinculação indevida (BOLA) de contas pessoais a metas familiares (`GoalsService.create`), exigindo estritamente `account.familyId === dto.familyId` para metas familiares e conta pessoal exclusiva do usuário para metas pessoais.
+- **Reason**: Neutraliza riscos de execução de comandos remotos via planilhas, negação de serviço, força bruta de credenciais, vazamento cruzado de CORS e manipulação cruzada de contas pessoais em metas de terceiros.
+- **Trade-off**: Limita compras parceladas a 72 meses e bloqueia tráfego que exceda 5 tentativas de autenticação por minuto.
+- **Scope**: Backend (`reports`, `transactions`, `auth`, `goals`), utilitários comuns, bootstrap `main.ts`, infraestrutura Docker e suíte de testes.
+- **Date**: 2026-09-30
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `auditoria-seguranca`
-- **Total Tasks**: 3
-- **Completed Tasks**: 3 / 3 (100%)
+- **Active Feature**: `auditoria-seguranca-altas`
+- **Total Tasks**: 5
+- **Completed Tasks**: 5 / 5 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (184 backend tests passed, clean build)
+- **Build Status**: 100% Success (197 backend tests passed, clean build)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/auditoria-seguranca
-- **Phase / Task**: Concluído (T1, T2 e T3 concluídas com sucesso)
-- **Completed**: T1, T2, T3
+- **Feature**: .specs/features/auditoria-seguranca-altas
+- **Phase / Task**: Concluído (T1 a T5 concluídas com sucesso)
+- **Completed**: T1, T2, T3, T4, T5
 - **In-progress**: None
 - **Next step**: Merge para develop ou validação final em homologação
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: feature/auditoria-seguraca
+
 
 
 
