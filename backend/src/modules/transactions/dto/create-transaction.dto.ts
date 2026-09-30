@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -56,8 +57,9 @@ export class CreateTransactionDto {
   destinationAccountId?: string;
 
   @ApiProperty({ required: false, default: 1, description: 'Número total de parcelas (ex: 3 para 3x)' })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Número de parcelas deve ser inteiro' })
+  @Min(1, { message: 'Mínimo de 1 parcela' })
+  @Max(72, { message: 'O parcelamento máximo permitido é de 72 vezes' })
   @IsOptional()
   totalInstallments?: number;
 

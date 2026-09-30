@@ -57,6 +57,9 @@ export class TransactionsService {
 
     const totalAmount = new Prisma.Decimal(dto.amount);
     const totalInstallments = dto.totalInstallments || 1;
+    if (totalInstallments > 72) {
+      throw new BadRequestException('O parcelamento máximo permitido é de 72 vezes');
+    }
     const isInstallment = totalInstallments > 1 && !!dto.creditCardId;
     const baseDate = this.parseTransactionDate(dto.transactionDate);
 

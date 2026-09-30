@@ -221,6 +221,22 @@ describe('TransactionsService', () => {
         }),
       );
     });
+
+    it('should reject transaction creation when totalInstallments exceeds 72 (SEC-HIGH-02)', async () => {
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 5000,
+          totalInstallments: 73,
+          description: 'Financiamento abusivo',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-1',
+          creditCardId: 'card-1',
+        }),
+      ).rejects.toThrow(
+        new BadRequestException('O parcelamento máximo permitido é de 72 vezes'),
+      );
+    });
   });
 
   describe('findAll with personId filter', () => {

@@ -93,10 +93,10 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `CreateTransactionDto` restringe `totalInstallments` a no máximo 72 com mensagem explicativa.
-- [ ] `TransactionsService.create` valida defensivamente o limite superior de parcelas.
-- [ ] Testes unitários validam a rejeição de solicitações com mais de 72 parcelas.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] `CreateTransactionDto` restringe `totalInstallments` a no máximo 72 com mensagem explicativa.
+- [x] `TransactionsService.create` valida defensivamente o limite superior de parcelas.
+- [x] Testes unitários validam a rejeição de solicitações com mais de 72 parcelas.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
