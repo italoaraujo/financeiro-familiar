@@ -114,24 +114,33 @@
 - **Date**: 2026-09-16
 - **Status**: active
 
+### AD-016
+- **Decision**: Bloquear rigorosamente vulnerabilidades de BOLA/IDOR em liquidação de faturas de cartão de crédito (`CreditCardsService.payInvoice`) e aportes em metas financeiras (`GoalsService.addDeposit`), garantindo a checagem de autorização de propriedade e contexto familiar tanto sobre a fatura/meta quanto sobre a conta bancária de débito. Eliminar segredos padrão e fallbacks estáticos de autenticação JWT, exigindo obrigatoriamente `JWT_SECRET` com entropia mínima de 256 bits (32+ caracteres) e sem termos previsíveis (`supersecret`), interrompendo a inicialização do backend com erro fatal caso a chave seja insegura.
+- **Reason**: Neutraliza riscos críticos de fraude financeira entre usuários (débito arbitrário de contas bancárias de terceiros) e impede a forja irrestrita de tokens JWT para tomada de contas.
+- **Trade-off**: Requer configuração obrigatória de uma chave forte `JWT_SECRET` em ambientes de execução e deploy, e rejeita qualquer operação de débito ou aporte em contas sobre as quais o usuário não possua autorização expressa.
+- **Scope**: Backend `CreditCardsService`, `GoalsService`, `AuthModule`, `JwtStrategy`, `docker-compose.yml`, templates de ambiente e testes unitários.
+- **Date**: 2026-09-30
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `tags-lancamentos-relatorios`
-- **Total Tasks**: 8
-- **Completed Tasks**: 8 / 8 (100%)
+- **Active Feature**: `auditoria-seguranca`
+- **Total Tasks**: 3
+- **Completed Tasks**: 3 / 3 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (173 backend tests passed, Next.js build clean)
+- **Build Status**: 100% Success (184 backend tests passed, clean build)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/tags-lancamentos-relatorios
-- **Phase / Task**: Concluído (Fase 1 e Fase 2 concluídas com sucesso)
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8
+- **Feature**: .specs/features/auditoria-seguranca
+- **Phase / Task**: Concluído (T1, T2 e T3 concluídas com sucesso)
+- **Completed**: T1, T2, T3
 - **In-progress**: None
 - **Next step**: Merge para develop ou validação final em homologação
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/tags-lancamentos-relatorios
+- **Branch**: feature/auditoria-seguraca
+
 
 
