@@ -196,7 +196,9 @@ describe('CreditCardsService', () => {
 
       prisma.account.findUnique.mockResolvedValue({
         id: 'acc-1',
+        userId: 'user-1',
         currentBalance: new Prisma.Decimal(1000),
+        deletedAt: null,
       });
 
       prisma.creditCardInvoice.update.mockResolvedValue({
@@ -233,7 +235,11 @@ describe('CreditCardsService', () => {
         },
       });
 
-      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1' });
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-1',
+        userId: 'user-1',
+        deletedAt: null,
+      });
       prisma.category.findFirst.mockResolvedValue({ id: 'cat-pay' });
       prisma.creditCardInvoice.update.mockImplementation(({ data }) => ({
         id: 'inv-1',
@@ -249,6 +255,84 @@ describe('CreditCardsService', () => {
 
       expect(result.status).toBe(InvoiceStatus.CLOSED);
       expect(result.paidAmount).toEqual(new Prisma.Decimal(200));
+    });
+
+    it('should reject payment if invoice belongs to personal card of another user (SEC-CRIT-01)', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-victim',
+        totalAmount: new Prisma.Decimal(500),
+        paidAmount: new Prisma.Decimal(0),
+        status: InvoiceStatus.OPEN,
+        creditCard: {
+          id: 'card-victim',
+          userId: 'user-victim',
+          familyId: null,
+        },
+      });
+
+      await expect(
+        service.payInvoice('user-attacker', 'inv-victim', {
+          accountId: 'acc-attacker',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('Acesso negado à fatura informada'),
+      );
+    });
+
+    it('should reject payment if bank account belongs to another user (SEC-CRIT-01)', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-attacker',
+        totalAmount: new Prisma.Decimal(500),
+        paidAmount: new Prisma.Decimal(0),
+        status: InvoiceStatus.OPEN,
+        creditCard: {
+          id: 'card-attacker',
+          userId: 'user-attacker',
+          familyId: null,
+        },
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-victim',
+        userId: 'user-victim',
+        familyId: null,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.payInvoice('user-attacker', 'inv-attacker', {
+          accountId: 'acc-victim',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('Você não tem permissão para debitar desta conta bancária'),
+      );
+    });
+
+    it('should reject payment if payment bank account is soft-deleted', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-attacker',
+        totalAmount: new Prisma.Decimal(500),
+        paidAmount: new Prisma.Decimal(0),
+        status: InvoiceStatus.OPEN,
+        creditCard: {
+          id: 'card-attacker',
+          userId: 'user-attacker',
+          familyId: null,
+        },
+      });
+
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-deleted',
+        userId: 'user-attacker',
+        familyId: null,
+        deletedAt: new Date(),
+      });
+
+      await expect(
+        service.payInvoice('user-attacker', 'inv-attacker', {
+          accountId: 'acc-deleted',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

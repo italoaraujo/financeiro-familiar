@@ -337,6 +337,8 @@ export class CreditCardsService {
 
       if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
         await this.verifyFamilyAccess(userId, invoice.creditCard.familyId, true);
+      } else if (invoice.creditCard.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à fatura informada');
       }
 
       if (invoice.status === InvoiceStatus.PAID) {
@@ -347,8 +349,14 @@ export class CreditCardsService {
         where: { id: dto.accountId },
       });
 
-      if (!paymentAccount) {
+      if (!paymentAccount || paymentAccount.deletedAt) {
         throw new NotFoundException('Conta bancária de pagamento não encontrada');
+      }
+
+      if (paymentAccount.userId !== userId && paymentAccount.familyId) {
+        await this.verifyFamilyAccess(userId, paymentAccount.familyId, true);
+      } else if (paymentAccount.userId !== userId) {
+        throw new ForbiddenException('Você não tem permissão para debitar desta conta bancária');
       }
 
       const amountToPay = dto.amount
