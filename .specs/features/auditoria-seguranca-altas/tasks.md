@@ -118,10 +118,10 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `ThrottlerModule` está configurado globalmente no NestJS com guard ativo.
-- [ ] Endpoints de login e cadastro possuem decorator de limitação específica (5 req/min).
-- [ ] Testes automatizados validam a proteção contra requisições excessivas.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/throttler-security.spec.ts`
+- [x] `ThrottlerModule` está configurado globalmente no NestJS com guard ativo.
+- [x] Endpoints de login e cadastro possuem decorator de limitação específica (5 req/min).
+- [x] Testes automatizados validam a proteção contra requisições excessivas.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/throttler-security.spec.ts`
 
 **Tests**: unit
 **Gate**: quick

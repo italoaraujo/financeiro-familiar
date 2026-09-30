@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -21,18 +22,22 @@ export class AuthController {
   }
 
   @Post('register')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
   @ApiResponse({ status: 409, description: 'E-mail já existente' })
+  @ApiResponse({ status: 429, description: 'Limite de requisições excedido' })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar usuário e obter token JWT' })
   @ApiResponse({ status: 200, description: 'Autenticação bem-sucedida' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
+  @ApiResponse({ status: 429, description: 'Limite de requisições excedido' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
