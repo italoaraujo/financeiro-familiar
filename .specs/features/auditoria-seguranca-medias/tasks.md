@@ -194,8 +194,8 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Porta do serviço postgres vinculada a `127.0.0.1`.
-- [ ] Gate check passes: `git diff docker-compose.yml`
+- [x] Porta do serviço postgres vinculada a `127.0.0.1`.
+- [x] Gate check passes: `git diff docker-compose.yml`
 
 **Tests**: manual
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 5
+- Completed: 6
 - In Progress: 0
-- Pending: 2
+- Pending: 1
