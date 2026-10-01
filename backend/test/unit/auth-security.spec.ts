@@ -1,5 +1,8 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { validateJwtSecret } from '../../src/modules/auth/auth.module';
 import { JwtStrategy } from '../../src/modules/auth/jwt.strategy';
+import { TokenBlacklistService } from '../../src/modules/auth/token-blacklist.service';
+import { AuthController } from '../../src/modules/auth/auth.controller';
 import { UsersService } from '../../src/modules/users/users.service';
 
 describe('JWT Security Configuration (SEC-CRIT-03)', () => {
@@ -57,6 +60,86 @@ describe('JWT Security Configuration (SEC-CRIT-03)', () => {
       process.env.JWT_SECRET = 'c8e763b2f8a94d01b1e9c2f6d5a84e32109876543210abcdef0123456789abcdef';
       const strategy = new JwtStrategy(mockUsersService);
       expect(strategy).toBeDefined();
+    });
+  });
+
+  describe('TokenBlacklistService & Server-side Logout (SEC-MED-03)', () => {
+    let blacklistService: TokenBlacklistService;
+    let mockUsersService: any;
+    let jwtStrategy: JwtStrategy;
+
+    beforeEach(() => {
+      blacklistService = new TokenBlacklistService();
+      mockUsersService = {
+        findById: jest.fn(),
+      };
+      process.env.JWT_SECRET = 'c8e763b2f8a94d01b1e9c2f6d5a84e32109876543210abcdef0123456789abcdef';
+      jwtStrategy = new JwtStrategy(mockUsersService, blacklistService);
+    });
+
+    it('should correctly flag tokens as blacklisted when added', () => {
+      expect(blacklistService.isBlacklisted('token-123')).toBe(false);
+      blacklistService.add('token-123');
+      expect(blacklistService.isBlacklisted('token-123')).toBe(true);
+    });
+
+    it('should evict expired tokens from blacklist', () => {
+      blacklistService.add('token-short-lived', -1000); // Já expirado
+      expect(blacklistService.isBlacklisted('token-short-lived')).toBe(false);
+    });
+
+    it('should reject request with UnauthorizedException when token is blacklisted', async () => {
+      const revokedToken = 'revoked.jwt.token';
+      blacklistService.add(revokedToken);
+
+      const mockReq = {
+        headers: {
+          authorization: `Bearer ${revokedToken}`,
+        },
+      };
+
+      await expect(
+        jwtStrategy.validate(mockReq, { sub: 'user-1', email: 'user@test.com' }),
+      ).rejects.toThrow(new UnauthorizedException('Token revogado. Faça login novamente.'));
+    });
+
+    it('should allow valid request when token is not blacklisted', async () => {
+      const validToken = 'valid.jwt.token';
+      const mockReq = {
+        headers: {
+          authorization: `Bearer ${validToken}`,
+        },
+      };
+
+      mockUsersService.findById.mockResolvedValue({
+        id: 'user-1',
+        email: 'user@test.com',
+        name: 'User Test',
+        passwordHash: 'hashedpassword',
+      });
+
+      const result = await jwtStrategy.validate(mockReq, { sub: 'user-1', email: 'user@test.com' });
+      expect(result).toEqual({
+        id: 'user-1',
+        email: 'user@test.com',
+        name: 'User Test',
+      });
+    });
+
+    it('should revoke token and return success message in AuthController.logout', async () => {
+      const mockAuthService = {} as any;
+      const controller = new AuthController(mockAuthService, blacklistService);
+
+      const tokenToRevoke = 'user.active.token';
+      const mockReq = {
+        headers: {
+          authorization: `Bearer ${tokenToRevoke}`,
+        },
+      };
+
+      const response = await controller.logout(mockReq);
+      expect(response).toEqual({ message: 'Sessão encerrada com sucesso' });
+      expect(blacklistService.isBlacklisted(tokenToRevoke)).toBe(true);
     });
   });
 });

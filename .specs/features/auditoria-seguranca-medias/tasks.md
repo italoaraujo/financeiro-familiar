@@ -119,11 +119,11 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `TokenBlacklistService` gerencia tokens revogados com limpeza periódica baseada na expiração.
-- [ ] Endpoint `POST /auth/logout` adiciona o token atual à blacklist.
-- [ ] `JwtStrategy.validate` verifica se o token está na blacklist e lança `UnauthorizedException`.
-- [ ] Testes unitários cobrem logout e bloqueio de chamadas com token revogado.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/auth-security.spec.ts`
+- [x] `TokenBlacklistService` gerencia tokens revogados com limpeza periódica baseada na expiração.
+- [x] Endpoint `POST /auth/logout` adiciona o token atual à blacklist.
+- [x] `JwtStrategy.validate` verifica se o token está na blacklist e lança `UnauthorizedException`.
+- [x] Testes unitários cobrem logout e bloqueio de chamadas com token revogado.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/auth-security.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 2
+- Completed: 3
 - In Progress: 0
-- Pending: 5
+- Pending: 4
