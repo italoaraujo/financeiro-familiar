@@ -145,9 +145,9 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `AuthContext` e `api.ts` gravam e leem o token preferencialmente em cookies seguros.
-- [ ] O logout no frontend limpa os cookies e aciona `POST /auth/logout` no backend.
-- [ ] Gate check passes: `npm --prefix backend run build`
+- [x] `AuthContext` e `api.ts` gravam e leem o token preferencialmente em cookies seguros.
+- [x] O logout no frontend limpa os cookies e aciona `POST /auth/logout` no backend.
+- [x] Gate check passes: `npm --prefix backend run build`
 
 **Tests**: manual
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 3
+- Completed: 4
 - In Progress: 0
-- Pending: 4
+- Pending: 3
