@@ -118,7 +118,7 @@ export class FamiliesService {
 
     const targetUser = await this.usersService.findByEmail(dto.email);
     if (!targetUser) {
-      throw new NotFoundException(`Nenhum usuário cadastrado com o e-mail ${dto.email}`);
+      throw new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.');
     }
 
     const existingMember = await this.prisma.familyMember.findUnique({
@@ -128,7 +128,7 @@ export class FamiliesService {
     });
 
     if (existingMember) {
-      throw new BadRequestException('Este usuário já é membro do grupo familiar');
+      throw new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.');
     }
 
     const member = await this.prisma.familyMember.create({

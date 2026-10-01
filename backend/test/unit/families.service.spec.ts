@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FamiliesService } from '../../src/modules/families/families.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { UsersService } from '../../src/modules/users/users.service';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { FamilyMemberRole } from '@prisma/client';
 
 describe('FamiliesService', () => {
@@ -94,7 +94,7 @@ describe('FamiliesService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('should throw NotFoundException if target user is not registered', async () => {
+    it('should throw BadRequestException with uniform message if target user is not registered', async () => {
       prisma.familyMember.findUnique.mockResolvedValueOnce({
         role: FamilyMemberRole.OWNER,
       });
@@ -105,7 +105,25 @@ describe('FamiliesService', () => {
           email: 'notregistered@email.com',
           role: FamilyMemberRole.MEMBER,
         }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(
+        new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.'),
+      );
+    });
+
+    it('should throw BadRequestException with uniform message if target user is already a member', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.OWNER })
+        .mockResolvedValueOnce({ id: 'existing-member-id' });
+      usersService.findByEmail.mockResolvedValue({ id: 'target-user-id', email: 'already@email.com' });
+
+      await expect(
+        service.addMember('owner-id', 'family-1', {
+          email: 'already@email.com',
+          role: FamilyMemberRole.MEMBER,
+        }),
+      ).rejects.toThrow(
+        new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.'),
+      );
     });
   });
 
