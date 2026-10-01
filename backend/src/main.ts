@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { getAllowedCorsOrigins } from './common/utils/cors.util';
+import { isSwaggerEnabled } from './common/utils/swagger.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,15 +25,17 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Sistema Financeiro Pessoal e Familiar API')
-    .setDescription('REST API para gestão financeira multiusuário e controle familiar')
-    .setVersion('1.0.0')
-    .addBearerAuth()
-    .build();
+  if (isSwaggerEnabled()) {
+    const config = new DocumentBuilder()
+      .setTitle('Sistema Financeiro Pessoal e Familiar API')
+      .setDescription('REST API para gestão financeira multiusuário e controle familiar')
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

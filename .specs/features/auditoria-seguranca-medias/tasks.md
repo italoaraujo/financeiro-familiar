@@ -217,9 +217,9 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Swagger só é montado se nenhum dos envs for `production`.
-- [ ] Testes unitários validam a regra condicional de montagem do Swagger.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/swagger-security.spec.ts`
+- [x] Swagger só é montado se nenhum dos envs for `production`.
+- [x] Testes unitários validam a regra condicional de montagem do Swagger.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/swagger-security.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 6
+- Completed: 7
 - In Progress: 0
-- Pending: 1
+- Pending: 0
