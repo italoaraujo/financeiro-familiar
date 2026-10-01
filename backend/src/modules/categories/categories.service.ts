@@ -71,7 +71,7 @@ export class CategoriesService {
     });
   }
 
-  async findById(id: string) {
+  async findById(id: string, userId?: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
@@ -86,11 +86,19 @@ export class CategoriesService {
       throw new NotFoundException('Categoria não encontrada');
     }
 
+    if (userId && !category.isSystemDefault) {
+      if (category.familyId) {
+        await this.verifyFamilyAccess(userId, category.familyId, false);
+      } else if (category.userId && category.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à categoria especificada');
+      }
+    }
+
     return category;
   }
 
   async update(userId: string, id: string, dto: UpdateCategoryDto) {
-    const category = await this.findById(id);
+    const category = await this.findById(id, userId);
 
     if (category.isSystemDefault) {
       throw new BadRequestException('Não é permitido alterar categorias padrão do sistema');
@@ -114,7 +122,7 @@ export class CategoriesService {
   }
 
   async remove(userId: string, id: string) {
-    const category = await this.findById(id);
+    const category = await this.findById(id, userId);
 
     if (category.isSystemDefault) {
       throw new BadRequestException('Não é permitido excluir categorias padrão do sistema');

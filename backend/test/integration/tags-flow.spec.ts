@@ -500,7 +500,7 @@ describe('Tags Flow Integration Test (End-to-End)', () => {
     const tagViagem = tags.find((t) => t.name === 'viagem');
 
     // 2. Relatório de Despesas por Tag (getExpensesByTag)
-    const expensesByTag = await reportsService.getExpensesByTag('user-1', 'family-1');
+    const expensesByTag = await reportsService.getExpensesByTag('user-1', 'family-1', '2026-09');
     expect(expensesByTag).toHaveLength(2);
 
     const tagViagemReport = expensesByTag.find((t: any) => t.name === 'viagem');

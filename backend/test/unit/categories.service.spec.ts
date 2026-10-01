@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesService } from '../../src/modules/categories/categories.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { TransactionType } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
@@ -91,7 +91,79 @@ describe('CategoriesService', () => {
         deletedAt: new Date(),
       });
 
-      await expect(service.findById('cat-1')).rejects.toThrow();
+      await expect(service.findById('cat-1', 'user-1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if category is personal and belongs to another user', async () => {
+      prisma.category.findUnique.mockResolvedValue({
+        id: 'cat-private',
+        userId: 'other-user',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      await expect(service.findById('cat-private', 'user-1')).rejects.toThrow(
+        new ForbiddenException('Acesso negado à categoria especificada'),
+      );
+    });
+
+    it('should return category if category belongs to the requesting user', async () => {
+      const personalCat = {
+        id: 'cat-mine',
+        userId: 'user-1',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      };
+      prisma.category.findUnique.mockResolvedValue(personalCat);
+
+      const result = await service.findById('cat-mine', 'user-1');
+      expect(result).toEqual(personalCat);
+    });
+
+    it('should return category if category is system default', async () => {
+      const defaultCat = {
+        id: 'cat-default',
+        userId: null,
+        familyId: null,
+        isSystemDefault: true,
+        deletedAt: null,
+      };
+      prisma.category.findUnique.mockResolvedValue(defaultCat);
+
+      const result = await service.findById('cat-default', 'user-1');
+      expect(result).toEqual(defaultCat);
+    });
+
+    it('should throw ForbiddenException if user has no access to the family category', async () => {
+      prisma.category.findUnique.mockResolvedValue({
+        id: 'cat-family',
+        userId: null,
+        familyId: 'family-other',
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue(null);
+
+      await expect(service.findById('cat-family', 'user-1')).rejects.toThrow(
+        new ForbiddenException('Acesso negado à família especificada'),
+      );
+    });
+
+    it('should return category if user is a member of the family', async () => {
+      const familyCat = {
+        id: 'cat-family',
+        userId: null,
+        familyId: 'family-mine',
+        isSystemDefault: false,
+        deletedAt: null,
+      };
+      prisma.category.findUnique.mockResolvedValue(familyCat);
+      prisma.familyMember.findUnique.mockResolvedValue({ role: 'MEMBER' });
+
+      const result = await service.findById('cat-family', 'user-1');
+      expect(result).toEqual(familyCat);
     });
   });
 

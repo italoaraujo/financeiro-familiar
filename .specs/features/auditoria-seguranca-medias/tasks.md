@@ -93,11 +93,11 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `CategoriesService.findById` valida posse do recurso ou padrão do sistema contra o `userId` requisitante.
-- [ ] `CategoriesController.findOne` repassa o usuário autenticado para o serviço.
-- [ ] Requisições para categorias privadas de terceiros retornam `ForbiddenException`.
-- [ ] Testes unitários cobrem acessos autorizados e bloqueios com 403.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
+- [x] `CategoriesService.findById` valida posse do recurso ou padrão do sistema contra o `userId` requisitante.
+- [x] `CategoriesController.findOne` repassa o usuário autenticado para o serviço.
+- [x] Requisições para categorias privadas de terceiros retornam `ForbiddenException`.
+- [x] Testes unitários cobrem acessos autorizados e bloqueios com 403.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 1
+- Completed: 2
 - In Progress: 0
-- Pending: 6
+- Pending: 5
