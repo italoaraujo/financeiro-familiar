@@ -74,7 +74,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
 | UPG-01 | P1: Atualização do Next.js para 16.3.8 com Testes Validados | Execute | Verified |
-| UPG-02 | P1: Compilação e Build do Frontend | Execute | Pending |
+| UPG-02 | P1: Compilação e Build do Frontend | Execute | Verified |
 | UPG-03 | P1: Validação de Testes Unitários | Execute | Pending |
 
 **Coverage:** 3 total, 3 mapped to tasks, 0 unmapped
@@ -86,5 +86,5 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 How we know the feature is successful:
 
 - [x] Pacote `next` atualizado para `16.3.8` no `frontend/package.json` e `package-lock.json`.
-- [ ] Build de produção (`npm run build` no frontend) executado com sucesso e zero erros.
+- [x] Build de produção (`npm run build` no frontend) executado com sucesso e zero erros.
 - [ ] 215 testes unitários e de integração do backend executados com 100% de sucesso (`npm test`).

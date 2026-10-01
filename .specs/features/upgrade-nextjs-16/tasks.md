@@ -89,10 +89,10 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Comando `npm --prefix frontend run build` conclui com código 0.
-- [ ] Todas as 14 rotas estáticas e dinâmicas são geradas com sucesso.
-- [ ] Diretório `.next/standalone` gerado corretamente para o container Docker.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Comando `npm --prefix frontend run build` conclui com código 0.
+- [x] Todas as 14 rotas estáticas e dinâmicas são geradas com sucesso.
+- [x] Diretório `.next/standalone` gerado corretamente para o container Docker.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: build
 **Gate**: full
