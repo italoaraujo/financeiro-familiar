@@ -114,10 +114,10 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Todas as 25 suítes de testes do backend são executadas.
-- [ ] Todos os 215 testes unitários e de integração passam com sucesso.
-- [ ] Zero falhas ou regressões detectadas no sistema.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Todas as 25 suítes de testes do backend são executadas.
+- [x] Todos os 215 testes unitários e de integração passam com sucesso.
+- [x] Zero falhas ou regressões detectadas no sistema.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: unit
 **Gate**: quick
