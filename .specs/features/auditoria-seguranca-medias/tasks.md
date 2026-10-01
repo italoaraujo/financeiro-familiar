@@ -169,10 +169,10 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `helmet` é registrado globalmente no aplicativo NestJS.
-- [ ] Cabeçalhos de segurança padrão são adicionados às respostas HTTP.
-- [ ] Testes automatizados validam a presença dos cabeçalhos do Helmet.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/helmet-security.spec.ts`
+- [x] `helmet` é registrado globalmente no aplicativo NestJS.
+- [x] Cabeçalhos de segurança padrão são adicionados às respostas HTTP.
+- [x] Testes automatizados validam a presença dos cabeçalhos do Helmet.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/helmet-security.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
@@ -229,6 +229,6 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 ## Status Summary
 
 - Total tasks: 7
-- Completed: 4
+- Completed: 5
 - In Progress: 0
-- Pending: 3
+- Pending: 2
