@@ -171,13 +171,13 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| SECM-01 | P1: Prevenção de Enumeração de E-mails em Famílias (SECM-01) | Tasks | Pending |
-| SECM-02 | P2: Proteção BOLA em Categorias Privadas (SECM-02) | Tasks | Pending |
-| SECM-03 | P3: Invalidação Server-side no Logout (SECM-03) | Tasks | Pending |
-| SECM-04 | P4: Armazenamento Seguro de Tokens no Cliente (SECM-04) | Tasks | Pending |
-| SECM-05 | P5: Cabeçalhos HTTP de Segurança com Helmet (SECM-05) | Tasks | Pending |
-| SECM-06 | P6: Restrição de Exposição da Porta do PostgreSQL (SECM-06) | Tasks | Pending |
-| SECM-07 | P7: Desativação do Swagger em Produção (SECM-07) | Tasks | Pending |
+| SECM-01 | P1: Prevenção de Enumeração de E-mails em Famílias (SECM-01) | Tasks | Complete |
+| SECM-02 | P2: Proteção BOLA em Categorias Privadas (SECM-02) | Tasks | Complete |
+| SECM-03 | P3: Invalidação Server-side no Logout (SECM-03) | Tasks | Complete |
+| SECM-04 | P4: Armazenamento Seguro de Tokens no Cliente (SECM-04) | Tasks | Complete |
+| SECM-05 | P5: Cabeçalhos HTTP de Segurança com Helmet (SECM-05) | Tasks | Complete |
+| SECM-06 | P6: Restrição de Exposição da Porta do PostgreSQL (SECM-06) | Tasks | Complete |
+| SECM-07 | P7: Desativação do Swagger em Produção (SECM-07) | Tasks | Complete |
 
 **Coverage:** 7 total, 7 mapped to tasks, 0 unmapped
 
@@ -187,11 +187,11 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 How we know the feature is successful:
 
-- [ ] Todas as 7 vulnerabilidades médias são neutralizadas.
-- [ ] Mensagens de adição de membros são uniformes impedindo enumeração.
-- [ ] `CategoriesService.findById` bloqueia IDOR em categorias privadas.
-- [ ] Endpoint `/auth/logout` invalida o token e barra requisições subsequentes com HTTP 401.
-- [ ] Frontend armazena tokens em cookies com flags de segurança.
-- [ ] Helmet ativo e porta do PostgreSQL restrita a 127.0.0.1.
-- [ ] Swagger desativado em produção.
-- [ ] 100% dos testes passam.
+- [x] Todas as 7 vulnerabilidades médias são neutralizadas.
+- [x] Mensagens de adição de membros são uniformes impedindo enumeração.
+- [x] `CategoriesService.findById` bloqueia IDOR em categorias privadas.
+- [x] Endpoint `/auth/logout` invalida o token e barra requisições subsequentes com HTTP 401.
+- [x] Frontend armazena tokens em cookies com flags de segurança.
+- [x] Helmet ativo e porta do PostgreSQL restrita a 127.0.0.1.
+- [x] Swagger desativado em produção.
+- [x] 100% dos testes passam.

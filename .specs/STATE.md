@@ -130,22 +130,30 @@
 - **Date**: 2026-09-30
 - **Status**: active
 
+### AD-018
+- **Decision**: Mitigar vulnerabilidades de severidade Média (SEC-MED-01 a SEC-MED-07): (1) Uniformizar mensagens de erro na adição de membros familiares em `FamiliesService.addMember` para resposta neutra única, eliminando enumeração de e-mails; (2) Adicionar verificação de autorização de usuário em `CategoriesService.findById`, bloqueando acesso BOLA/IDOR a categorias privadas de terceiros com `HTTP 403 Forbidden`; (3) Implementar invalidação de sessão server-side no logout via `TokenBlacklistService`, endpoint `POST /auth/logout` e verificação na `JwtStrategy`; (4) Armazenar tokens no frontend com cookies seguros contendo atributos `SameSite=Lax`, `Path=/` e `Secure` em produção; (5) Integrar `helmet` globalmente no NestJS para injeção de headers defensivos HTTP; (6) Restringir exposição da porta do PostgreSQL a `127.0.0.1` no Docker Compose; (7) Desativar documentação do Swagger condicionalmente quando `APP_ENV=production` ou `NODE_ENV=production`.
+- **Reason**: Neutraliza riscos de enumeração de contas, roubo e reutilização de tokens pós-logout, BOLA em categorias personalizadas, extração de credenciais, ausência de headers HTTP de proteção, exposição do banco à internet e vazamento de schemas OpenAPI em produção.
+- **Trade-off**: Requer manutenção de blacklist em memória e suprime Swagger em produção.
+- **Scope**: Backend (`families`, `categories`, `auth`), frontend (`cookies.ts`, `api.ts`, `AuthContext.tsx`), infraestrutura Docker e suíte de testes.
+- **Date**: 2026-10-01
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `auditoria-seguranca-altas`
-- **Total Tasks**: 5
-- **Completed Tasks**: 5 / 5 (100%)
+- **Active Feature**: `auditoria-seguranca-medias`
+- **Total Tasks**: 7
+- **Completed Tasks**: 7 / 7 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (197 backend tests passed, clean build)
+- **Build Status**: 100% Success (215 backend tests passed, clean build frontend & backend)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/auditoria-seguranca-altas
-- **Phase / Task**: Concluído (T1 a T5 concluídas com sucesso)
-- **Completed**: T1, T2, T3, T4, T5
+- **Feature**: .specs/features/auditoria-seguranca-medias
+- **Phase / Task**: Concluído (T1 a T7 concluídas com sucesso)
+- **Completed**: T1, T2, T3, T4, T5, T6, T7
 - **In-progress**: None
-- **Next step**: Merge para develop ou validação final em homologação
+- **Next step**: Validação final de segurança e homologação
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: feature/auditoria-seguraca
