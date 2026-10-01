@@ -138,26 +138,30 @@
 - **Date**: 2026-10-01
 - **Status**: active
 
+### AD-019
+- **Decision**: Atualizar o Next.js no frontend para a versão `16.3.8` com compilação Turbopack, saída standalone (`output: 'standalone'`) e ESLint 9 Flat Config (`eslint.config.js`), mantendo compatibilidade com React 18.3 e assegurando 100% de aprovação na suíte de testes unitários e de integração do sistema.
+- **Reason**: Atende à solicitação direta de atualização do framework para Next.js 16.3.8, habilitando as mais recentes otimizações de performance e mantendo compatibilidade total com os containers Docker e testes existentes.
+- **Trade-off**: Requer configuração do ESLint 9 no formato Flat Config com ajustes de tolerância a regras estritas de hooks SSR (`react-hooks/set-state-in-effect` e `react-hooks/static-components`) em componentes legados de cliente.
+- **Scope**: `frontend/package.json`, `frontend/eslint.config.js`, `frontend/tsconfig.json`, build Docker standalone e validação de testes unitários.
+- **Date**: 2026-10-01
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `auditoria-seguranca-medias`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
+- **Active Feature**: `upgrade-nextjs-16`
+- **Total Tasks**: 3
+- **Completed Tasks**: 3 / 3 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (215 backend tests passed, clean build frontend & backend)
+- **Build Status**: 100% Success (215 backend tests passed, clean Turbopack build frontend)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/auditoria-seguranca-medias
-- **Phase / Task**: Concluído (T1 a T7 concluídas com sucesso)
-- **Completed**: T1, T2, T3, T4, T5, T6, T7
+- **Feature**: .specs/features/upgrade-nextjs-16
+- **Phase / Task**: Concluído (T1 a T3 concluídas com sucesso)
+- **Completed**: T1, T2, T3
 - **In-progress**: None
-- **Next step**: Validação final de segurança e homologação
+- **Next step**: Homologação e merge da branch feature/upgrade-nextjs-16 na develop
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/auditoria-seguraca
-
-
-
-
+- **Branch**: feature/upgrade-nextjs-16
