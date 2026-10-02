@@ -117,11 +117,11 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Lançamento com categoria inexistente ou soft-deleted lança `NotFoundException` ('Categoria informada não encontrada').
-- [ ] Lançamento associado a categoria de outro usuário/família lança `ForbiddenException` ('Acesso negado à categoria informada').
-- [ ] Lançamento com categoria padrão ou autorizada é persistido normalmente.
-- [ ] Testes unitários em `transactions.service.spec.ts` cobrindo proteção BOLA em categorias passam.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] Lançamento com categoria inexistente ou soft-deleted lança `NotFoundException` ('Categoria informada não encontrada').
+- [x] Lançamento associado a categoria de outro usuário/família lança `ForbiddenException` ('Acesso negado à categoria informada').
+- [x] Lançamento com categoria padrão ou autorizada é persistido normalmente.
+- [x] Testes unitários em `transactions.service.spec.ts` cobrindo proteção BOLA em categorias passam.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  

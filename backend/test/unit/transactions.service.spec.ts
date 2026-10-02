@@ -41,6 +41,12 @@ describe('TransactionsService', () => {
       },
       category: {
         findFirst: jest.fn(),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'cat-1',
+          name: 'Alimentação',
+          isSystemDefault: true,
+          deletedAt: null,
+        }),
         create: jest.fn(),
       },
       transaction: {
@@ -986,4 +992,126 @@ describe('TransactionsService', () => {
       expect(secondDate.getHours()).toBe(0);
     });
   });
+
+  describe('category authorization (SEC-CRIT-03)', () => {
+    it('should throw NotFoundException if category does not exist', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 100,
+          description: 'Despesa com cat inexistente',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-non-existent',
+          accountId: 'acc-1',
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw NotFoundException if category is soft-deleted', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-deleted',
+        name: 'Categoria Deletada',
+        deletedAt: new Date(),
+        isSystemDefault: false,
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 100,
+          description: 'Despesa com cat deletada',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-deleted',
+          accountId: 'acc-1',
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another user', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-user',
+        name: 'Outra Categoria',
+        userId: 'other-user',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 100,
+          description: 'Despesa invadindo outra conta',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-other-user',
+          accountId: 'acc-1',
+        }),
+      ).rejects.toThrow(new ForbiddenException('Acesso negado à categoria informada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another family', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-family',
+        name: 'Outra Família Cat',
+        userId: null,
+        familyId: 'family-other',
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      // user-1 tenta associar categoria da family-other em transação da family-1
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'member-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.create('user-1', {
+          type: TransactionType.EXPENSE,
+          amount: 100,
+          description: 'Despesa cruzando família',
+          transactionDate: '2026-09-01',
+          categoryId: 'cat-other-family',
+          accountId: 'acc-1',
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow transaction creation when category belongs to current user', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-my-own',
+        name: 'Minha Categoria',
+        userId: 'user-1',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-1',
+        userId: 'user-1',
+        currentBalance: new Prisma.Decimal(1000),
+      });
+      prisma.transaction.create.mockResolvedValueOnce({
+        id: 'tx-ok',
+        amount: new Prisma.Decimal(100),
+      });
+
+      const result = await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 100,
+        description: 'Despesa legítima',
+        transactionDate: '2026-09-01',
+        categoryId: 'cat-my-own',
+        accountId: 'acc-1',
+      });
+
+      expect(result).toBeDefined();
+    });
+  });
 });
+

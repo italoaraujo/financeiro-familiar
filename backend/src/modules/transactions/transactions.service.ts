@@ -48,6 +48,27 @@ export class TransactionsService {
       }
     }
 
+    if (dto.categoryId) {
+      const category = await this.prisma.category.findUnique({
+        where: { id: dto.categoryId },
+      });
+
+      if (!category || category.deletedAt) {
+        throw new NotFoundException('Categoria informada não encontrada');
+      }
+
+      if (!category.isSystemDefault) {
+        if (category.familyId) {
+          await this.verifyFamilyAccess(userId, category.familyId, true);
+          if (dto.familyId && category.familyId !== dto.familyId) {
+            throw new ForbiddenException('Acesso negado à categoria informada');
+          }
+        } else if (category.userId !== userId) {
+          throw new ForbiddenException('Acesso negado à categoria informada');
+        }
+      }
+    }
+
     if (dto.type === TransactionType.TRANSFER) {
       throw new BadRequestException('Para transferências, utilize o endpoint específico /transactions/transfer');
     }

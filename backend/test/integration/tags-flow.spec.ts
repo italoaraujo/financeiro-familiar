@@ -253,6 +253,10 @@ describe('Tags Flow Integration Test (End-to-End)', () => {
       }),
     },
 
+    category: {
+      findUnique: jest.fn(async ({ where }) => categories.find((c) => c.id === where.id) || null),
+    },
+
     familyMember: {
       findUnique: jest.fn(async ({ where }) => {
         if (where.familyId_userId) {
@@ -312,8 +316,8 @@ describe('Tags Flow Integration Test (End-to-End)', () => {
       },
     ];
     categories = [
-      { id: 'cat-alimentacao', name: 'Alimentação', color: '#10b981' },
-      { id: 'cat-viagem', name: 'Viagem', color: '#3b82f6' },
+      { id: 'cat-alimentacao', name: 'Alimentação', color: '#10b981', isSystemDefault: true, deletedAt: null },
+      { id: 'cat-viagem', name: 'Viagem', color: '#3b82f6', isSystemDefault: true, deletedAt: null },
     ];
     familyMembers = [
       { id: 'fm-1', familyId: 'family-1', userId: 'user-1', role: FamilyMemberRole.ADMIN },
