@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import AppShell from '../../components/layout/AppShell';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
-import { formatCurrency, formatDate } from '../../lib/formatters';
+import { formatCurrency, formatDate, formatTransactionDateTime } from '../../lib/formatters';
 import {
   Plus,
   Search,
@@ -52,6 +52,7 @@ export default function TransactionsPage() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [transactionTime, setTransactionTime] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [accountId, setAccountId] = useState('');
   const [destinationAccountId, setDestinationAccountId] = useState('');
@@ -161,6 +162,7 @@ export default function TransactionsPage() {
             amount: parseFloat(amount),
             description,
             transactionDate,
+            transactionTime: transactionTime || undefined,
             familyId: selectedFamilyId || undefined,
           }),
         });
@@ -172,6 +174,7 @@ export default function TransactionsPage() {
             amount: parseFloat(amount),
             description,
             transactionDate,
+            transactionTime: transactionTime || undefined,
             categoryId,
             accountId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? undefined : accountId,
             creditCardId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? creditCardId : undefined,
@@ -189,6 +192,7 @@ export default function TransactionsPage() {
       // Reset form
       setAmount('');
       setDescription('');
+      setTransactionTime('');
       setNotes('');
       setPersonId('');
       setTags([]);
@@ -370,10 +374,19 @@ export default function TransactionsPage() {
                     </td>
                   </tr>
                 ) : (
-                  transactions.map((tx) => (
+                  transactions.map((tx) => {
+                    const formatted = formatTransactionDateTime(tx.transactionDate);
+                    return (
                     <tr key={tx.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-xs text-slate-400">
-                        {formatDate(tx.transactionDate)}
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-xs text-slate-300 font-medium">{formatted.date}</span>
+                          {formatted.time && (
+                            <span className="text-[11px] text-slate-500 font-mono">
+                              {formatted.time}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 sm:px-6 py-3.5">
                         <div className="flex items-center gap-2 font-medium text-white max-w-xs flex-wrap">
@@ -522,7 +535,8 @@ export default function TransactionsPage() {
                         )}
                       </td>
                     </tr>
-                  ))
+                  );
+                })
                 )}
               </tbody>
             </table>
@@ -639,18 +653,31 @@ export default function TransactionsPage() {
                   />
                 </div>
 
-                {/* Date */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                    Data do Lançamento *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={transactionDate}
-                    onChange={(e) => setTransactionDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  />
+                {/* Date and Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Data do Lançamento *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={transactionDate}
+                      onChange={(e) => setTransactionDate(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Horário (Opcional)
+                    </label>
+                    <input
+                      type="time"
+                      value={transactionTime}
+                      onChange={(e) => setTransactionTime(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </div>
                 </div>
 
                 {/* Conditional Fields for TRANSFER */}

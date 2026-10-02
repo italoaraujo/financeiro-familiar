@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - arquitetura direta nos DTOs, Service e UI existentes)
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -225,11 +225,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Campo de entrada de horário (`input type="time"`) adicionado no modal de novo lançamento ao lado da data
-- [ ] Horário inicia vazio/opcional conforme decisão de produto
-- [ ] Payload enviado para API inclui `transactionTime` ou `transactionDate` com hora e minuto
-- [ ] Tabela de extrato exibe a data e a hora do lançamento de forma limpa e responsiva
-- [ ] Build do frontend passa sem erros
+- [x] Campo de entrada de horário (`input type="time"`) adicionado no modal de novo lançamento ao lado da data
+- [x] Horário inicia vazio/opcional conforme decisão de produto
+- [x] Payload enviado para API inclui `transactionTime` ou `transactionDate` com hora e minuto
+- [x] Tabela de extrato exibe a data e a hora do lançamento de forma limpa e responsiva
+- [x] Build do frontend passa sem erros
 
 **Tests**: none
 **Gate**: build

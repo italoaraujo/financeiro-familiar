@@ -90,14 +90,14 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| TIME-01 | P1: Registro e Exibição de Horário no Lançamento | Design | Pending |
-| TIME-02 | P1: Registro e Exibição de Horário no Lançamento | Design | Pending |
-| TIME-03 | P1: Registro e Exibição de Horário no Lançamento | Design | Pending |
-| TIME-04 | P1: Registro e Exibição de Horário no Lançamento | Design | Pending |
-| TIME-05 | P1: Registro e Exibição de Horário no Lançamento | Design | Pending |
-| TIME-06 | P2: Horário em Transferências e Compras Parceladas | Design | Pending |
-| TIME-07 | P2: Horário em Transferências e Compras Parceladas | Design | Pending |
-| TIME-08 | P2: Horário em Transferências e Compras Parceladas | Design | Pending |
+| TIME-01 | P1: Registro e Exibição de Horário no Lançamento | Execute | Verified |
+| TIME-02 | P1: Registro e Exibição de Horário no Lançamento | Execute | Verified |
+| TIME-03 | P1: Registro e Exibição de Horário no Lançamento | Execute | Verified |
+| TIME-04 | P1: Registro e Exibição de Horário no Lançamento | Execute | Verified |
+| TIME-05 | P1: Registro e Exibição de Horário no Lançamento | Execute | Verified |
+| TIME-06 | P2: Horário em Transferências e Compras Parceladas | Execute | Verified |
+| TIME-07 | P2: Horário em Transferências e Compras Parceladas | Execute | Verified |
+| TIME-08 | P2: Horário em Transferências e Compras Parceladas | Execute | Verified |
 
 **Coverage:** 8 total, 8 mapped to requirements, 0 unmapped.
 
@@ -107,7 +107,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 How we know the feature is successful:
 
-- [ ] Usuário consegue informar hora e minuto no modal de novo lançamento e salvar com sucesso.
-- [ ] O extrato exibe a data acompanhada do horário na listagem.
-- [ ] Lançamentos no mesmo dia são exibidos em ordem cronológica precisa.
-- [ ] Testes automatizados unitários e de integração validam a persistência e ordenação de hora e minuto.
+- [x] Usuário consegue informar hora e minuto no modal de novo lançamento e salvar com sucesso.
+- [x] O extrato exibe a data acompanhada do horário na listagem.
+- [x] Lançamentos no mesmo dia são exibidos em ordem cronológica precisa.
+- [x] Testes automatizados unitários e de integração validam a persistência e ordenação de hora e minuto.
