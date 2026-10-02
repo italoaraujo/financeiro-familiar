@@ -137,10 +137,45 @@ describe('TransactionsService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('should reject transfer if source account has insufficient balance (SEC-CRIT-02)', async () => {
+      prisma.account.findUnique
+        .mockResolvedValueOnce({
+          id: 'acc-src',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(50),
+        })
+        .mockResolvedValueOnce({
+          id: 'acc-dst',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(100),
+        });
+
+      await expect(
+        service.transfer('user-1', {
+          sourceAccountId: 'acc-src',
+          destinationAccountId: 'acc-dst',
+          amount: 200,
+          description: 'Transferência sem fundos',
+          transactionDate: '2026-09-01',
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prisma.account.update).not.toHaveBeenCalled();
+      expect(prisma.transaction.create).not.toHaveBeenCalled();
+    });
+
     it('should debit source and credit destination in atomic transaction', async () => {
       prisma.account.findUnique
-        .mockResolvedValueOnce({ id: 'acc-src', userId: 'user-1' })
-        .mockResolvedValueOnce({ id: 'acc-dst', userId: 'user-1' });
+        .mockResolvedValueOnce({
+          id: 'acc-src',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(1000),
+        })
+        .mockResolvedValueOnce({
+          id: 'acc-dst',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(500),
+        });
 
       prisma.category.findFirst.mockResolvedValue({ id: 'cat-transf' });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-transf' });
@@ -825,8 +860,16 @@ describe('TransactionsService', () => {
 
     it('should persist explicit time in transfer (TIME-06)', async () => {
       prisma.account.findUnique
-        .mockResolvedValueOnce({ id: 'acc-1', userId: 'user-1' })
-        .mockResolvedValueOnce({ id: 'acc-2', userId: 'user-1' });
+        .mockResolvedValueOnce({
+          id: 'acc-1',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(1000),
+        })
+        .mockResolvedValueOnce({
+          id: 'acc-2',
+          userId: 'user-1',
+          currentBalance: new Prisma.Decimal(500),
+        });
       prisma.category.findFirst.mockResolvedValue({ id: 'cat-transf' });
       prisma.transaction.create.mockResolvedValue({ id: 'tx-transf' });
 

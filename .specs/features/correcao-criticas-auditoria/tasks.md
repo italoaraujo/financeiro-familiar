@@ -92,10 +92,10 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Transferência com montante maior que o saldo da conta de origem lança `BadRequestException`.
-- [ ] Transferência com saldo suficiente continua debitando a origem e creditando o destino atomicamente.
-- [ ] Testes unitários em `transactions.service.spec.ts` cobrindo validação de saldo insuficiente e transferência legítima passam.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] Transferência com montante maior que o saldo da conta de origem lança `BadRequestException`.
+- [x] Transferência com saldo suficiente continua debitando a origem e creditando o destino atomicamente.
+- [x] Testes unitários em `transactions.service.spec.ts` cobrindo validação de saldo insuficiente e transferência legítima passam.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  

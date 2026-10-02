@@ -328,6 +328,17 @@ export class TransactionsService {
         throw new ForbiddenException('Acesso negado à conta bancária de destino');
       }
 
+      const sourceBalance =
+        source.currentBalance instanceof Prisma.Decimal
+          ? source.currentBalance
+          : new Prisma.Decimal(source.currentBalance || 0);
+
+      if (sourceBalance.lt(amount)) {
+        throw new BadRequestException(
+          `Saldo insuficiente na conta de origem para realizar a transferência. Saldo disponível: R$ ${sourceBalance.toFixed(2)}`,
+        );
+      }
+
       // Busca ou cria categoria padrão para Transferência
       let transferCategory = await tx.category.findFirst({
         where: { name: 'Transferência' },
