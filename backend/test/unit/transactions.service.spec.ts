@@ -70,6 +70,7 @@ describe('TransactionsService', () => {
 
     creditCardsService = {
       determineInvoiceForDate: jest.fn(),
+      getOrCreateInvoice: jest.fn().mockResolvedValue({ id: 'inv-future' }),
     };
 
     tagsService = {
@@ -852,17 +853,23 @@ describe('TransactionsService', () => {
       expect(date.getMinutes()).toBe(15);
     });
 
-    it('should set explicit time on first installment and 00:00:00 on future installments (TIME-07, TIME-08)', async () => {
+    it('should set explicit time on first installment and closing day with 00:00:00 on future installments (TIME-07, TIME-08)', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-1',
         userId: 'user-1',
         isActive: true,
+        closingDay: 20,
         creditLimit: new Prisma.Decimal(5000),
         invoices: [],
       });
-      creditCardsService.determineInvoiceForDate
-        .mockResolvedValueOnce({ id: 'inv-1' })
-        .mockResolvedValueOnce({ id: 'inv-2' });
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({
+        id: 'inv-1',
+        referenceMonth: '2026-10',
+      });
+      creditCardsService.getOrCreateInvoice.mockResolvedValue({
+        id: 'inv-2',
+        referenceMonth: '2026-11',
+      });
       prisma.transaction.create
         .mockResolvedValueOnce({ id: 'tx-inst-1' })
         .mockResolvedValueOnce({ id: 'tx-inst-2' });
@@ -882,14 +889,58 @@ describe('TransactionsService', () => {
 
       const firstCall = prisma.transaction.create.mock.calls[0][0];
       const firstDate: Date = firstCall.data.transactionDate;
+      expect(firstDate.getDate()).toBe(2);
+      expect(firstDate.getMonth()).toBe(9); // Outubro (0-indexed: 9)
+      expect(firstDate.getFullYear()).toBe(2026);
       expect(firstDate.getHours()).toBe(16);
       expect(firstDate.getMinutes()).toBe(20);
 
       const secondCall = prisma.transaction.create.mock.calls[1][0];
       const secondDate: Date = secondCall.data.transactionDate;
+      expect(secondDate.getDate()).toBe(20); // Fechamento do cartão (closingDay = 20)
+      expect(secondDate.getMonth()).toBe(10); // Novembro (0-indexed: 10)
+      expect(secondDate.getFullYear()).toBe(2026);
       expect(secondDate.getHours()).toBe(0);
       expect(secondDate.getMinutes()).toBe(0);
       expect(secondDate.getSeconds()).toBe(0);
+    });
+
+    it('should adjust future installment date if closingDay exceeds days in target month', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        closingDay: 31,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+      });
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({
+        id: 'inv-1',
+        referenceMonth: '2026-10',
+      });
+      creditCardsService.getOrCreateInvoice.mockResolvedValue({
+        id: 'inv-2',
+        referenceMonth: '2026-11',
+      });
+      prisma.transaction.create
+        .mockResolvedValueOnce({ id: 'tx-inst-1' })
+        .mockResolvedValueOnce({ id: 'tx-inst-2' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 300,
+        description: 'Compra parcelada dia 31',
+        transactionDate: '2026-10-15',
+        categoryId: 'cat-1',
+        creditCardId: 'card-1',
+        totalInstallments: 2,
+      });
+
+      const secondCall = prisma.transaction.create.mock.calls[1][0];
+      const secondDate: Date = secondCall.data.transactionDate;
+      expect(secondDate.getDate()).toBe(30); // Novembro tem 30 dias (Math.min(31, 30))
+      expect(secondDate.getMonth()).toBe(10);
+      expect(secondDate.getHours()).toBe(0);
     });
   });
 });

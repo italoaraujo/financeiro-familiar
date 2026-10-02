@@ -31,7 +31,7 @@
 | The system SHALL ordenar transações por data e hora decrescente (TIME-05) | Ordenação por data/hora e criação desc | `backend/src/modules/transactions/transactions.service.ts:430` - `orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }]` | ✅ PASS |
 | WHEN usuário cria transferência THEN salva horário consistente (TIME-06) | Horário idêntico nas contas | `backend/test/unit/transactions.service.spec.ts:854` - `expect(date.getHours()).toBe(9)` | ✅ PASS |
 | WHEN compra parcelada criada THEN primeira parcela recebe horário (TIME-07) | 1ª parcela com hora informada (16:20) | `backend/test/unit/transactions.service.spec.ts:899` - `expect(firstDate.getHours()).toBe(16)` | ✅ PASS |
-| WHILE gerando parcelas futuras THEN recebem 00:00:00 (TIME-08) | Parcelas 2+ com horário 00:00:00 | `backend/test/unit/transactions.service.spec.ts:905` - `expect(secondDate.getHours()).toBe(0)` | ✅ PASS |
+| WHILE gerando parcelas futuras THEN recebem data de fechamento e 00:00:00 (TIME-08) | Parcelas 2+ com dia de fechamento do cartão e horário 00:00:00 | `backend/test/unit/transactions.service.spec.ts:889` - `expect(secondDate.getDate()).toBe(20)` e `expect(secondDate.getHours()).toBe(0)` | ✅ PASS |
 
 **Status**: ✅ All ACs covered
 
@@ -41,8 +41,8 @@
 
 | Mutation | File:line | Description | Killed? |
 | -------- | --------- | ----------- | ------- |
-| 1 | `backend/src/modules/transactions/transactions.service.ts:563` | Alterar defaultHour de 12 para 0 | ✅ Killed (teste fallback falha) |
-| 2 | `backend/src/modules/transactions/transactions.service.ts:147` | Alterar horário de parcelas futuras de 0 para 12 | ✅ Killed (teste parcela 2 falha) |
+| 1 | `backend/src/modules/transactions/transactions.service.ts:580` | Alterar defaultHour de 12 para 0 | ✅ Killed (teste fallback falha) |
+| 2 | `backend/src/modules/transactions/transactions.service.ts:167` | Alterar targetDay de closingDay para baseDay | ✅ Killed (teste parcela 2 data de fechamento falha) |
 
 **Sensor depth**: lightweight
 **Result**: 2/2 mutations killed - PASS

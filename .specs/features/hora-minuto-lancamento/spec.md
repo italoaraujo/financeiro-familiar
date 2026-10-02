@@ -69,10 +69,10 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 **Acceptance Criteria**:
 
 1. WHEN o usuário criar uma transferência entre contas informando hora e minuto THEN the system SHALL salvar o mesmo horário nas duas pontas (saída e entrada).
-2. WHEN o usuário criar uma compra parcelada no cartão de crédito com horário THEN the system SHALL aplicar o horário informado na primeira parcela.
-3. WHILE gerando as parcelas subsequentes (parcela 2 em diante) the system SHALL atribuir o horário padrão de início de dia (00:00:00) a essas parcelas futuras.
+2. WHEN o usuário criar uma compra parcelada no cartão de crédito com horário THEN the system SHALL aplicar a data e horário informados na primeira parcela.
+3. WHILE gerando as parcelas subsequentes (parcela 2 em diante) the system SHALL atribuir a data de fechamento do cartão de crédito escolhido (ajustada para o último dia do mês quando o mês tiver menos dias) com horário padrão de início de dia (00:00:00).
 
-**Independent Test**: Criar compra parcelada em 2x às 16:20 e verificar que a parcela 1 possui 16:20 e a parcela 2 possui o horário padrão 00:00:00.
+**Independent Test**: Criar compra parcelada em 2x às 16:20 em cartão com fechamento dia 20 e verificar que a parcela 1 possui data informada às 16:20 e a parcela 2 possui data no dia 20 do mês seguinte às 00:00:00.
 
 ---
 

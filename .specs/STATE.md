@@ -147,9 +147,9 @@
 - **Status**: active
 
 ### AD-020
-- **Decision**: Persistir data e horário de transações financeiras utilizando `@db.Timestamptz` no Prisma e PostgreSQL, permitindo campo opcional `transactionTime` (formato `HH:mm`) nos DTOs e modal de lançamento, com fallback padrão de 12:00:00 para lançamentos sem horário e 00:00:00 para parcelas futuras no cartão de crédito.
-- **Reason**: Permite aos usuários registrar a hora exata dos lançamentos e garante ordenação cronológica precisa dentro do mesmo dia no extrato, preservando compatibilidade retroativa e integridade de faturas.
-- **Trade-off**: Requer manipulação cuidadosa de horas e minutos em DTOs, parsing e formatação no frontend.
+- **Decision**: Persistir data e horário de transações financeiras utilizando `@db.Timestamptz` no Prisma e PostgreSQL, permitindo campo opcional `transactionTime` (formato `HH:mm`) nos DTOs e modal de lançamento, com fallback padrão de 12:00:00 para lançamentos sem horário e data igual ao dia de fechamento do cartão de crédito (com horário 00:00:00) para parcelas futuras subsequentes.
+- **Reason**: Permite aos usuários registrar a hora exata dos lançamentos e garante ordenação cronológica precisa dentro do mesmo dia no extrato, atribuindo parcelas futuras ao dia de fechamento da respectiva fatura do cartão.
+- **Trade-off**: Requer manipulação cuidadosa de horas e minutos em DTOs, cálculo de dias válidos no mês de fechamento, parsing e formatação no frontend.
 - **Scope**: `backend/prisma/schema.prisma`, DTOs de transação e transferência, `TransactionsService`, formatters e modal/tabela do frontend.
 - **Date**: 2026-10-02
 - **Status**: active
@@ -160,7 +160,7 @@
 - **Total Tasks**: 7
 - **Completed Tasks**: 7 / 7 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (32 unit tests passed in transactions.service, full backend build passed, Next.js frontend build passed)
+- **Build Status**: 100% Success (33 unit tests passed in transactions.service, full backend build passed, Next.js frontend build passed)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff

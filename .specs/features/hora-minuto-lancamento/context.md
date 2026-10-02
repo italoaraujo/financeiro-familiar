@@ -26,8 +26,8 @@ Permitir a definição e visualização de horário (hora e minuto) ao criar lan
 
 ### Parcelamento no Cartão de Crédito
 
-- Ao registrar uma compra parcelada, o horário definido pelo usuário é atribuído à primeira parcela.
-- As parcelas futuras subsequentes recebem o horário padrão de início de dia (00:00:00), conforme escolha do usuário.
+- Ao registrar uma compra parcelada, a data e horário definidos pelo usuário são atribuídos à primeira parcela.
+- As parcelas futuras subsequentes recebem como data a data de fechamento do cartão de crédito escolhido (ajustada para o último dia do mês quando o mês tiver menos dias que o `closingDay`) com o horário padrão de início de dia (00:00:00).
 
 ### Modelagem e Banco de Dados
 

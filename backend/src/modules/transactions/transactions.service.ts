@@ -90,8 +90,9 @@ export class TransactionsService {
       };
 
       // Validação de limite e status do cartão de crédito
+      let card: any = null;
       if (dto.creditCardId) {
-        const card = await tx.creditCard.findUnique({
+        card = await tx.creditCard.findUnique({
           where: { id: dto.creditCardId },
           include: {
             invoices: {
@@ -137,33 +138,38 @@ export class TransactionsService {
 
         const createdTransactions = [];
 
-        const baseYear = baseDate.getFullYear();
-        const baseMonth = baseDate.getMonth();
-        const baseDay = baseDate.getDate();
+        const firstInvoice = await this.creditCardsService.determineInvoiceForDate(
+          dto.creditCardId!,
+          baseDate,
+        );
+        const refMonthBase =
+          firstInvoice?.referenceMonth ||
+          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`;
+        const [firstYear, firstMonth] = refMonthBase.split('-').map(Number);
+        const closingDay = card?.closingDay || 1;
 
         for (let i = 1; i <= totalInstallments; i++) {
-          const targetMonth = baseMonth + (i - 1);
-          const targetYear = baseYear + Math.floor(targetMonth / 12);
-          const monthIndex = ((targetMonth % 12) + 12) % 12;
-          const maxDaysInMonth = new Date(targetYear, monthIndex + 1, 0).getDate();
-          const targetDay = Math.min(baseDay, maxDaysInMonth);
-          const hour = i === 1 ? baseDate.getHours() : 0;
-          const minute = i === 1 ? baseDate.getMinutes() : 0;
-          const second = i === 1 ? baseDate.getSeconds() : 0;
-          const installmentDate = new Date(
-            targetYear,
-            monthIndex,
-            targetDay,
-            hour,
-            minute,
-            second,
-            0,
-          );
+          let installmentDate: Date;
+          let invoice = firstInvoice;
 
-          const invoice = await this.creditCardsService.determineInvoiceForDate(
-            dto.creditCardId!,
-            installmentDate,
-          );
+          if (i === 1) {
+            installmentDate = baseDate;
+          } else {
+            const targetMonth = firstMonth + (i - 1);
+            const targetYear = firstYear + Math.floor((targetMonth - 1) / 12);
+            const normalizedMonth = ((targetMonth - 1) % 12) + 1;
+            const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
+
+            if (this.creditCardsService.getOrCreateInvoice) {
+              invoice = await this.creditCardsService.getOrCreateInvoice(dto.creditCardId!, refMonth);
+            } else {
+              invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
+            }
+
+            const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
+            const targetDay = Math.min(closingDay, maxDaysInMonth);
+            installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
+          }
 
           const instAmount = i === totalInstallments ? lastInstallmentValue : baseInstallmentValue;
 
