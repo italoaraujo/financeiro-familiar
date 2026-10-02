@@ -31,3 +31,21 @@ export function formatDateTime(dateString: string | Date | null | undefined): st
     minute: '2-digit',
   }).format(d);
 }
+
+export function formatTransactionDateTime(dateString: string | Date | null | undefined): { date: string; time: string | null } {
+  if (!dateString) return { date: '-', time: null };
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return { date: '-', time: null };
+
+  const date = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(d);
+
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const time = `${hours}:${minutes}`;
+
+  return { date, time };
+}

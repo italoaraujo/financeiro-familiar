@@ -202,9 +202,9 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Função `formatTransactionDateTime` exportada
-- [ ] Exibe a data (DD/MM/YYYY) e o horário (HH:mm) quando presente e relevante
-- [ ] Retorna traço ou formato limpo para valores nulos/inválidos
+- [x] Função `formatTransactionDateTime` exportada
+- [x] Exibe a data (DD/MM/YYYY) e o horário (HH:mm) quando presente e relevante
+- [x] Retorna traço ou formato limpo para valores nulos/inválidos
 
 **Tests**: none
 **Gate**: build
