@@ -124,9 +124,9 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Campo `transactionTime?: string` adicionado ao `TransferDto`
-- [ ] Validação aceita horários no formato `HH:mm`
-- [ ] Documentação Swagger atualizada
+- [x] Campo `transactionTime?: string` adicionado ao `TransferDto`
+- [x] Validação aceita horários no formato `HH:mm`
+- [x] Documentação Swagger atualizada
 
 **Tests**: unit
 **Gate**: quick
