@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -35,6 +36,12 @@ export class CreateTransactionDto {
   @IsDateString({}, { message: 'Data inválida (formato YYYY-MM-DD)' })
   @IsNotEmpty({ message: 'Data é obrigatória' })
   transactionDate: string;
+
+  @ApiProperty({ required: false, example: '14:30', description: 'Horário do lançamento no formato HH:mm' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Horário deve estar no formato HH:mm (ex: 14:30)' })
+  transactionTime?: string;
 
   @ApiProperty({ required: false })
   @IsUUID('4', { message: 'Categoria inválida' })

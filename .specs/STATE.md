@@ -146,22 +146,30 @@
 - **Date**: 2026-10-01
 - **Status**: active
 
+### AD-020
+- **Decision**: Persistir data e horário de transações financeiras utilizando `@db.Timestamptz` no Prisma e PostgreSQL, permitindo campo opcional `transactionTime` (formato `HH:mm`) nos DTOs e modal de lançamento, com fallback padrão de 12:00:00 para lançamentos sem horário e data igual ao dia de fechamento do cartão de crédito (com horário 00:00:00) para parcelas futuras subsequentes.
+- **Reason**: Permite aos usuários registrar a hora exata dos lançamentos e garante ordenação cronológica precisa dentro do mesmo dia no extrato, atribuindo parcelas futuras ao dia de fechamento da respectiva fatura do cartão.
+- **Trade-off**: Requer manipulação cuidadosa de horas e minutos em DTOs, cálculo de dias válidos no mês de fechamento, parsing e formatação no frontend.
+- **Scope**: `backend/prisma/schema.prisma`, DTOs de transação e transferência, `TransactionsService`, formatters e modal/tabela do frontend.
+- **Date**: 2026-10-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `upgrade-nextjs-16`
-- **Total Tasks**: 3
-- **Completed Tasks**: 3 / 3 (100%)
+- **Active Feature**: `hora-minuto-lancamento`
+- **Total Tasks**: 7
+- **Completed Tasks**: 7 / 7 (100%)
 - **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (215 backend tests passed, clean Turbopack build frontend)
+- **Build Status**: 100% Success (33 unit tests passed in transactions.service, full backend build passed, Next.js frontend build passed)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/upgrade-nextjs-16
-- **Phase / Task**: Concluído (T1 a T3 concluídas com sucesso)
-- **Completed**: T1, T2, T3
+- **Feature**: .specs/features/hora-minuto-lancamento
+- **Phase / Task**: Concluído (T1 a T7 concluídas com sucesso)
+- **Completed**: T1, T2, T3, T4, T5, T6, T7
 - **In-progress**: None
-- **Next step**: Homologação e merge da branch feature/upgrade-nextjs-16 na develop
+- **Next step**: Homologação com usuário e finalização da branch (`git flow feature finish hora_minuto`)
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/upgrade-nextjs-16
+- **Branch**: feature/hora_minuto

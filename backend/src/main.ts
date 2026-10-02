@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import { getAllowedCorsOrigins } from './common/utils/cors.util';
 import { isSwaggerEnabled } from './common/utils/swagger.util';
 
+process.env.TZ = process.env.TZ || 'America/Sao_Paulo';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

@@ -238,7 +238,7 @@ model Transaction {
   amount               Decimal           @db.Decimal(15, 2)
   description          String            @db.VarChar(255)
   notes                String?           @db.Text
-  transactionDate      DateTime          @map("transaction_date") @db.Date
+  transactionDate      DateTime          @map("transaction_date") @db.Timestamptz
   status               TransactionStatus @default(COMPLETED)
   isPrivate            Boolean           @default(false) @map("is_private")
   installmentNumber    Int?              @map("installment_number") @db.SmallInt
