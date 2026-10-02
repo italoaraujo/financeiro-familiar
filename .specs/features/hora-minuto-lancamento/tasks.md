@@ -175,11 +175,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Teste unitário para criação com horário explícito
-- [ ] Teste unitário para criação sem horário (fallback 12:00:00)
-- [ ] Teste unitário para transferência com horário consistente
-- [ ] Teste unitário para parcelamento (1ª parcela com horário informado, parcelas 2+ com 00:00:00)
-- [ ] Todos os testes unitários do serviço passam no Jest
+- [x] Teste unitário para criação com horário explícito
+- [x] Teste unitário para criação sem horário (fallback 12:00:00)
+- [x] Teste unitário para transferência com horário consistente
+- [x] Teste unitário para parcelamento (1ª parcela com horário informado, parcelas 2+ com 00:00:00)
+- [x] Todos os testes unitários do serviço passam no Jest
 
 **Tests**: unit
 **Gate**: quick

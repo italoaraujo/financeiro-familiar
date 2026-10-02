@@ -772,4 +772,124 @@ describe('TransactionsService', () => {
       expect(result.data[0].tags).toEqual([]);
     });
   });
+
+  describe('transaction time support (TIME-01 to TIME-08)', () => {
+    it('should persist explicit hour and minute when transactionTime is provided (TIME-01, TIME-02)', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-time-1' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 85.5,
+        description: 'Almoço com horário',
+        transactionDate: '2026-10-02',
+        transactionTime: '15:45',
+        categoryId: 'cat-1',
+        accountId: 'acc-1',
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            transactionDate: expect.any(Date),
+          }),
+        }),
+      );
+
+      const createdCall = prisma.transaction.create.mock.calls[0][0];
+      const date: Date = createdCall.data.transactionDate;
+      expect(date.getHours()).toBe(15);
+      expect(date.getMinutes()).toBe(45);
+    });
+
+    it('should fallback to neutral 12:00:00 when no transactionTime is provided (TIME-03)', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-time-2' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 50.0,
+        description: 'Lanche sem horário',
+        transactionDate: '2026-10-02',
+        categoryId: 'cat-1',
+        accountId: 'acc-1',
+      });
+
+      const createdCall = prisma.transaction.create.mock.calls[0][0];
+      const date: Date = createdCall.data.transactionDate;
+      expect(date.getHours()).toBe(12);
+      expect(date.getMinutes()).toBe(0);
+      expect(date.getSeconds()).toBe(0);
+    });
+
+    it('should persist explicit time in transfer (TIME-06)', async () => {
+      prisma.account.findUnique
+        .mockResolvedValueOnce({ id: 'acc-1', userId: 'user-1' })
+        .mockResolvedValueOnce({ id: 'acc-2', userId: 'user-1' });
+      prisma.category.findFirst.mockResolvedValue({ id: 'cat-transf' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-transf' });
+
+      await service.transfer('user-1', {
+        sourceAccountId: 'acc-1',
+        destinationAccountId: 'acc-2',
+        amount: 200,
+        description: 'Transferência com horário',
+        transactionDate: '2026-10-02',
+        transactionTime: '09:15',
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            transactionDate: expect.any(Date),
+          }),
+        }),
+      );
+
+      const createdCall = prisma.transaction.create.mock.calls[0][0];
+      const date: Date = createdCall.data.transactionDate;
+      expect(date.getHours()).toBe(9);
+      expect(date.getMinutes()).toBe(15);
+    });
+
+    it('should set explicit time on first installment and 00:00:00 on future installments (TIME-07, TIME-08)', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+      });
+      creditCardsService.determineInvoiceForDate
+        .mockResolvedValueOnce({ id: 'inv-1' })
+        .mockResolvedValueOnce({ id: 'inv-2' });
+      prisma.transaction.create
+        .mockResolvedValueOnce({ id: 'tx-inst-1' })
+        .mockResolvedValueOnce({ id: 'tx-inst-2' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 600,
+        description: 'Compra parcelada com horário',
+        transactionDate: '2026-10-02',
+        transactionTime: '16:20',
+        categoryId: 'cat-1',
+        creditCardId: 'card-1',
+        totalInstallments: 2,
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledTimes(2);
+
+      const firstCall = prisma.transaction.create.mock.calls[0][0];
+      const firstDate: Date = firstCall.data.transactionDate;
+      expect(firstDate.getHours()).toBe(16);
+      expect(firstDate.getMinutes()).toBe(20);
+
+      const secondCall = prisma.transaction.create.mock.calls[1][0];
+      const secondDate: Date = secondCall.data.transactionDate;
+      expect(secondDate.getHours()).toBe(0);
+      expect(secondDate.getMinutes()).toBe(0);
+      expect(secondDate.getSeconds()).toBe(0);
+    });
+  });
 });
