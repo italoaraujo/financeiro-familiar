@@ -149,12 +149,12 @@ T6 → T7
 
 **Done when**:
 
-- [ ] `parseTransactionDate` aceita `dateInput` e `timeInput` opcional, definindo a hora e minuto fornecidos
-- [ ] Caso não haja horário fornecido, define horário neutro padrão (12:00:00)
-- [ ] Compras parceladas atribuem o horário informado à primeira parcela e `00:00:00` às parcelas subsequentes
-- [ ] Transferências atribuem o mesmo horário a ambas as pontas
-- [ ] Filtros de data (`startDate`/`endDate`) consideram o dia completo (00:00:00 até 23:59:59.999)
-- [ ] Ordenação de transações aplica `orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }]`
+- [x] `parseTransactionDate` aceita `dateInput` e `timeInput` opcional, definindo a hora e minuto fornecidos
+- [x] Caso não haja horário fornecido, define horário neutro padrão (12:00:00)
+- [x] Compras parceladas atribuem o horário informado à primeira parcela e `00:00:00` às parcelas subsequentes
+- [x] Transferências atribuem o mesmo horário a ambas as pontas
+- [x] Filtros de data (`startDate`/`endDate`) consideram o dia completo (00:00:00 até 23:59:59.999)
+- [x] Ordenação de transações aplica `orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }]`
 
 **Tests**: unit
 **Gate**: quick
