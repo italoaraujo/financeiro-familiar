@@ -101,9 +101,9 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Campo `transactionTime?: string` adicionado com validação de formato `HH:mm` (opcional)
-- [ ] Validação do `transactionDate` permanece compatível com formato `YYYY-MM-DD` ou ISO completo
-- [ ] Documentação Swagger atualizada
+- [x] Campo `transactionTime?: string` adicionado com validação de formato `HH:mm` (opcional)
+- [x] Validação do `transactionDate` permanece compatível com formato `YYYY-MM-DD` ou ISO completo
+- [x] Documentação Swagger atualizada
 
 **Tests**: unit
 **Gate**: quick
