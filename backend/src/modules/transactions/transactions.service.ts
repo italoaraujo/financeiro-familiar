@@ -21,6 +21,8 @@ import {
 } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
+process.env.TZ = process.env.TZ || 'America/Sao_Paulo';
+
 @Injectable()
 export class TransactionsService {
   constructor(

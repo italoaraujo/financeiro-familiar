@@ -20,11 +20,13 @@ RUN npm run build
 
 # Production image, copy all the files and run next
 FROM node:20-alpine AS runner
+RUN apk add --no-cache tzdata
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+ENV TZ=America/Sao_Paulo
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./

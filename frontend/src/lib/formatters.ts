@@ -15,7 +15,7 @@ export function formatDate(dateString: string | Date | null | undefined): string
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'America/Sao_Paulo',
   }).format(d);
 }
 
@@ -29,6 +29,7 @@ export function formatDateTime(dateString: string | Date | null | undefined): st
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
   }).format(d);
 }
 
@@ -41,11 +42,14 @@ export function formatTransactionDateTime(dateString: string | Date | null | und
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
   }).format(d);
 
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const time = `${hours}:${minutes}`;
+  const time = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  }).format(d);
 
   return { date, time };
 }
