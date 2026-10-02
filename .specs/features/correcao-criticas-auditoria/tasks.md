@@ -66,11 +66,11 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] A consulta da meta e a checagem de saldo ocorrem dentro do callback de `$transaction`.
-- [ ] O saldo da meta é atualizado utilizando decremento atômico `{ decrement: withdrawAmount }`.
-- [ ] Tentativas de resgate com saldo insuficiente lançam `BadRequestException` ('Saldo insuficiente na meta para realizar o resgate').
-- [ ] Testes unitários em `goals.service.spec.ts` cobrindo resgate atômico e saldo insuficiente passam com 100% de sucesso.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
+- [x] A consulta da meta e a checagem de saldo ocorrem dentro do callback de `$transaction`.
+- [x] O saldo da meta é atualizado utilizando decremento atômico `{ decrement: withdrawAmount }`.
+- [x] Tentativas de resgate com saldo insuficiente lançam `BadRequestException` ('Saldo insuficiente na meta para realizar o resgate').
+- [x] Testes unitários em `goals.service.spec.ts` cobrindo resgate atômico e saldo insuficiente passam com 100% de sucesso.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/goals.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
