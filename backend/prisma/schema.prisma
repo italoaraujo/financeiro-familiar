@@ -447,4 +447,14 @@ model TransactionTag {
   @@map("transaction_tags")
 }
 
+model RevokedToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  tokenHash String   @unique @map("token_hash") @db.VarChar(64)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([expiresAt])
+  @@map("revoked_tokens")
+}
+
 

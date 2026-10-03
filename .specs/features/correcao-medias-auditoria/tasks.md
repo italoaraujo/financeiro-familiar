@@ -146,12 +146,12 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Schema do Prisma contém modelo `RevokedToken` com índice em `expiresAt` e `tokenHash` único.
-- [ ] `TokenBlacklistService.add` armazena hash SHA-256 no banco e no cache de memória.
-- [ ] `TokenBlacklistService.isBlacklisted` consulta cache e banco assincronamente.
-- [ ] `JwtStrategy` e `AuthController.logout` operam de forma assíncrona e revogam tokens com sucesso.
-- [ ] Testes unitários para `TokenBlacklistService` cobrem inclusão, consulta, expiração e persistência.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Schema do Prisma contém modelo `RevokedToken` com índice em `expiresAt` e `tokenHash` único.
+- [x] `TokenBlacklistService.add` armazena hash SHA-256 no banco e no cache de memória.
+- [x] `TokenBlacklistService.isBlacklisted` consulta cache e banco assincronamente.
+- [x] `JwtStrategy` e `AuthController.logout` operam de forma assíncrona e revogam tokens com sucesso.
+- [x] Testes unitários para `TokenBlacklistService` cobrem inclusão, consulta, expiração e persistência.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: unit  
 **Gate**: quick  
