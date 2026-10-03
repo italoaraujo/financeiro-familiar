@@ -162,22 +162,30 @@
 - **Date**: 2026-10-02
 - **Status**: active
 
+### AD-022
+- **Decision**: Mitigar as 5 vulnerabilidades de severidade Alta (`SEC-HIGH-01` a `SEC-HIGH-05`) catalogadas na auditoria de segurança: (1) Validar `accountId` em cartões de crédito (`CreditCardsService.create` e `update`) garantindo pertinência ao titular ou à mesma família; (2) Validar `parentId` em subcategorias (`CategoriesService.create` e `update`) impedindo vinculação a categorias privadas de terceiros e rejeitando auto-referência cíclica; (3) Bloquear exclusão de transações em faturas fechadas (`CLOSED`) ou pagas (`PAID`) em `TransactionsService.remove`; (4) Vincular mapeamento de portas de serviços no `docker-compose.yml` estritamente a `127.0.0.1`; (5) Aplicar remediação de dependências com CVEs no backend e frontend via `npm audit fix` e overrides seguros.
+- **Reason**: Elimina vetores de BOLA/IDOR em cartões e categorias, protege a integridade contábil de períodos encerrados, previne bypass de proxy reverso e reduz a superfície de ataque em bibliotecas de terceiros.
+- **Trade-off**: Requer verificações relacionais adicionais em banco e impede edições retroativas em períodos já consolidados.
+- **Scope**: `CreditCardsService`, `CategoriesService`, `TransactionsService`, `docker-compose.yml`, `backend/package.json`, `frontend/package.json` e testes unitários.
+- **Date**: 2026-10-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `correcao-criticas-auditoria`
-- **Total Tasks**: 4
-- **Completed Tasks**: 4 / 4 (100%)
-- **Status**: **COMPLETE**
-- **Build Status**: 233 testes unitários e de integração passando, build NestJS 100% limpo
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `correcao-altas-auditoria`
+- **Total Tasks**: 6
+- **Completed Tasks**: 0 / 6 (0%)
+- **Status**: **READY TO EXECUTE**
+- **Build Status**: 233 testes unitários e de integração passando
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/correcao-criticas-auditoria
-- **Phase / Task**: Phase 1 / T4 (All tasks complete)
-- **Completed**: T1 (Race condition goals), T2 (Transfer balance check), T3 (BOLA transactions), T4 (BOLA budgets)
-- **In-progress**: None
-- **Next step**: Revisão do usuário e preparação de PR ou avanço para correções de vulnerabilidades de severidade alta
+- **Feature**: .specs/features/correcao-altas-auditoria
+- **Phase / Task**: Phase 1 / T1
+- **Completed**: None
+- **In-progress**: T1: Prevenção de BOLA na Associação de Contas a Cartões de Crédito (SEC-HIGH-01)
+- **Next step**: Implementar validação de `accountId` em `CreditCardsService.create` e `update` com testes unitários
 - **Blockers**: none
-- **Uncommitted files**: none
-- **Branch**: feature/correcao-criticas-auditoria
+- **Uncommitted files**: .specs/features/correcao-altas-auditoria/*
+- **Branch**: feature/correcao-altas-auditoria
