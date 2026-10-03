@@ -172,7 +172,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | MED-01 | P1: Execução Segura em Contêineres sem Privilégios Root | Tasks | Complete |
 | MED-02 | P2: Blindagem do Seed em Ambientes Produtivos | Tasks | Complete |
 | MED-03 | P3: Persistência Durável da Blacklist de Tokens JWT | Tasks | Complete |
-| MED-04 | P4: Eliminação de Fallback Inseguro de Credenciais no Compose | Tasks | Pending |
+| MED-04 | P4: Eliminação de Fallback Inseguro de Credenciais no Compose | Tasks | Complete |
 | MED-05 | P5: Prevenção de Escalação de Privilégios em Membros de Família | Tasks | Complete |
 | MED-06 | P6: Validação de Tamanho Máximo em DTOs de Entrada | Tasks | Complete |
 | MED-07 | P7: Reforço da Política de Senhas e Complexidade | Tasks | Complete |

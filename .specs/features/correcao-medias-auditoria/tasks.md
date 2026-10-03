@@ -221,10 +221,10 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `docker-compose.yml` falha se `DB_USER` ou `DB_PASSWORD` não estiverem definidas no ambiente.
-- [ ] `.env.example` orienta a definição obrigatória de credenciais fortes de banco de dados.
-- [ ] Build e testes de backend e frontend passam sem erros.
-- [ ] Gate check passes: `npm --prefix backend test && npm --prefix frontend test`
+- [x] `docker-compose.yml` falha se `DB_USER` ou `DB_PASSWORD` não estiverem definidas no ambiente.
+- [x] `.env.example` orienta a definição obrigatória de credenciais fortes de banco de dados.
+- [x] Build e testes de backend e frontend passam sem erros.
+- [x] Gate check passes: `npm --prefix backend test && npm --prefix frontend test`
 
 **Tests**: integration  
 **Gate**: full  
