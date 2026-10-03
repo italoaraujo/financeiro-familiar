@@ -143,11 +143,11 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Criação de orçamento com categoria inexistente ou soft-deleted lança `NotFoundException` ('Categoria informada não encontrada').
-- [ ] Criação de orçamento associado a categoria de outro usuário/família lança `ForbiddenException` ('Acesso negado à categoria informada').
-- [ ] Criação de orçamento com categoria autorizada ou padrão funciona com sucesso.
-- [ ] Testes unitários em `budgets.service.spec.ts` cobrindo proteção BOLA em categorias passam.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/budgets.service.spec.ts`
+- [x] Criação de orçamento com categoria inexistente ou soft-deleted lança `NotFoundException` ('Categoria informada não encontrada').
+- [x] Criação de orçamento associado a categoria de outro usuário/família lança `ForbiddenException` ('Acesso negado à categoria informada').
+- [x] Criação de orçamento com categoria autorizada ou padrão funciona com sucesso.
+- [x] Testes unitários em `budgets.service.spec.ts` cobrindo proteção BOLA em categorias passam.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/budgets.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
