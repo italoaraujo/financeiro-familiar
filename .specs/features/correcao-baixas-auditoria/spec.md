@@ -130,7 +130,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| LOW-01 | P1: Configuração de Cabeçalhos HTTP Defensivos no Next.js | Tasks | Pending |
+| LOW-01 | P1: Configuração de Cabeçalhos HTTP Defensivos no Next.js | Tasks | Complete |
 | LOW-02 | P2: Reforço de Atributos de Segurança nos Cookies de Sessão | Tasks | Pending |
 | LOW-03 | P3: Proteção contra Spoofing de IP no Interceptor de Auditoria | Tasks | Pending |
 | LOW-04 | P4: Definição de Limites de Recursos no Docker Compose | Tasks | Pending |

@@ -68,9 +68,9 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `frontend/next.config.js` exporta a função assíncrona `headers()` com todos os cabeçalhos de segurança configurados.
-- [ ] O build do Next.js Turbopack compila com sucesso sem quebras.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] `frontend/next.config.js` exporta a função assíncrona `headers()` com todos os cabeçalhos de segurança configurados.
+- [x] O build do Next.js Turbopack compila com sucesso sem quebras.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: integration  
 **Gate**: quick  
