@@ -175,4 +175,4 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | MED-04 | P4: Eliminação de Fallback Inseguro de Credenciais no Compose | Tasks | Pending |
 | MED-05 | P5: Prevenção de Escalação de Privilégios em Membros de Família | Tasks | Complete |
 | MED-06 | P6: Validação de Tamanho Máximo em DTOs de Entrada | Tasks | Pending |
-| MED-07 | P7: Reforço da Política de Senhas e Complexidade | Tasks | Pending |
+| MED-07 | P7: Reforço da Política de Senhas e Complexidade | Tasks | Complete |

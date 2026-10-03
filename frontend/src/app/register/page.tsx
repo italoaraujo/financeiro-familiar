@@ -59,8 +59,18 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+    if (password.length < 8) {
+      setError('A senha deve ter pelo menos 8 caracteres');
+      return;
+    }
+
+    if (password.length > 72) {
+      setError('A senha não pode exceder 72 caracteres');
+      return;
+    }
+
+    if (!/^(?=.*[a-zA-Z])(?=.*\d).+$/.test(password)) {
+      setError('A senha deve conter ao menos uma letra e um número');
       return;
     }
 
@@ -176,7 +186,7 @@ export default function RegisterPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres (letras e números)"
                       className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-10 sm:pl-11 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     />
                   </div>

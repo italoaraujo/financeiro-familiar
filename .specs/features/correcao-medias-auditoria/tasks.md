@@ -96,11 +96,11 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `RegisterDto` rejeita senhas com menos de 8 caracteres com mensagem clara.
-- [ ] `RegisterDto` rejeita senhas com mais de 72 caracteres.
-- [ ] `RegisterDto` rejeita senhas puramente numéricas ou puramente alfabéticas.
-- [ ] Página de registro do frontend valida localmente o mínimo de 8 caracteres e a presença de letras e números.
-- [ ] Testes unitários passam: `npm --prefix backend test -- test/unit/auth.service.spec.ts`
+- [x] `RegisterDto` rejeita senhas com menos de 8 caracteres com mensagem clara.
+- [x] `RegisterDto` rejeita senhas com mais de 72 caracteres.
+- [x] `RegisterDto` rejeita senhas puramente numéricas ou puramente alfabéticas.
+- [x] Página de registro do frontend valida localmente o mínimo de 8 caracteres e a presença de letras e números.
+- [x] Testes unitários passam: `npm --prefix backend test -- test/unit/auth.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
