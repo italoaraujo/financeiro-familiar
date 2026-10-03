@@ -92,9 +92,9 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `setAuthCookie` e `removeAuthCookie` aplicam `SameSite=Strict`.
-- [ ] Flag `Secure` é incluída dinamicamente quando a conexão utiliza protocolo HTTPS.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] `setAuthCookie` e `removeAuthCookie` aplicam `SameSite=Strict`.
+- [x] Flag `Secure` é incluída dinamicamente quando a conexão utiliza protocolo HTTPS.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: unit  
 **Gate**: quick  
