@@ -519,6 +519,7 @@ export class TransactionsService {
         include: {
           category: true,
           goalDeposits: true,
+          invoice: true,
         },
       });
 
@@ -532,6 +533,17 @@ export class TransactionsService {
 
       if (transaction.familyId) {
         await this.verifyFamilyAccess(userId, transaction.familyId, true);
+      }
+
+      // Bloqueio de exclusão em faturas de cartão já fechadas ou pagas
+      if (
+        transaction.invoice &&
+        (transaction.invoice.status === InvoiceStatus.CLOSED ||
+          transaction.invoice.status === InvoiceStatus.PAID)
+      ) {
+        throw new BadRequestException(
+          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+        );
       }
 
       // Bloqueio de exclusão avulsa de movimentações de Metas e Cofrinhos

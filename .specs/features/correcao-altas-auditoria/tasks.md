@@ -122,11 +122,11 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] Tentativa de excluir transação vinculada a fatura `CLOSED` lança `BadRequestException`.
-- [ ] Tentativa de excluir transação vinculada a fatura `PAID` lança `BadRequestException`.
-- [ ] Exclusão de transação vinculada a fatura `OPEN` ou sem fatura continua sendo estornada e marcada com soft-delete normalmente.
-- [ ] Testes unitários em `transactions.service.spec.ts` passam com 100% de sucesso.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
+- [x] Tentativa de excluir transação vinculada a fatura `CLOSED` lança `BadRequestException`.
+- [x] Tentativa de excluir transação vinculada a fatura `PAID` lança `BadRequestException`.
+- [x] Exclusão de transação vinculada a fatura `OPEN` ou sem fatura continua sendo estornada e marcada com soft-delete normalmente.
+- [x] Testes unitários em `transactions.service.spec.ts` passam com 100% de sucesso.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/transactions.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  

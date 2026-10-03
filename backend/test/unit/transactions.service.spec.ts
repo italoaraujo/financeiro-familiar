@@ -386,6 +386,52 @@ describe('TransactionsService', () => {
       });
     });
 
+    it('should throw BadRequestException when trying to delete credit card transaction from CLOSED invoice (SEC-HIGH-03)', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-closed-inv',
+        userId: 'user-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(80),
+        status: TransactionStatus.COMPLETED,
+        creditCardId: 'card-1',
+        invoiceId: 'inv-closed',
+        deletedAt: null,
+        invoice: {
+          id: 'inv-closed',
+          status: InvoiceStatus.CLOSED,
+        },
+      });
+
+      await expect(service.remove('user-1', 'tx-closed-inv')).rejects.toThrow(
+        new BadRequestException(
+          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+        ),
+      );
+    });
+
+    it('should throw BadRequestException when trying to delete credit card transaction from PAID invoice (SEC-HIGH-03)', async () => {
+      prisma.transaction.findUnique.mockResolvedValue({
+        id: 'tx-paid-inv',
+        userId: 'user-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(120),
+        status: TransactionStatus.COMPLETED,
+        creditCardId: 'card-1',
+        invoiceId: 'inv-paid',
+        deletedAt: null,
+        invoice: {
+          id: 'inv-paid',
+          status: InvoiceStatus.PAID,
+        },
+      });
+
+      await expect(service.remove('user-1', 'tx-paid-inv')).rejects.toThrow(
+        new BadRequestException(
+          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+        ),
+      );
+    });
+
     it('should soft delete transfer transaction and revert both accounts', async () => {
       prisma.transaction.findUnique.mockResolvedValue({
         id: 'tx-4',
