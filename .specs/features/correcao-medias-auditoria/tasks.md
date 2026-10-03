@@ -70,11 +70,11 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Tentativa de adicionar membro com `role: OWNER` lança `BadRequestException`.
-- [ ] Tentativa de remoção de administrador por outro administrador lança `ForbiddenException`.
-- [ ] Remoção de administradores por parte do proprietário (`OWNER`) executa com sucesso.
-- [ ] Testes unitários em `families.service.spec.ts` cobrem todos os novos comportamentos.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/families.service.spec.ts`
+- [x] Tentativa de adicionar membro com `role: OWNER` lança `BadRequestException`.
+- [x] Tentativa de remoção de administrador por outro administrador lança `ForbiddenException`.
+- [x] Remoção de administradores por parte do proprietário (`OWNER`) executa com sucesso.
+- [x] Testes unitários em `families.service.spec.ts` cobrem todos os novos comportamentos.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/families.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
