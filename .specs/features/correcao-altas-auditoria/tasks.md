@@ -172,9 +172,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] Vulnerabilidade crítica de `tar` e altas de `multer`, `lodash`, `glob` e `js-yaml` tratadas sem quebrar o build.
-- [ ] `npm --prefix backend test` e `npm --prefix backend run build` passam sem regressões.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Vulnerabilidade crítica de `tar` e altas de `multer`, `lodash`, `glob` e `js-yaml` tratadas sem quebrar o build.
+- [x] `npm --prefix backend test` e `npm --prefix backend run build` passam sem regressões.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: integration  
 **Gate**: full  
