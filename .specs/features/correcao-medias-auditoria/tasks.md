@@ -173,9 +173,9 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `seed.ts` utiliza `production` como fallback e não cria usuário demo fora de `development`.
-- [ ] Inicialização no Dockerfile condiciona execução de seed ao ambiente de desenvolvimento.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] `seed.ts` utiliza `production` como fallback e não cria usuário demo fora de `development`.
+- [x] Inicialização no Dockerfile condiciona execução de seed ao ambiente de desenvolvimento.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: unit  
 **Gate**: quick  
