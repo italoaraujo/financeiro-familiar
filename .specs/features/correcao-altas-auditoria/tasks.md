@@ -196,9 +196,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] Vulnerabilidades de `brace-expansion` corrigidas no frontend via `npm audit fix`.
-- [ ] Compilação do frontend e execução de testes passam sem erros.
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] Vulnerabilidades de `brace-expansion` corrigidas no frontend via `npm audit fix`.
+- [x] Compilação do frontend e execução de testes passam sem erros.
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: integration  
 **Gate**: full  
