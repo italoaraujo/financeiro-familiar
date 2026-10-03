@@ -167,4 +167,47 @@ describe('AuditLogInterceptor', () => {
       },
     });
   });
+
+  it('deve extrair o primeiro IP de múltiplos proxies e truncar se exceder 45 caracteres', (done) => {
+    const rawContext = createMockContext('POST', '/transactions', { desc: 'test' });
+    const req = rawContext.switchToHttp().getRequest() as any;
+    req.ip = undefined;
+    req.headers['x-forwarded-for'] = '203.0.113.195, 70.41.3.18, 150.172.238.178';
+
+    const next: CallHandler = {
+      handle: () => of({ success: true }),
+    };
+
+    interceptor.intercept(rawContext, next).subscribe({
+      next: () => {
+        expect(auditLogsService.createLog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ipAddress: '203.0.113.195',
+          }),
+        );
+        done();
+      },
+    });
+  });
+
+  it('deve truncar endereço de IP em no máximo 45 caracteres para evitar erro de banco', (done) => {
+    const rawContext = createMockContext('POST', '/transactions', { desc: 'test' });
+    const req = rawContext.switchToHttp().getRequest() as any;
+    req.ip = '2001:0db8:85a3:0000:0000:8a2e:0370:7334:excessively_long_suffix_exceeding_forty_five_chars';
+
+    const next: CallHandler = {
+      handle: () => of({ success: true }),
+    };
+
+    interceptor.intercept(rawContext, next).subscribe({
+      next: () => {
+        expect(auditLogsService.createLog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ipAddress: req.ip.slice(0, 45),
+          }),
+        );
+        done();
+      },
+    });
+  });
 });

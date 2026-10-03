@@ -116,11 +116,11 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `main.ts` habilita `trust proxy` na instância NestExpressApplication.
-- [ ] `AuditLogInterceptor` prioriza `request.ip` e extrai com segurança o primeiro IP em caso de cabeçalhos de proxy.
-- [ ] Strings de IP com comprimento superior a 45 caracteres são truncadas preventivamente.
-- [ ] Testes unitários em `audit-log.interceptor.spec.ts` cobrem os novos cenários de sanitização.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/audit-log.interceptor.spec.ts`
+- [x] `main.ts` habilita `trust proxy` na instância NestExpressApplication.
+- [x] `AuditLogInterceptor` prioriza `request.ip` e extrai com segurança o primeiro IP em caso de cabeçalhos de proxy.
+- [x] Strings de IP com comprimento superior a 45 caracteres são truncadas preventivamente.
+- [x] Testes unitários em `audit-log.interceptor.spec.ts` cobrem os novos cenários de sanitização.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/audit-log.interceptor.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  

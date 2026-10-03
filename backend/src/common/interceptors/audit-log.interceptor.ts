@@ -29,7 +29,14 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     const startTime = Date.now();
     const url = request.originalUrl || request.url || '';
-    const ipAddress = request.ip || request.headers?.['x-forwarded-for'] || null;
+    const rawForwarded = request.headers?.['x-forwarded-for'];
+    const forwardedIp = typeof rawForwarded === 'string'
+      ? rawForwarded.split(',')[0].trim()
+      : Array.isArray(rawForwarded)
+        ? rawForwarded[0]?.trim()
+        : null;
+    const resolvedIp = request.ip || forwardedIp || request.socket?.remoteAddress || null;
+    const ipAddress = resolvedIp ? resolvedIp.slice(0, 45) : null;
     const userAgent = request.headers?.['user-agent'] || null;
     const userId = request.user?.id || request.user?.userId || null;
     const familyId =
