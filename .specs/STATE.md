@@ -166,18 +166,18 @@
 
 - **Active Feature**: `correcao-criticas-auditoria`
 - **Total Tasks**: 4
-- **Completed Tasks**: 0 / 4 (0%)
-- **Status**: **READY TO EXECUTE**
-- **Build Status**: Testes prévios passando (220 testes unitários/integração)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
+- **Completed Tasks**: 4 / 4 (100%)
+- **Status**: **COMPLETE**
+- **Build Status**: 233 testes unitários e de integração passando, build NestJS 100% limpo
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/correcao-criticas-auditoria
-- **Phase / Task**: Phase 1 / T1
-- **Completed**: None
-- **In-progress**: T1: Correção de Race Condition no Resgate de Metas (SEC-CRIT-01)
-- **Next step**: Implementar T1 em `backend/src/modules/goals/goals.service.ts` com validação atômica de saldo e decremento em transação
+- **Phase / Task**: Phase 1 / T4 (All tasks complete)
+- **Completed**: T1 (Race condition goals), T2 (Transfer balance check), T3 (BOLA transactions), T4 (BOLA budgets)
+- **In-progress**: None
+- **Next step**: Revisão do usuário e preparação de PR ou avanço para correções de vulnerabilidades de severidade alta
 - **Blockers**: none
-- **Uncommitted files**: .specs/features/correcao-criticas-auditoria/*
+- **Uncommitted files**: none
 - **Branch**: feature/correcao-criticas-auditoria
