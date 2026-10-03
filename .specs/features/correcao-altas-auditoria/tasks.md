@@ -69,11 +69,11 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] Criação e edição de cartão com `accountId` inexistente ou soft-deleted lançam `NotFoundException` ('Conta bancária informada não encontrada').
-- [ ] Criação e edição de cartão com `accountId` de outro usuário ou família não correspondente lançam `ForbiddenException`.
-- [ ] Criação e edição de cartão com `accountId` legítimo e compatível persistem com sucesso.
-- [ ] Testes unitários em `credit-cards.service.spec.ts` cobrem todos os cenários com 100% de sucesso.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/credit-cards.service.spec.ts`
+- [x] Criação e edição de cartão com `accountId` inexistente ou soft-deleted lançam `NotFoundException` ('Conta bancária informada não encontrada').
+- [x] Criação e edição de cartão com `accountId` de outro usuário ou família não correspondente lançam `ForbiddenException`.
+- [x] Criação e edição de cartão com `accountId` legítimo e compatível persistem com sucesso.
+- [x] Testes unitários em `credit-cards.service.spec.ts` cobrem todos os cenários com 100% de sucesso.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/credit-cards.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
