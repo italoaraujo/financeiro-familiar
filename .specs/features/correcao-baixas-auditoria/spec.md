@@ -134,4 +134,4 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | LOW-02 | P2: Reforço de Atributos de Segurança nos Cookies de Sessão | Tasks | Complete |
 | LOW-03 | P3: Proteção contra Spoofing de IP no Interceptor de Auditoria | Tasks | Complete |
 | LOW-04 | P4: Definição de Limites de Recursos no Docker Compose | Tasks | Complete |
-| LOW-05 | P5: Guia de Rotação de Segredos e Hardening de Credenciais | Tasks | Pending |
+| LOW-05 | P5: Guia de Rotação de Segredos e Hardening de Credenciais | Tasks | Complete |

@@ -165,9 +165,9 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Documento `docs/SECURITY_SECRETS_GUIDE.md` detalha processos de geração de entropia, rotação e boas práticas DevSecOps.
-- [ ] Todos os testes e compilações passam com sucesso.
-- [ ] Gate check passes: `npm --prefix backend test && npm --prefix frontend run build`
+- [x] Documento `docs/SECURITY_SECRETS_GUIDE.md` detalha processos de geração de entropia, rotação e boas práticas DevSecOps.
+- [x] Todos os testes e compilações passam com sucesso.
+- [x] Gate check passes: `npm --prefix backend test && npm --prefix frontend run build`
 
 **Tests**: integration  
 **Gate**: full  
