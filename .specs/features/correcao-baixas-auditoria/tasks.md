@@ -142,8 +142,8 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Todos os serviços do `docker-compose.yml` possuem limites de recursos de memória e CPU configurados.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Todos os serviços do `docker-compose.yml` possuem limites de recursos de memória e CPU configurados.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: integration  
 **Gate**: quick  
