@@ -44,7 +44,7 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     networks:
       - financial-net
 
@@ -68,7 +68,7 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       NEXT_PUBLIC_DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - financial-net
 

@@ -148,9 +148,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] O serviço `api` possui a porta mapeada explicitamente como `"127.0.0.1:3001:3001"`.
-- [ ] O serviço `frontend` possui a porta mapeada explicitamente como `"127.0.0.1:3000:3000"`.
-- [ ] Validação do arquivo compose com `docker compose config` ou checagem de sintaxe YAML.
+- [x] O serviço `api` possui a porta mapeada explicitamente como `"127.0.0.1:3001:3001"`.
+- [x] O serviço `frontend` possui a porta mapeada explicitamente como `"127.0.0.1:3000:3000"`.
+- [x] Validação do arquivo compose com `docker compose config` ou checagem de sintaxe YAML.
 
 **Tests**: integration  
 **Gate**: quick  
