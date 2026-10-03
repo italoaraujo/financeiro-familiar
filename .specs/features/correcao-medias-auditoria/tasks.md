@@ -197,9 +197,9 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `backend/Dockerfile` possui `USER node` e permissões adequadas no estágio de execução.
-- [ ] `frontend/Dockerfile` possui `USER node` e permissões adequadas no estágio de execução.
-- [ ] Gate check passes: `npm --prefix backend test && npm --prefix frontend test`
+- [x] `backend/Dockerfile` possui `USER node` e permissões adequadas no estágio de execução.
+- [x] `frontend/Dockerfile` possui `USER node` e permissões adequadas no estágio de execução.
+- [x] Gate check passes: `npm --prefix backend test && npm --prefix frontend test`
 
 **Tests**: integration  
 **Gate**: quick  

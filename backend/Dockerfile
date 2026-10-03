@@ -19,13 +19,15 @@ ENV NODE_ENV=production
 ENV PORT=3001
 ENV TZ=America/Sao_Paulo
 
-COPY package*.json ./
-RUN npm ci
+COPY --chown=node:node package*.json ./
+RUN npm ci && chown -R node:node /app
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/prisma ./prisma
+COPY --chown=node:node --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=node:node --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+USER node
 
 EXPOSE 3001
 

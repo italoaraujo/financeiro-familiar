@@ -169,7 +169,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| MED-01 | P1: Execução Segura em Contêineres sem Privilégios Root | Tasks | Pending |
+| MED-01 | P1: Execução Segura em Contêineres sem Privilégios Root | Tasks | Complete |
 | MED-02 | P2: Blindagem do Seed em Ambientes Produtivos | Tasks | Complete |
 | MED-03 | P3: Persistência Durável da Blacklist de Tokens JWT | Tasks | Complete |
 | MED-04 | P4: Eliminação de Fallback Inseguro de Credenciais no Compose | Tasks | Pending |
