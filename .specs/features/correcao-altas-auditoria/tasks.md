@@ -95,12 +95,12 @@ T1 → T2 → T3 → T4 → T5 → T6
 
 **Done when**:
 
-- [ ] Associação de `parentId` inexistente ou soft-deleted lança `NotFoundException` ('Categoria pai não encontrada').
-- [ ] Associação de `parentId` igual ao próprio ID da categoria em atualização lança `BadRequestException` ('Uma categoria não pode ser definida como pai de si mesma').
-- [ ] Associação de `parentId` privado de outro usuário ou outra família lança `ForbiddenException`.
-- [ ] Associação de categoria pai padrão do sistema ou pertencente ao usuário/família persiste normalmente.
-- [ ] Testes unitários em `categories.service.spec.ts` passam com 100% de sucesso.
-- [ ] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
+- [x] Associação de `parentId` inexistente ou soft-deleted lança `NotFoundException` ('Categoria pai não encontrada').
+- [x] Associação de `parentId` igual ao próprio ID da categoria em atualização lança `BadRequestException` ('Uma categoria não pode ser definida como pai de si mesma').
+- [x] Associação de `parentId` privado de outro usuário ou outra família lança `ForbiddenException`.
+- [x] Associação de categoria pai padrão do sistema ou pertencente ao usuário/família persiste normalmente.
+- [x] Testes unitários em `categories.service.spec.ts` passam com 100% de sucesso.
+- [x] Gate check passes: `npm --prefix backend test -- test/unit/categories.service.spec.ts`
 
 **Tests**: unit  
 **Gate**: quick  
