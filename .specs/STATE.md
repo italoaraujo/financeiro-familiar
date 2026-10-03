@@ -183,22 +183,35 @@
 - **Date**: 2026-10-03
 - **Status**: active
 
+### AD-024
+- **Decision**: Mitigar as 5 vulnerabilidades de severidade Baixa e Hardening (`SEC-LOW-01` a `SEC-LOW-05`) catalogadas na auditoria de segurança de software:
+  1. Configurar cabeçalhos HTTP defensivos e `Content-Security-Policy` no Next.js Turbopack via `headers()` em `frontend/next.config.js` (`SEC-LOW-01`).
+  2. Reforçar cookies de autenticação do cliente com o atributo `SameSite=Strict` e flag `Secure` condicional em conexões HTTPS no utilitário `frontend/src/lib/cookies.ts` (`SEC-LOW-02`).
+  3. Proteger o log de auditoria contra spoofing de IP, habilitando `trust proxy` no Express (`backend/src/main.ts`), sanitizando múltiplos endereços de proxy reverso e truncando a string em 45 caracteres em `AuditLogInterceptor` (`SEC-LOW-03`).
+  4. Configurar cotas defensivas de recursos (`deploy.resources.limits`) com `cpus: '1.0'` e `memory: 1024M` para todos os serviços (`postgres`, `api`, `frontend`) no `docker-compose.yml`, prevenindo ataques de DoS por exaustão de hardware (`SEC-LOW-04`).
+  5. Elaborar o guia operacional de segurança `docs/SECURITY_SECRETS_GUIDE.md` com instruções detalhadas para geração de entropia, procedimentos de rotação periódica de `JWT_SECRET` e senhas do PostgreSQL, boas práticas de prevenção contra vazamentos no Git e higienização de ambientes (`SEC-LOW-05`).
+- **Reason**: Reduz a superfície de ataque no navegador, neutraliza falsificações de endereço IP em trilhas de auditoria para conformidade com LGPD/PCI-DSS, previne exaustão de recursos computacionais por DoS no host e estabelece governança formal do ciclo de vida de credenciais de produção.
+- **Trade-off**: Restringe compartilhamento de cookies estritamente à mesma origem (`SameSite=Strict`) e impõe limites rígidos de memória por contêiner.
+- **Scope**: `frontend/next.config.js`, `frontend/src/lib/cookies.ts`, `backend/src/main.ts`, `backend/src/common/interceptors/audit-log.interceptor.ts`, `docker-compose.yml`, `docs/SECURITY_SECRETS_GUIDE.md` e suíte de testes.
+- **Date**: 2026-10-03
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `correcao-medias-auditoria`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
+- **Active Feature**: `correcao-baixas-auditoria`
+- **Total Tasks**: 5
+- **Completed Tasks**: 5 / 5 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: 272 testes unitários e de integração passando, builds de backend e frontend 100% limpos
+- **Build Status**: 275 testes unitários e de integração passando, builds de backend e frontend 100% limpos
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/correcao-medias-auditoria
-- **Phase / Task**: Phase 1 / T7 (All tasks complete)
-- **Completed**: T1 (Family privilege escalation), T2 (Password policy), T3 (DTO maxLength), T4 (Durable token blacklist), T5 (Seed hardening), T6 (Docker non-root), T7 (Compose credentials hardening)
+- **Feature**: .specs/features/correcao-baixas-auditoria
+- **Phase / Task**: Phase 1 / T5 (All tasks complete)
+- **Completed**: T1 (Security Headers & CSP), T2 (SameSite=Strict cookies), T3 (IP spoofing prevention in audit logs), T4 (Docker Compose resource limits), T5 (Security secrets rotation guide)
 - **In-progress**: None
-- **Next step**: Validação do completion gate, commit do state e envio remoto (git push) mediante aprovação do usuário
+- **Next step**: Validação do completion gate, commit do state e envio remoto (git push)
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/correcao-medias-auditoria
+- **Branch**: feature/correcao-baixas-auditoria
