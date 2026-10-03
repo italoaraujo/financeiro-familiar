@@ -122,9 +122,9 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Todas as propriedades de string possuem `@MaxLength()` coerente com o esquema do PostgreSQL.
-- [ ] Payloads com textos acima dos limites são rejeitados pelo `ValidationPipe` com HTTP 400.
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] Todas as propriedades de string possuem `@MaxLength()` coerente com o esquema do PostgreSQL.
+- [x] Payloads com textos acima dos limites são rejeitados pelo `ValidationPipe` com HTTP 400.
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: unit  
 **Gate**: quick  

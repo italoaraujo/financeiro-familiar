@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePersonDto {
@@ -11,10 +11,12 @@ export class CreatePersonDto {
   @ApiPropertyOptional({ example: '#3b82f6', description: 'Cor identificadora em formato hexadecimal' })
   @IsOptional()
   @IsString({ message: 'Cor deve ser uma string' })
+  @MaxLength(7, { message: 'Cor não pode exceder 7 caracteres' })
   color?: string;
 
   @ApiPropertyOptional({ example: 'https://avatar.url/pedro.png', description: 'URL de avatar opcional' })
   @IsOptional()
   @IsString({ message: 'Avatar deve ser uma URL ou caminho' })
+  @MaxLength(255, { message: 'URL do avatar não pode exceder 255 caracteres' })
   avatarUrl?: string;
 }

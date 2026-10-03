@@ -11,6 +11,7 @@ import {
   IsUUID,
   Matches,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -30,6 +31,7 @@ export class CreateTransactionDto {
   @ApiProperty({ example: 'Compras da semana no mercado' })
   @IsString()
   @IsNotEmpty({ message: 'Descrição é obrigatória' })
+  @MaxLength(255, { message: 'Descrição não pode exceder 255 caracteres' })
   description: string;
 
   @ApiProperty({ example: '2026-09-01' })
@@ -82,6 +84,7 @@ export class CreateTransactionDto {
 
   @ApiProperty({ required: false })
   @IsString()
+  @MaxLength(1000, { message: 'Observações não podem exceder 1000 caracteres' })
   @IsOptional()
   notes?: string;
 
@@ -98,6 +101,7 @@ export class CreateTransactionDto {
   @ApiProperty({ required: false, type: [String], description: 'Tags para categorização transversal' })
   @IsArray({ message: 'Tags deve ser uma lista de textos' })
   @IsString({ each: true, message: 'Cada tag deve ser um texto' })
+  @MaxLength(50, { each: true, message: 'Cada tag não pode exceder 50 caracteres' })
   @IsOptional()
   tags?: string[];
 }
