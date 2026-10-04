@@ -21,6 +21,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
   api:
     build:
@@ -47,6 +52,11 @@ services:
       - "127.0.0.1:3001:3001"
     networks:
       - financial-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
   frontend:
     build:
@@ -71,6 +81,11 @@ services:
       - "127.0.0.1:3000:3000"
     networks:
       - financial-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
 
 networks:

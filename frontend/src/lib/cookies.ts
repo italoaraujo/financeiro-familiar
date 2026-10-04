@@ -7,7 +7,7 @@ export function setAuthCookie(name: string, value: string, days: number = 1): vo
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   const secureFlag = isSecure ? '; Secure' : '';
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secureFlag}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict${secureFlag}`;
 }
 
 export function getAuthCookie(name: string): string | null {
@@ -20,5 +20,5 @@ export function removeAuthCookie(name: string): void {
   if (typeof document === 'undefined') return;
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
   const secureFlag = isSecure ? '; Secure' : '';
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax${secureFlag}`;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict${secureFlag}`;
 }
