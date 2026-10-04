@@ -86,6 +86,116 @@ describe('CreditCardsService', () => {
       expect(prisma.creditCard.create).toHaveBeenCalled();
       expect(prisma.creditCardInvoice.create).toHaveBeenCalled();
     });
+
+    it('should throw NotFoundException if accountId does not exist (SEC-HIGH-01)', async () => {
+      prisma.account.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create('user-1', {
+          name: 'Nubank',
+          creditLimit: 2000,
+          closingDay: 20,
+          dueDay: 27,
+          accountId: 'acc-non-existent',
+        }),
+      ).rejects.toThrow(new NotFoundException('Conta bancária informada não encontrada'));
+    });
+
+    it('should throw NotFoundException if accountId is soft-deleted (SEC-HIGH-01)', async () => {
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-del',
+        deletedAt: new Date(),
+        userId: 'user-1',
+        familyId: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Nubank',
+          creditLimit: 2000,
+          closingDay: 20,
+          dueDay: 27,
+          accountId: 'acc-del',
+        }),
+      ).rejects.toThrow(new NotFoundException('Conta bancária informada não encontrada'));
+    });
+
+    it('should throw ForbiddenException if accountId belongs to another user (SEC-HIGH-01)', async () => {
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-other-user',
+        deletedAt: null,
+        userId: 'other-user',
+        familyId: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Nubank',
+          creditLimit: 2000,
+          closingDay: 20,
+          dueDay: 27,
+          accountId: 'acc-other-user',
+        }),
+      ).rejects.toThrow(new ForbiddenException('A conta bancária informada não pertence ao seu escopo pessoal'));
+    });
+
+    it('should throw ForbiddenException if accountId belongs to another family (SEC-HIGH-01)', async () => {
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-other-family',
+        deletedAt: null,
+        userId: 'user-1',
+        familyId: 'family-other',
+      });
+
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'fm-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Nubank Familiar',
+          creditLimit: 2000,
+          closingDay: 20,
+          dueDay: 27,
+          familyId: 'family-1',
+          accountId: 'acc-other-family',
+        }),
+      ).rejects.toThrow(new ForbiddenException('A conta bancária informada não pertence ao grupo familiar do cartão'));
+    });
+
+    it('should create credit card when accountId is valid and owned by user (SEC-HIGH-01)', async () => {
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-valid',
+        deletedAt: null,
+        userId: 'user-1',
+        familyId: null,
+      });
+      prisma.creditCard.create.mockResolvedValueOnce({
+        id: 'card-acc-ok',
+        name: 'Nubank Com Conta',
+        accountId: 'acc-valid',
+      });
+      prisma.creditCardInvoice.findUnique.mockResolvedValue(null);
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-acc-ok',
+        closingDay: 20,
+        dueDay: 27,
+      });
+      prisma.creditCardInvoice.create.mockResolvedValue({});
+
+      const result = await service.create('user-1', {
+        name: 'Nubank Com Conta',
+        creditLimit: 2000,
+        closingDay: 20,
+        dueDay: 27,
+        accountId: 'acc-valid',
+      });
+
+      expect(result.id).toBe('card-acc-ok');
+    });
   });
 
   describe('determineInvoiceForDate', () => {
@@ -554,6 +664,26 @@ describe('CreditCardsService', () => {
       await expect(service.update('user-1', 'card-1', { dueDay: 0 })).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+    it('should throw ForbiddenException if updated accountId belongs to another user (SEC-HIGH-01)', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+      });
+      prisma.account.findUnique.mockResolvedValueOnce({
+        id: 'acc-other',
+        userId: 'other-user',
+        familyId: null,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.update('user-1', 'card-1', { accountId: 'acc-other' }),
+      ).rejects.toThrow(new ForbiddenException('A conta bancária informada não pertence ao seu escopo pessoal'));
     });
   });
 

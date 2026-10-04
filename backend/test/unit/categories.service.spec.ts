@@ -52,6 +52,100 @@ describe('CategoriesService', () => {
       expect(result.id).toBe('cat-1');
       expect(prisma.category.create).toHaveBeenCalled();
     });
+
+    it('should throw NotFoundException if parentId does not exist (SEC-HIGH-02)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create('user-1', {
+          name: 'Hortifruti',
+          type: TransactionType.EXPENSE,
+          parentId: 'cat-non-existent',
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria pai não encontrada'));
+    });
+
+    it('should throw NotFoundException if parentId is soft-deleted (SEC-HIGH-02)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-del',
+        deletedAt: new Date(),
+        isSystemDefault: false,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Hortifruti',
+          type: TransactionType.EXPENSE,
+          parentId: 'cat-del',
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria pai não encontrada'));
+    });
+
+    it('should throw ForbiddenException if parentId belongs to another user (SEC-HIGH-02)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-user',
+        deletedAt: null,
+        userId: 'other-user',
+        familyId: null,
+        isSystemDefault: false,
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Hortifruti',
+          type: TransactionType.EXPENSE,
+          parentId: 'cat-other-user',
+        }),
+      ).rejects.toThrow(new ForbiddenException('A categoria pai não pertence ao seu escopo pessoal'));
+    });
+
+    it('should throw ForbiddenException if parentId belongs to another family (SEC-HIGH-02)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-fam',
+        deletedAt: null,
+        userId: 'user-1',
+        familyId: 'family-other',
+        isSystemDefault: false,
+      });
+
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'fm-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.create('user-1', {
+          name: 'Hortifruti Familiar',
+          type: TransactionType.EXPENSE,
+          familyId: 'family-1',
+          parentId: 'cat-other-fam',
+        }),
+      ).rejects.toThrow(new ForbiddenException('A categoria pai não pertence a este grupo familiar'));
+    });
+
+    it('should create subcategory when parentId is system default or owned by user (SEC-HIGH-02)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-sys-def',
+        deletedAt: null,
+        isSystemDefault: true,
+      });
+
+      prisma.category.create.mockResolvedValueOnce({
+        id: 'cat-sub-ok',
+        name: 'Hortifruti',
+        parentId: 'cat-sys-def',
+      });
+
+      const result = await service.create('user-1', {
+        name: 'Hortifruti',
+        type: TransactionType.EXPENSE,
+        parentId: 'cat-sys-def',
+      });
+
+      expect(result.id).toBe('cat-sub-ok');
+    });
   });
 
   describe('findAll', () => {
@@ -282,4 +376,75 @@ describe('CategoriesService', () => {
       expect(result).toHaveLength(1);
     });
   });
+
+  describe('update parentId validation (SEC-HIGH-02)', () => {
+    it('should throw BadRequestException if category is set as parent of itself', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-1',
+        userId: 'user-1',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.update('user-1', 'cat-1', { parentId: 'cat-1' }),
+      ).rejects.toThrow(new BadRequestException('Uma categoria não pode ser definida como pai de si mesma'));
+    });
+
+    it('should throw ForbiddenException if updated parentId belongs to another user', async () => {
+      prisma.category.findUnique
+        .mockResolvedValueOnce({
+          id: 'cat-1',
+          userId: 'user-1',
+          familyId: null,
+          isSystemDefault: false,
+          deletedAt: null,
+        })
+        .mockResolvedValueOnce({
+          id: 'cat-other',
+          userId: 'other-user',
+          familyId: null,
+          isSystemDefault: false,
+          deletedAt: null,
+        });
+
+      await expect(
+        service.update('user-1', 'cat-1', { parentId: 'cat-other' }),
+      ).rejects.toThrow(new ForbiddenException('A categoria pai não pertence ao seu escopo pessoal'));
+    });
+
+    it('should update category when parentId is valid and owned by user', async () => {
+      prisma.category.findUnique
+        .mockResolvedValueOnce({
+          id: 'cat-1',
+          userId: 'user-1',
+          familyId: null,
+          isSystemDefault: false,
+          deletedAt: null,
+        })
+        .mockResolvedValueOnce({
+          id: 'cat-parent-ok',
+          userId: 'user-1',
+          familyId: null,
+          isSystemDefault: false,
+          deletedAt: null,
+        });
+
+      prisma.category.update.mockResolvedValueOnce({
+        id: 'cat-1',
+        name: 'Categoria Atualizada',
+        parentId: 'cat-parent-ok',
+      });
+
+      const result = await service.update('user-1', 'cat-1', {
+        name: 'Categoria Atualizada',
+        parentId: 'cat-parent-ok',
+      });
+
+      expect(result.id).toBe('cat-1');
+      expect(result.parentId).toBe('cat-parent-ok');
+    });
+  });
 });
+

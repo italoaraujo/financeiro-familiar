@@ -19,6 +19,10 @@ export class CreditCardsService {
       await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
+    if (dto.accountId) {
+      await this.validateAccountAccess(userId, dto.accountId, dto.familyId);
+    }
+
     const creditLimit = new Prisma.Decimal(dto.creditLimit);
 
     const card = await this.prisma.creditCard.create({
@@ -122,6 +126,11 @@ export class CreditCardsService {
 
     if (dto.familyId && dto.familyId !== card.familyId) {
       await this.verifyFamilyAccess(userId, dto.familyId, true);
+    }
+
+    if (dto.accountId) {
+      const targetFamilyId = dto.familyId !== undefined ? dto.familyId : card.familyId;
+      await this.validateAccountAccess(userId, dto.accountId, targetFamilyId);
     }
 
     if (dto.creditLimit !== undefined && dto.creditLimit <= 0) {
@@ -531,5 +540,28 @@ export class CreditCardsService {
         status: InvoiceStatus.CLOSED,
       },
     });
+  }
+
+  private async validateAccountAccess(userId: string, accountId: string, familyId?: string | null) {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    });
+
+    if (!account || account.deletedAt) {
+      throw new NotFoundException('Conta bancária informada não encontrada');
+    }
+
+    if (familyId) {
+      if (account.familyId !== familyId) {
+        throw new ForbiddenException('A conta bancária informada não pertence ao grupo familiar do cartão');
+      }
+      await this.verifyFamilyAccess(userId, familyId, true);
+    } else {
+      if (account.familyId !== null || account.userId !== userId) {
+        throw new ForbiddenException('A conta bancária informada não pertence ao seu escopo pessoal');
+      }
+    }
+
+    return account;
   }
 }

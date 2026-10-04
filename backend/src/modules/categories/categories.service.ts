@@ -19,12 +19,7 @@ export class CategoriesService {
     }
 
     if (dto.parentId) {
-      const parent = await this.prisma.category.findUnique({
-        where: { id: dto.parentId },
-      });
-      if (!parent) {
-        throw new NotFoundException('Categoria pai não encontrada');
-      }
+      await this.validateParentCategory(userId, dto.parentId, dto.familyId);
     }
 
     return this.prisma.category.create({
@@ -110,6 +105,10 @@ export class CategoriesService {
       throw new ForbiddenException('Acesso negado para modificar esta categoria');
     }
 
+    if (dto.parentId) {
+      await this.validateParentCategory(userId, dto.parentId, category.familyId, id);
+    }
+
     return this.prisma.category.update({
       where: { id },
       data: {
@@ -173,5 +172,39 @@ export class CategoriesService {
     }
 
     return member;
+  }
+
+  private async validateParentCategory(
+    userId: string,
+    parentId: string,
+    targetFamilyId?: string | null,
+    currentCategoryId?: string,
+  ) {
+    if (currentCategoryId && parentId === currentCategoryId) {
+      throw new BadRequestException('Uma categoria não pode ser definida como pai de si mesma');
+    }
+
+    const parent = await this.prisma.category.findUnique({
+      where: { id: parentId },
+    });
+
+    if (!parent || parent.deletedAt) {
+      throw new NotFoundException('Categoria pai não encontrada');
+    }
+
+    if (!parent.isSystemDefault) {
+      if (targetFamilyId) {
+        if (parent.familyId !== targetFamilyId) {
+          throw new ForbiddenException('A categoria pai não pertence a este grupo familiar');
+        }
+        await this.verifyFamilyAccess(userId, targetFamilyId, true);
+      } else {
+        if (parent.familyId !== null || parent.userId !== userId) {
+          throw new ForbiddenException('A categoria pai não pertence ao seu escopo pessoal');
+        }
+      }
+    }
+
+    return parent;
   }
 }
