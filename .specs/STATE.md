@@ -154,22 +154,30 @@
 - **Date**: 2026-10-02
 - **Status**: active
 
+### AD-021
+- **Decision**: Mitigar as 3 vulnerabilidades críticas identificadas na auditoria de segurança de software: (1) Eliminar race condition no resgate de metas (`GoalsService.withdraw`) movendo a verificação de saldo para dentro da transação Prisma e aplicando decremento atômico `{ currentAmount: { decrement: withdrawAmount } }`; (2) Bloquear transferências bancárias (`TransactionsService.transfer`) cujo montante exceda o saldo disponível da conta de origem (`source.currentBalance >= amount`), retornando `BadRequestException`; (3) Bloquear BOLA/IDOR universal em categorias (`TransactionsService.create` e `BudgetsService.create`), validando que a categoria informada exista e pertença legitimamente ao escopo pessoal do usuário, familiar ou seja padrão do sistema (`isSystemDefault`).
+- **Reason**: Neutraliza riscos de duplicação de crédito bancário por requisições concorrentes (double-spend), impede geração de crédito sem lastro via saldo negativo e assegura a estrita segregação multitenant entre contas individuais e familiares.
+- **Trade-off**: Requer validação relacional síncrona de categorias e restringe transferências exclusivamente a contas com fundos disponíveis.
+- **Scope**: `backend/src/modules/goals/goals.service.ts`, `backend/src/modules/transactions/transactions.service.ts`, `backend/src/modules/budgets/budgets.service.ts` e suíte de testes unitários.
+- **Date**: 2026-10-02
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `hora-minuto-lancamento`
-- **Total Tasks**: 7
-- **Completed Tasks**: 7 / 7 (100%)
-- **Status**: **COMPLETED & VERIFIED (PASS)**
-- **Build Status**: 100% Success (33 unit tests passed in transactions.service, full backend build passed, Next.js frontend build passed)
+- **Active Feature**: `correcao-criticas-auditoria`
+- **Total Tasks**: 4
+- **Completed Tasks**: 4 / 4 (100%)
+- **Status**: **COMPLETE**
+- **Build Status**: 233 testes unitários e de integração passando, build NestJS 100% limpo
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/hora-minuto-lancamento
-- **Phase / Task**: Concluído (T1 a T7 concluídas com sucesso)
-- **Completed**: T1, T2, T3, T4, T5, T6, T7
+- **Feature**: .specs/features/correcao-criticas-auditoria
+- **Phase / Task**: Phase 1 / T4 (All tasks complete)
+- **Completed**: T1 (Race condition goals), T2 (Transfer balance check), T3 (BOLA transactions), T4 (BOLA budgets)
 - **In-progress**: None
-- **Next step**: Homologação com usuário e finalização da branch (`git flow feature finish hora_minuto`)
+- **Next step**: Revisão do usuário e preparação de PR ou avanço para correções de vulnerabilidades de severidade alta
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/hora_minuto
+- **Branch**: feature/correcao-criticas-auditoria

@@ -417,7 +417,7 @@ describe('GoalsService', () => {
       expect(prisma.goal.update).toHaveBeenCalledWith({
         where: { id: 'goal-1' },
         data: {
-          currentAmount: new Prisma.Decimal(1500),
+          currentAmount: { decrement: new Prisma.Decimal(500) },
           status: GoalStatus.IN_PROGRESS,
         },
       });
@@ -451,7 +451,7 @@ describe('GoalsService', () => {
       expect(prisma.goal.update).toHaveBeenCalledWith({
         where: { id: 'goal-1' },
         data: {
-          currentAmount: new Prisma.Decimal(9000),
+          currentAmount: { decrement: new Prisma.Decimal(1000) },
           status: GoalStatus.IN_PROGRESS,
         },
       });
@@ -474,19 +474,40 @@ describe('GoalsService', () => {
     });
 
     it('should throw BadRequestException if withdrawal amount is <= 0', async () => {
-      prisma.goal.findUnique.mockResolvedValue({
-        id: 'goal-1',
-        userId: 'user-1',
-        currentAmount: new Prisma.Decimal(500),
-        deletedAt: null,
-      });
-
       await expect(
         service.withdraw('user-1', 'goal-1', {
           amount: -50,
           withdrawalDate: '2026-09-04',
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException if goal does not exist or has deletedAt inside withdraw transaction (SEC-CRIT-01)', async () => {
+      prisma.goal.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.withdraw('user-1', 'goal-non-existent', {
+          amount: 100,
+          withdrawalDate: '2026-09-04',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if user has no access to goal inside withdraw transaction (SEC-CRIT-01)', async () => {
+      prisma.goal.findUnique.mockResolvedValue({
+        id: 'goal-other',
+        userId: 'other-user',
+        familyId: null,
+        currentAmount: new Prisma.Decimal(1000),
+        deletedAt: null,
+      });
+
+      await expect(
+        service.withdraw('user-1', 'goal-other', {
+          amount: 100,
+          withdrawalDate: '2026-09-04',
+        }),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 

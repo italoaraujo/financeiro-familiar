@@ -73,7 +73,15 @@ describe('Goals Cofrinho Flow Integration Test', () => {
         update: jest.fn(async ({ where, data }) => {
           const g = goals.find((item) => item.id === where.id);
           if (!g) throw new Error('Goal not found');
-          Object.assign(g, data);
+          const toAssign = { ...data };
+          if (data.currentAmount?.decrement) {
+            g.currentAmount = g.currentAmount.minus(data.currentAmount.decrement);
+            delete toAssign.currentAmount;
+          } else if (data.currentAmount?.increment) {
+            g.currentAmount = g.currentAmount.plus(data.currentAmount.increment);
+            delete toAssign.currentAmount;
+          }
+          Object.assign(g, toAssign);
           return g;
         }),
       },

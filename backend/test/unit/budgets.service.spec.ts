@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BudgetsService } from '../../src/modules/budgets/budgets.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('BudgetsService', () => {
   let service: BudgetsService;
@@ -17,6 +17,14 @@ describe('BudgetsService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+      },
+      category: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'cat-1',
+          name: 'Alimentação',
+          isSystemDefault: true,
+          deletedAt: null,
+        }),
       },
       transaction: {
         aggregate: jest.fn(),
@@ -68,6 +76,107 @@ describe('BudgetsService', () => {
           targetAmount: 500,
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException if category does not exist (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-non-existent',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw NotFoundException if category is soft-deleted (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-deleted',
+        name: 'Categoria Deletada',
+        deletedAt: new Date(),
+        isSystemDefault: false,
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-deleted',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another user (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-user',
+        name: 'Categoria Alheia',
+        userId: 'other-user',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-other-user',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new ForbiddenException('Acesso negado à categoria informada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another family (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-fam',
+        name: 'Categoria de Outra Família',
+        userId: null,
+        familyId: 'family-other',
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'member-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-other-fam',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow budget creation when category belongs to current user (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-my-own',
+        name: 'Minha Categoria',
+        userId: 'user-1',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.budget.findFirst.mockResolvedValueOnce(null);
+      prisma.budget.create.mockResolvedValueOnce({
+        id: 'budget-ok',
+        categoryId: 'cat-my-own',
+        periodMonth: '2026-09',
+        targetAmount: new Prisma.Decimal(500),
+      });
+
+      const result = await service.create('user-1', {
+        categoryId: 'cat-my-own',
+        periodMonth: '2026-09',
+        targetAmount: 500,
+      });
+
+      expect(result.id).toBe('budget-ok');
     });
   });
 

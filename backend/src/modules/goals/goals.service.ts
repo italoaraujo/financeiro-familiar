@@ -252,34 +252,34 @@ export class GoalsService {
   }
 
   async withdraw(userId: string, goalId: string, dto: CreateWithdrawalDto) {
-    const goal = await this.prisma.goal.findUnique({
-      where: { id: goalId },
-    });
-
-    if (!goal || goal.deletedAt) {
-      throw new NotFoundException('Meta não encontrada');
-    }
-
-    if (goal.familyId) {
-      await this.verifyFamilyAccess(userId, goal.familyId, true);
-    } else if (goal.userId !== userId) {
-      throw new ForbiddenException('Acesso negado à meta especificada');
-    }
-
     const withdrawAmount = new Prisma.Decimal(dto.amount);
     if (withdrawAmount.lte(0)) {
       throw new BadRequestException('O valor do resgate deve ser maior que zero');
     }
 
-    if (withdrawAmount.gt(goal.currentAmount)) {
-      throw new BadRequestException(
-        `Saldo insuficiente na meta para realizar o resgate. Saldo disponível: R$ ${goal.currentAmount.toFixed(2)}`
-      );
-    }
-
     const withdrawalDate = new Date(dto.withdrawalDate);
 
     return this.prisma.$transaction(async (tx) => {
+      const goal = await tx.goal.findUnique({
+        where: { id: goalId },
+      });
+
+      if (!goal || goal.deletedAt) {
+        throw new NotFoundException('Meta não encontrada');
+      }
+
+      if (goal.familyId) {
+        await this.verifyFamilyAccess(userId, goal.familyId, true);
+      } else if (goal.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à meta especificada');
+      }
+
+      if (withdrawAmount.gt(goal.currentAmount)) {
+        throw new BadRequestException(
+          `Saldo insuficiente na meta para realizar o resgate. Saldo disponível: R$ ${goal.currentAmount.toFixed(2)}`
+        );
+      }
+
       const account = await tx.account.findUnique({
         where: { id: goal.accountId },
       });
@@ -351,7 +351,7 @@ export class GoalsService {
       await tx.goal.update({
         where: { id: goal.id },
         data: {
-          currentAmount: updatedAmount,
+          currentAmount: { decrement: withdrawAmount },
           status: shouldRevertStatus ? GoalStatus.IN_PROGRESS : goal.status,
         },
       });
