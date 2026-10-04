@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BudgetsService } from '../../src/modules/budgets/budgets.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('BudgetsService', () => {
   let service: BudgetsService;
@@ -17,6 +17,14 @@ describe('BudgetsService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+      },
+      category: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'cat-1',
+          name: 'Alimentação',
+          isSystemDefault: true,
+          deletedAt: null,
+        }),
       },
       transaction: {
         aggregate: jest.fn(),
@@ -69,6 +77,107 @@ describe('BudgetsService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should throw NotFoundException if category does not exist (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-non-existent',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw NotFoundException if category is soft-deleted (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-deleted',
+        name: 'Categoria Deletada',
+        deletedAt: new Date(),
+        isSystemDefault: false,
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-deleted',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new NotFoundException('Categoria informada não encontrada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another user (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-user',
+        name: 'Categoria Alheia',
+        userId: 'other-user',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-other-user',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+        }),
+      ).rejects.toThrow(new ForbiddenException('Acesso negado à categoria informada'));
+    });
+
+    it('should throw ForbiddenException if category belongs to another family (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-other-fam',
+        name: 'Categoria de Outra Família',
+        userId: null,
+        familyId: 'family-other',
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'member-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.create('user-1', {
+          categoryId: 'cat-other-fam',
+          periodMonth: '2026-09',
+          targetAmount: 500,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow budget creation when category belongs to current user (SEC-CRIT-03)', async () => {
+      prisma.category.findUnique.mockResolvedValueOnce({
+        id: 'cat-my-own',
+        name: 'Minha Categoria',
+        userId: 'user-1',
+        familyId: null,
+        isSystemDefault: false,
+        deletedAt: null,
+      });
+      prisma.budget.findFirst.mockResolvedValueOnce(null);
+      prisma.budget.create.mockResolvedValueOnce({
+        id: 'budget-ok',
+        categoryId: 'cat-my-own',
+        periodMonth: '2026-09',
+        targetAmount: new Prisma.Decimal(500),
+      });
+
+      const result = await service.create('user-1', {
+        categoryId: 'cat-my-own',
+        periodMonth: '2026-09',
+        targetAmount: 500,
+      });
+
+      expect(result.id).toBe('budget-ok');
+    });
   });
 
   describe('findAll with consumption and alerts', () => {
@@ -91,10 +200,142 @@ describe('BudgetsService', () => {
       });
 
       const results = await service.findAll('user-1', '2026-09');
+
+      expect(prisma.budget.findMany).toHaveBeenCalledWith({
+        where: {
+          periodMonth: '2026-09',
+          deletedAt: null,
+          userId: 'user-1',
+          familyId: null,
+        },
+        include: {
+          category: true,
+        },
+      });
+      expect(prisma.transaction.aggregate).toHaveBeenCalledWith({
+        where: {
+          categoryId: 'cat-alimentacao',
+          type: 'EXPENSE',
+          status: 'COMPLETED',
+          deletedAt: null,
+          transactionDate: {
+            gte: expect.any(Date),
+            lte: expect.any(Date),
+          },
+          userId: 'user-1',
+          familyId: null,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
       expect(results).toHaveLength(1);
       expect(results[0].percentage).toBe(84);
       expect(results[0].isAlert).toBe(true);
       expect(results[0].isExceeded).toBe(false);
+    });
+  });
+
+  describe('remove', () => {
+    it('should soft delete budget setting deletedAt', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'b-1',
+        userId: 'user-1',
+        deletedAt: null,
+      });
+      prisma.budget.update.mockResolvedValue({ id: 'b-1' });
+
+      const result = await service.remove('user-1', 'b-1');
+
+      expect(prisma.budget.update).toHaveBeenCalledWith({
+        where: { id: 'b-1' },
+        data: { deletedAt: expect.any(Date) },
+      });
+      expect(result.message).toContain('removido com sucesso');
+    });
+
+    it('should throw NotFoundException if budget is already deleted', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'b-1',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+
+      await expect(service.remove('user-1', 'b-1')).rejects.toThrow();
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family budget', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          categoryId: 'cat-1',
+          periodMonth: '2026-09',
+          targetAmount: 1000,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to update family budget', async () => {
+      prisma.budget.findUnique.mockResolvedValue({
+        id: 'budget-fam-1',
+        familyId: 'family-1',
+        categoryId: 'cat-1',
+        periodMonth: '2026-09',
+        targetAmount: new Prisma.Decimal(1000),
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('user-viewer', 'budget-fam-1', {
+          targetAmount: 1500,
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to list family budgets via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.budget.findMany.mockResolvedValue([
+        {
+          id: 'budget-fam-1',
+          familyId: 'family-1',
+          categoryId: 'cat-1',
+          periodMonth: '2026-09',
+          targetAmount: new Prisma.Decimal(1000),
+          alertPercentage: 80,
+          category: { name: 'Alimentação' },
+        },
+      ]);
+      prisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: new Prisma.Decimal(200) },
+      });
+
+      const result = await service.findAll('user-viewer', '2026-09', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

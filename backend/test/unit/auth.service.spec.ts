@@ -2,15 +2,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { UsersService } from '../../src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let authService: AuthService;
   let usersService: jest.Mocked<UsersService>;
   let jwtService: jest.Mocked<JwtService>;
+  const originalEnv = process.env.DISABLE_REGISTRATION;
+
+  afterEach(() => {
+    if (originalEnv !== undefined) {
+      process.env.DISABLE_REGISTRATION = originalEnv;
+    } else {
+      delete process.env.DISABLE_REGISTRATION;
+    }
+  });
 
   beforeEach(async () => {
+    delete process.env.DISABLE_REGISTRATION;
     const mockUsersService = {
       findByEmail: jest.fn(),
       create: jest.fn(),
@@ -78,6 +88,63 @@ describe('AuthService', () => {
           password: 'password123',
         }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw ForbiddenException when DISABLE_REGISTRATION is true', async () => {
+      process.env.DISABLE_REGISTRATION = 'true';
+
+      await expect(
+        authService.register({
+          name: 'Maria Silva',
+          email: 'maria@email.com',
+          password: 'password123',
+        }),
+      ).rejects.toThrow(
+        new ForbiddenException('O cadastro de novos usuários está desativado pelo administrador'),
+      );
+      expect(usersService.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when DISABLE_REGISTRATION has spaces or truthy variations', async () => {
+      process.env.DISABLE_REGISTRATION = '  True ';
+
+      await expect(
+        authService.register({
+          name: 'Maria Silva',
+          email: 'maria@email.com',
+          password: 'password123',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+
+      process.env.DISABLE_REGISTRATION = '1';
+      await expect(
+        authService.register({
+          name: 'Maria Silva',
+          email: 'maria@email.com',
+          password: 'password123',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('isRegistrationEnabled', () => {
+    it('should return true by default or when set to false', () => {
+      delete process.env.DISABLE_REGISTRATION;
+      expect(authService.isRegistrationEnabled()).toBe(true);
+
+      process.env.DISABLE_REGISTRATION = 'false';
+      expect(authService.isRegistrationEnabled()).toBe(true);
+    });
+
+    it('should return false when DISABLE_REGISTRATION is true, 1 or yes', () => {
+      process.env.DISABLE_REGISTRATION = 'true';
+      expect(authService.isRegistrationEnabled()).toBe(false);
+
+      process.env.DISABLE_REGISTRATION = '1';
+      expect(authService.isRegistrationEnabled()).toBe(false);
+
+      process.env.DISABLE_REGISTRATION = 'YES';
+      expect(authService.isRegistrationEnabled()).toBe(false);
     });
   });
 

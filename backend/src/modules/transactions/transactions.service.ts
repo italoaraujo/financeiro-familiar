@@ -6,22 +6,34 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreditCardsService } from '../credit-cards/credit-cards.service';
+import { TagsService } from '../tags/tags.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import {
+  GoalMovementType,
+  GoalStatus,
+  InvoiceStatus,
+  Prisma,
+  TransactionStatus,
+  TransactionType,
+  FamilyMemberRole,
+} from '@prisma/client';
 import { randomUUID } from 'crypto';
+
+process.env.TZ = process.env.TZ || 'America/Sao_Paulo';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly creditCardsService: CreditCardsService,
+    private readonly tagsService: TagsService,
   ) {}
 
   async create(userId: string, dto: CreateTransactionDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     if (dto.personId) {
@@ -36,6 +48,27 @@ export class TransactionsService {
       }
     }
 
+    if (dto.categoryId) {
+      const category = await this.prisma.category.findUnique({
+        where: { id: dto.categoryId },
+      });
+
+      if (!category || category.deletedAt) {
+        throw new NotFoundException('Categoria informada não encontrada');
+      }
+
+      if (!category.isSystemDefault) {
+        if (category.familyId) {
+          await this.verifyFamilyAccess(userId, category.familyId, true);
+          if (dto.familyId && category.familyId !== dto.familyId) {
+            throw new ForbiddenException('Acesso negado à categoria informada');
+          }
+        } else if (category.userId !== userId) {
+          throw new ForbiddenException('Acesso negado à categoria informada');
+        }
+      }
+    }
+
     if (dto.type === TransactionType.TRANSFER) {
       throw new BadRequestException('Para transferências, utilize o endpoint específico /transactions/transfer');
     }
@@ -47,13 +80,40 @@ export class TransactionsService {
 
     const totalAmount = new Prisma.Decimal(dto.amount);
     const totalInstallments = dto.totalInstallments || 1;
+    if (totalInstallments > 72) {
+      throw new BadRequestException('O parcelamento máximo permitido é de 72 vezes');
+    }
     const isInstallment = totalInstallments > 1 && !!dto.creditCardId;
-    const baseDate = this.parseTransactionDate(dto.transactionDate);
+    const baseDate = this.parseTransactionDate(dto.transactionDate, dto.transactionTime);
 
     return this.prisma.$transaction(async (tx) => {
+      let resolvedTags: any[] = [];
+      if (dto.tags && dto.tags.length > 0) {
+        resolvedTags = await this.tagsService.findOrCreateMany(
+          userId,
+          dto.familyId,
+          dto.tags,
+          tx,
+        );
+      }
+
+      const linkTags = async (transactionId: string) => {
+        if (resolvedTags.length > 0) {
+          for (const tag of resolvedTags) {
+            await tx.transactionTag.create({
+              data: {
+                transactionId,
+                tagId: tag.id,
+              },
+            });
+          }
+        }
+      };
+
       // Validação de limite e status do cartão de crédito
+      let card: any = null;
       if (dto.creditCardId) {
-        const card = await tx.creditCard.findUnique({
+        card = await tx.creditCard.findUnique({
           where: { id: dto.creditCardId },
           include: {
             invoices: {
@@ -67,7 +127,7 @@ export class TransactionsService {
         }
 
         if (card.userId !== userId && card.familyId) {
-          await this.verifyFamilyAccess(userId, card.familyId);
+          await this.verifyFamilyAccess(userId, card.familyId, true);
         } else if (card.userId !== userId) {
           throw new ForbiddenException('Acesso negado ao cartão de crédito');
         }
@@ -99,29 +159,38 @@ export class TransactionsService {
 
         const createdTransactions = [];
 
-        const baseYear = baseDate.getFullYear();
-        const baseMonth = baseDate.getMonth();
-        const baseDay = baseDate.getDate();
+        const firstInvoice = await this.creditCardsService.determineInvoiceForDate(
+          dto.creditCardId!,
+          baseDate,
+        );
+        const refMonthBase =
+          firstInvoice?.referenceMonth ||
+          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`;
+        const [firstYear, firstMonth] = refMonthBase.split('-').map(Number);
+        const closingDay = card?.closingDay || 1;
 
         for (let i = 1; i <= totalInstallments; i++) {
-          const targetMonth = baseMonth + (i - 1);
-          const targetYear = baseYear + Math.floor(targetMonth / 12);
-          const monthIndex = ((targetMonth % 12) + 12) % 12;
-          const maxDaysInMonth = new Date(targetYear, monthIndex + 1, 0).getDate();
-          const targetDay = Math.min(baseDay, maxDaysInMonth);
-          const installmentDate = new Date(
-            targetYear,
-            monthIndex,
-            targetDay,
-            12,
-            0,
-            0,
-          );
+          let installmentDate: Date;
+          let invoice = firstInvoice;
 
-          const invoice = await this.creditCardsService.determineInvoiceForDate(
-            dto.creditCardId!,
-            installmentDate,
-          );
+          if (i === 1) {
+            installmentDate = baseDate;
+          } else {
+            const targetMonth = firstMonth + (i - 1);
+            const targetYear = firstYear + Math.floor((targetMonth - 1) / 12);
+            const normalizedMonth = ((targetMonth - 1) % 12) + 1;
+            const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
+
+            if (this.creditCardsService.getOrCreateInvoice) {
+              invoice = await this.creditCardsService.getOrCreateInvoice(dto.creditCardId!, refMonth);
+            } else {
+              invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
+            }
+
+            const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
+            const targetDay = Math.min(closingDay, maxDaysInMonth);
+            installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
+          }
 
           const instAmount = i === totalInstallments ? lastInstallmentValue : baseInstallmentValue;
 
@@ -151,6 +220,8 @@ export class TransactionsService {
             where: { id: invoice.id },
             data: { totalAmount: { increment: instAmount } },
           });
+
+          await linkTags(transaction.id);
 
           createdTransactions.push(transaction);
         }
@@ -189,6 +260,8 @@ export class TransactionsService {
           data: { totalAmount: { increment: totalAmount } },
         });
 
+        await linkTags(transaction.id);
+
         return transaction;
       }
 
@@ -199,6 +272,12 @@ export class TransactionsService {
 
       if (!account) {
         throw new NotFoundException('Conta bancária não encontrada');
+      }
+
+      if (account.userId !== userId && account.familyId) {
+        await this.verifyFamilyAccess(userId, account.familyId, true);
+      } else if (account.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária');
       }
 
       const transaction = await tx.transaction.create({
@@ -232,6 +311,8 @@ export class TransactionsService {
         });
       }
 
+      await linkTags(transaction.id);
+
       return transaction;
     });
   }
@@ -242,11 +323,11 @@ export class TransactionsService {
     }
 
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const amount = new Prisma.Decimal(dto.amount);
-    const date = this.parseTransactionDate(dto.transactionDate);
+    const date = this.parseTransactionDate(dto.transactionDate, dto.transactionTime);
 
     return this.prisma.$transaction(async (tx) => {
       const source = await tx.account.findUnique({ where: { id: dto.sourceAccountId } });
@@ -254,6 +335,29 @@ export class TransactionsService {
 
       if (!source || !dest) {
         throw new NotFoundException('Conta de origem ou destino não encontrada');
+      }
+
+      if (source.userId !== userId && source.familyId) {
+        await this.verifyFamilyAccess(userId, source.familyId, true);
+      } else if (source.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária de origem');
+      }
+
+      if (dest.userId !== userId && dest.familyId) {
+        await this.verifyFamilyAccess(userId, dest.familyId, true);
+      } else if (dest.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à conta bancária de destino');
+      }
+
+      const sourceBalance =
+        source.currentBalance instanceof Prisma.Decimal
+          ? source.currentBalance
+          : new Prisma.Decimal(source.currentBalance || 0);
+
+      if (sourceBalance.lt(amount)) {
+        throw new BadRequestException(
+          `Saldo insuficiente na conta de origem para realizar a transferência. Saldo disponível: R$ ${sourceBalance.toFixed(2)}`,
+        );
       }
 
       // Busca ou cria categoria padrão para Transferência
@@ -308,19 +412,22 @@ export class TransactionsService {
     const limit = filter.limit || 20;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = {
+      deletedAt: null,
+    };
 
     if (filter.familyId) {
-      await this.verifyFamilyAccess(userId, filter.familyId);
+      await this.verifyFamilyAccess(userId, filter.familyId, false);
       where.familyId = filter.familyId;
     } else {
       where.userId = userId;
+      where.familyId = null;
     }
 
     if (filter.startDate || filter.endDate) {
       where.transactionDate = {};
-      if (filter.startDate) where.transactionDate.gte = new Date(filter.startDate);
-      if (filter.endDate) where.transactionDate.lte = new Date(filter.endDate);
+      if (filter.startDate) where.transactionDate.gte = this.parseFilterStartDate(filter.startDate);
+      if (filter.endDate) where.transactionDate.lte = this.parseFilterEndDate(filter.endDate);
     }
 
     if (filter.accountId) where.accountId = filter.accountId;
@@ -334,6 +441,17 @@ export class TransactionsService {
       where.description = { contains: filter.search, mode: 'insensitive' };
     }
 
+    if (filter.tagId) {
+      where.tags = {
+        some: {
+          OR: [
+            { tagId: filter.tagId },
+            { tag: { name: { equals: filter.tagId, mode: 'insensitive' } } },
+          ],
+        },
+      };
+    }
+
     const [total, transactions] = await Promise.all([
       this.prisma.transaction.count({ where }),
       this.prisma.transaction.findMany({
@@ -343,14 +461,22 @@ export class TransactionsService {
           account: true,
           destinationAccount: true,
           creditCard: true,
+          goalDeposits: {
+            select: { id: true, goalId: true },
+          },
           person: {
             select: { id: true, name: true, color: true, avatarUrl: true },
           },
           user: {
             select: { id: true, name: true, email: true },
           },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
         },
-        orderBy: { transactionDate: 'desc' },
+        orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }],
         skip,
         take: limit,
       }),
@@ -358,16 +484,21 @@ export class TransactionsService {
 
     // Aplica regra de privacidade familiar (RN06):
     // Se isPrivate = true e usuário não é o autor, omite descrição e detalhes
-    const sanitized = transactions.map((tx) => {
+    const sanitized = transactions.map((tx: any) => {
+      const flatTags = tx.tags ? tx.tags.map((tt: any) => tt.tag) : [];
       if (tx.isPrivate && tx.userId !== userId) {
         return {
           ...tx,
           description: 'Lançamento Privado',
           notes: null,
           category: { ...tx.category, name: 'Privado' },
+          tags: [],
         };
       }
-      return tx;
+      return {
+        ...tx,
+        tags: flatTags,
+      };
     });
 
     return {
@@ -385,14 +516,45 @@ export class TransactionsService {
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.transaction.findUnique({
         where: { id },
+        include: {
+          category: true,
+          goalDeposits: true,
+          invoice: true,
+        },
       });
 
-      if (!transaction) {
+      if (!transaction || transaction.deletedAt) {
         throw new NotFoundException('Transação não encontrada');
       }
 
       if (transaction.userId !== userId) {
         throw new ForbiddenException('Apenas o autor pode excluir o lançamento');
+      }
+
+      if (transaction.familyId) {
+        await this.verifyFamilyAccess(userId, transaction.familyId, true);
+      }
+
+      // Bloqueio de exclusão em faturas de cartão já fechadas ou pagas
+      if (
+        transaction.invoice &&
+        (transaction.invoice.status === InvoiceStatus.CLOSED ||
+          transaction.invoice.status === InvoiceStatus.PAID)
+      ) {
+        throw new BadRequestException(
+          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+        );
+      }
+
+      // Bloqueio de exclusão avulsa de movimentações de Metas e Cofrinhos
+      if (
+        (transaction.goalDeposits && transaction.goalDeposits.length > 0) ||
+        transaction.category?.name === 'Aporte em Meta' ||
+        transaction.category?.name === 'Resgate de Meta'
+      ) {
+        throw new BadRequestException(
+          'Lançamentos vinculados a Metas e Cofrinhos não podem ser excluídos diretamente pelo extrato. Para movimentar ou retirar valores da sua meta, utilize a operação de Resgate na tela de Metas.'
+        );
       }
 
       // Estorno de saldos se estiver efetivada
@@ -428,15 +590,16 @@ export class TransactionsService {
         }
       }
 
-      await tx.transaction.delete({
+      await tx.transaction.update({
         where: { id },
+        data: { deletedAt: new Date() },
       });
 
       return { message: 'Transação excluída e saldo estornado com sucesso' };
     });
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -446,17 +609,86 @@ export class TransactionsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado ao grupo familiar');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 
-  private parseTransactionDate(dateInput: string | Date): Date {
+  private parseTransactionDate(
+    dateInput: string | Date,
+    timeInput?: string,
+    defaultHour: number = 12,
+  ): Date {
+    let year: number;
+    let month: number;
+    let day: number;
+    let hour = defaultHour;
+    let minute = 0;
+    let second = 0;
+
     if (typeof dateInput === 'string') {
-      const datePart = dateInput.split('T')[0];
-      const parts = datePart.split('-').map(Number);
-      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
-        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+      const parts = dateInput.split('T');
+      const dateParts = parts[0].split('-').map(Number);
+      if (dateParts.length === 3 && !isNaN(dateParts[0]) && !isNaN(dateParts[1]) && !isNaN(dateParts[2])) {
+        year = dateParts[0];
+        month = dateParts[1] - 1;
+        day = dateParts[2];
+      } else {
+        const d = new Date(dateInput);
+        year = d.getFullYear();
+        month = d.getMonth();
+        day = d.getDate();
+      }
+
+      if (parts[1]) {
+        const timeParts = parts[1].split(':').map(Number);
+        if (timeParts.length >= 2 && !isNaN(timeParts[0]) && !isNaN(timeParts[1])) {
+          hour = timeParts[0];
+          minute = timeParts[1];
+          second = !isNaN(timeParts[2]) ? Math.floor(timeParts[2]) : 0;
+        }
+      }
+    } else {
+      year = dateInput.getFullYear();
+      month = dateInput.getMonth();
+      day = dateInput.getDate();
+      hour = dateInput.getHours();
+      minute = dateInput.getMinutes();
+      second = dateInput.getSeconds();
+    }
+
+    if (timeInput && typeof timeInput === 'string') {
+      const timeParts = timeInput.split(':').map(Number);
+      if (timeParts.length >= 2 && !isNaN(timeParts[0]) && !isNaN(timeParts[1])) {
+        hour = timeParts[0];
+        minute = timeParts[1];
+        second = 0;
       }
     }
-    const d = new Date(dateInput);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+
+    return new Date(year, month, day, hour, minute, second, 0);
+  }
+
+  private parseFilterStartDate(dateStr: string): Date {
+    const parts = dateStr.split('T')[0].split('-').map(Number);
+    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+      return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+    }
+    const d = new Date(dateStr);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  }
+
+  private parseFilterEndDate(dateStr: string): Date {
+    const parts = dateStr.split('T')[0].split('-').map(Number);
+    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+      return new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+    }
+    const d = new Date(dateStr);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
   }
 }

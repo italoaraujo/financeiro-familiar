@@ -5,20 +5,27 @@ services:
     profiles: ["db"]
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USER:?Variavel DB_USER obrigatoria}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Variavel DB_PASSWORD obrigatoria}
       POSTGRES_DB: ${DB_NAME:-financial_db}
+      TZ: ${TZ:-America/Sao_Paulo}
+      PGTZ: ${TZ:-America/Sao_Paulo}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     networks:
       - financial-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-financial_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?Variavel DB_USER obrigatoria} -d ${DB_NAME:-financial_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
   api:
     build:
@@ -35,13 +42,21 @@ services:
       NODE_ENV: production
       APP_ENV: ${APP_ENV:-development}
       PORT: 3001
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
-      JWT_SECRET: ${JWT_SECRET:-supersecretjwtkey1234567890}
+      TZ: ${TZ:-America/Sao_Paulo}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:?Variavel DB_USER obrigatoria}:${DB_PASSWORD:?Variavel DB_PASSWORD obrigatoria}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: 1d
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     networks:
       - financial-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
   frontend:
     build:
@@ -50,6 +65,7 @@ services:
       args:
         NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+        NEXT_PUBLIC_DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     container_name: financial_frontend
     profiles: ["app"]
     restart: always
@@ -57,12 +73,19 @@ services:
       - api
     environment:
       NODE_ENV: production
+      TZ: ${TZ:-America/Sao_Paulo}
       NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - financial-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
 
 
 networks:

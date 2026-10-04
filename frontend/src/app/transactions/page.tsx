@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import AppShell from '../../components/layout/AppShell';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
-import { formatCurrency, formatDate } from '../../lib/formatters';
+import { formatCurrency, formatDate, formatTransactionDateTime } from '../../lib/formatters';
 import {
   Plus,
   Search,
@@ -18,9 +18,11 @@ import {
   User,
   X,
 } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
+import { TagInput } from '../../components/ui/TagInput';
 
 export default function TransactionsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>({ total: 0, page: 1, limit: 15, totalPages: 1 });
@@ -31,6 +33,7 @@ export default function TransactionsPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filterPersonId, setFilterPersonId] = useState('');
+  const [filterTagId, setFilterTagId] = useState('');
   const [page, setPage] = useState(1);
 
   // Aux data for modals & filters
@@ -38,6 +41,7 @@ export default function TransactionsPage() {
   const [cards, setCards] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [people, setPeople] = useState<any[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,12 +52,14 @@ export default function TransactionsPage() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [transactionTime, setTransactionTime] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [accountId, setAccountId] = useState('');
   const [destinationAccountId, setDestinationAccountId] = useState('');
   const [creditCardId, setCreditCardId] = useState('');
   const [totalInstallments, setTotalInstallments] = useState(1);
   const [personId, setPersonId] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [isPrivate, setIsPrivate] = useState(false);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -68,18 +74,20 @@ export default function TransactionsPage() {
   const loadAuxData = async () => {
     try {
       const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
-      const [accs, cds, cats, ppl] = await Promise.all([
+      const [accs, cds, cats, ppl, tgs] = await Promise.all([
         apiRequest('/accounts', { params }),
         apiRequest('/credit-cards', { params }),
         apiRequest('/categories', { params }),
         selectedFamilyId
           ? apiRequest(`/families/${selectedFamilyId}/people`).catch(() => [])
           : Promise.resolve([]),
+        apiRequest('/tags', { params }).catch(() => []),
       ]);
       setAccounts(accs || []);
       setCards(cds || []);
       setCategories(cats || []);
       setPeople(ppl || []);
+      setAvailableTags(Array.isArray(tgs) ? tgs : []);
 
       if (accs && accs.length > 0) setAccountId(accs[0].id);
       if (cds && cds.length > 0) setCreditCardId(cds[0].id);
@@ -100,6 +108,7 @@ export default function TransactionsPage() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         personId: filterPersonId || undefined,
+        tagId: filterTagId || undefined,
         familyId: selectedFamilyId || undefined,
       };
 
@@ -123,7 +132,7 @@ export default function TransactionsPage() {
     if (user) {
       loadTransactions();
     }
-  }, [user, selectedFamilyId, page, type, startDate, endDate, filterPersonId]);
+  }, [user, selectedFamilyId, page, type, startDate, endDate, filterPersonId, filterTagId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +162,7 @@ export default function TransactionsPage() {
             amount: parseFloat(amount),
             description,
             transactionDate,
+            transactionTime: transactionTime || undefined,
             familyId: selectedFamilyId || undefined,
           }),
         });
@@ -164,11 +174,13 @@ export default function TransactionsPage() {
             amount: parseFloat(amount),
             description,
             transactionDate,
+            transactionTime: transactionTime || undefined,
             categoryId,
             accountId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? undefined : accountId,
             creditCardId: modalType === 'EXPENSE' && paymentMode === 'CARD' ? creditCardId : undefined,
             totalInstallments: modalType === 'EXPENSE' && paymentMode === 'CARD' ? totalInstallments : 1,
             personId: personId || undefined,
+            tags: tags.length > 0 ? tags : undefined,
             isPrivate,
             notes: notes || undefined,
             familyId: selectedFamilyId || undefined,
@@ -180,11 +192,14 @@ export default function TransactionsPage() {
       // Reset form
       setAmount('');
       setDescription('');
+      setTransactionTime('');
       setNotes('');
       setPersonId('');
+      setTags([]);
       setTotalInstallments(1);
       setIsPrivate(false);
       loadTransactions();
+      loadAuxData();
     } catch (err: any) {
       alert(err.message || 'Erro ao criar transação');
     } finally {
@@ -217,18 +232,20 @@ export default function TransactionsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Novo Lançamento</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Novo Lançamento</span>
+            </button>
+          )}
         </div>
 
         {/* Search & Filters Bar */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 sm:p-4">
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-3">
             {/* Search query */}
             <div className="relative sm:col-span-2 lg:col-span-2">
               <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -304,6 +321,27 @@ export default function TransactionsPage() {
                 </select>
               </div>
             )}
+
+            {/* Tag Filter */}
+            {availableTags.length > 0 && (
+              <div>
+                <select
+                  value={filterTagId}
+                  onChange={(e) => {
+                    setFilterTagId(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="">Todas as Tags</option>
+                  {availableTags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      #{tag.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </form>
         </div>
 
@@ -336,10 +374,19 @@ export default function TransactionsPage() {
                     </td>
                   </tr>
                 ) : (
-                  transactions.map((tx) => (
+                  transactions.map((tx) => {
+                    const formatted = formatTransactionDateTime(tx.transactionDate);
+                    return (
                     <tr key={tx.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-xs text-slate-400">
-                        {formatDate(tx.transactionDate)}
+                      <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-xs text-slate-300 font-medium">{formatted.date}</span>
+                          {formatted.time && (
+                            <span className="text-[11px] text-slate-500 font-mono">
+                              {formatted.time}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 sm:px-6 py-3.5">
                         <div className="flex items-center gap-2 font-medium text-white max-w-xs flex-wrap">
@@ -369,6 +416,31 @@ export default function TransactionsPage() {
                             </span>
                           )}
                         </div>
+                        {tx.tags && tx.tags.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1 mt-1">
+                            {tx.tags.map((tItem: any, idx: number) => {
+                              const tagObj = tItem?.tag || tItem;
+                              const tagName = typeof tagObj === 'string' ? tagObj : tagObj?.name;
+                              const tagColor = tagObj?.color || '#10b981';
+                              const tagKey = tagObj?.id || `${tagName}-${idx}`;
+
+                              if (!tagName) return null;
+
+                              return (
+                                <span
+                                  key={tagKey}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700 shadow-sm"
+                                >
+                                  <span
+                                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                                    style={{ backgroundColor: tagColor }}
+                                  />
+                                  #{tagName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
                         <span
@@ -389,8 +461,12 @@ export default function TransactionsPage() {
                         {tx.type === 'TRANSFER' ? (
                           <div className="flex items-center gap-1">
                             <span>{tx.account?.name}</span>
-                            <ArrowLeftRight className="h-3 w-3 text-slate-500 shrink-0" />
-                            <span>{tx.destinationAccount?.name}</span>
+                            {tx.destinationAccount && (
+                              <>
+                                <ArrowLeftRight className="h-3 w-3 text-slate-500 shrink-0" />
+                                <span>{tx.destinationAccount.name}</span>
+                              </>
+                            )}
                           </div>
                         ) : tx.account ? (
                           <div className="flex items-center gap-1.5">
@@ -432,16 +508,35 @@ export default function TransactionsPage() {
                         </span>
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => handleDelete(tx.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          title="Excluir lançamento"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {isViewer ? (
+                          <span
+                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                            title="Modo somente leitura"
+                          >
+                            <Trash2 className="h-4 w-4 opacity-20" />
+                          </span>
+                        ) : tx.goalDeposits?.length > 0 ||
+                        tx.category?.name === 'Aporte em Meta' ||
+                        tx.category?.name === 'Resgate de Meta' ? (
+                          <span
+                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                            title="Lançamento de Cofrinho: gerencie através de aportes e resgates na tela de Metas"
+                          >
+                            <Trash2 className="h-4 w-4 opacity-30" />
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleDelete(tx.id)}
+                            className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                            title="Excluir lançamento"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  ))
+                  );
+                })
                 )}
               </tbody>
             </table>
@@ -476,9 +571,8 @@ export default function TransactionsPage() {
         </div>
 
         {/* Create Transaction Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
@@ -559,18 +653,31 @@ export default function TransactionsPage() {
                   />
                 </div>
 
-                {/* Date */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                    Data do Lançamento *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={transactionDate}
-                    onChange={(e) => setTransactionDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  />
+                {/* Date and Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Data do Lançamento *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={transactionDate}
+                      onChange={(e) => setTransactionDate(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Horário (Opcional)
+                    </label>
+                    <input
+                      type="time"
+                      value={transactionTime}
+                      onChange={(e) => setTransactionTime(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </div>
                 </div>
 
                 {/* Conditional Fields for TRANSFER */}
@@ -740,6 +847,21 @@ export default function TransactionsPage() {
                   </>
                 )}
 
+                {/* Tags */}
+                {modalType !== 'TRANSFER' && (
+                  <div className="pt-1">
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                      Tags (opcional)
+                    </label>
+                    <TagInput
+                      value={tags}
+                      onChange={setTags}
+                      familyId={selectedFamilyId}
+                      placeholder="Adicionar tags (ex: #viagem, #festa)..."
+                    />
+                  </div>
+                )}
+
                 {/* Person Attribution */}
                 {people.length > 0 && modalType !== 'TRANSFER' && (
                   <div className="pt-1">
@@ -791,8 +913,7 @@ export default function TransactionsPage() {
                 </button>
               </form>
             </div>
-          </div>
-        )}
+        </Modal>
       </div>
     </AppShell>
   );

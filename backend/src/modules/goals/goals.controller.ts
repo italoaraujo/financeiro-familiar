@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@ne
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { CreateDepositDto } from './dto/create-deposit.dto';
+import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
@@ -61,6 +62,17 @@ export class GoalsController {
     @Body() dto: CreateDepositDto,
   ) {
     return this.goalsService.addDeposit(userId, id, dto);
+  }
+
+  @Post(':id/withdraw')
+  @ApiOperation({ summary: 'Realizar resgate de valor da meta para a conta bancária vinculada' })
+  @ApiResponse({ status: 201, description: 'Resgate realizado com sucesso' })
+  async withdraw(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: CreateWithdrawalDto,
+  ) {
+    return this.goalsService.withdraw(userId, id, dto);
   }
 
   @Put(':id')

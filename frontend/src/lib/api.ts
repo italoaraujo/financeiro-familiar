@@ -1,3 +1,5 @@
+import { getAuthCookie, removeAuthCookie } from './cookies';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface RequestOptions extends RequestInit {
@@ -22,7 +24,9 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
     }
   }
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('financial_token') : null;
+  const token = typeof window !== 'undefined'
+    ? (getAuthCookie('financial_token') || localStorage.getItem('financial_token'))
+    : null;
 
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
@@ -38,6 +42,7 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
   if (response.status === 401 && typeof window !== 'undefined') {
     // Se não estiver na página de login, pode redirecionar ou limpar token
     if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+      removeAuthCookie('financial_token');
       localStorage.removeItem('financial_token');
       localStorage.removeItem('financial_user');
       window.location.href = '/login';
@@ -61,3 +66,32 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
 
   return data as T;
 }
+
+export interface AuthStatusResponse {
+  registrationEnabled: boolean;
+}
+
+export async function getAuthStatus(): Promise<AuthStatusResponse> {
+  try {
+    return await apiRequest<AuthStatusResponse>('/auth/status');
+  } catch (error) {
+    console.error('Falha ao consultar status de autenticação:', error);
+    const envDisabled =
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === 'true' ||
+      process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === '1';
+
+    if (envDisabled) {
+      return { registrationEnabled: false };
+    }
+
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null) {
+        return { registrationEnabled: cached === 'true' };
+      }
+    }
+
+    return { registrationEnabled: false };
+  }
+}
+

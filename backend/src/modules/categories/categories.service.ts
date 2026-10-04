@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { TransactionType } from '@prisma/client';
+import { FamilyMemberRole, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
@@ -15,16 +15,11 @@ export class CategoriesService {
 
   async create(userId: string, dto: CreateCategoryDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     if (dto.parentId) {
-      const parent = await this.prisma.category.findUnique({
-        where: { id: dto.parentId },
-      });
-      if (!parent) {
-        throw new NotFoundException('Categoria pai não encontrada');
-      }
+      await this.validateParentCategory(userId, dto.parentId, dto.familyId);
     }
 
     return this.prisma.category.create({
@@ -44,15 +39,15 @@ export class CategoriesService {
   async findAll(userId: string, familyId?: string, type?: TransactionType) {
     const whereCondition: any = {
       parentId: null, // Categorias raiz
+      deletedAt: null,
       OR: [
         { isSystemDefault: true },
-        { userId },
+        familyId ? { familyId } : { userId, familyId: null },
       ],
     };
 
     if (familyId) {
-      await this.verifyFamilyAccess(userId, familyId);
-      whereCondition.OR.push({ familyId });
+      await this.verifyFamilyAccess(userId, familyId, false);
     }
 
     if (type) {
@@ -63,6 +58,7 @@ export class CategoriesService {
       where: whereCondition,
       include: {
         subcategories: {
+          where: { deletedAt: null },
           orderBy: { name: 'asc' },
         },
       },
@@ -70,31 +66,47 @@ export class CategoriesService {
     });
   }
 
-  async findById(id: string) {
+  async findById(id: string, userId?: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
-        subcategories: true,
+        subcategories: {
+          where: { deletedAt: null },
+        },
         parent: true,
       },
     });
 
-    if (!category) {
+    if (!category || category.deletedAt) {
       throw new NotFoundException('Categoria não encontrada');
+    }
+
+    if (userId && !category.isSystemDefault) {
+      if (category.familyId) {
+        await this.verifyFamilyAccess(userId, category.familyId, false);
+      } else if (category.userId && category.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à categoria especificada');
+      }
     }
 
     return category;
   }
 
   async update(userId: string, id: string, dto: UpdateCategoryDto) {
-    const category = await this.findById(id);
+    const category = await this.findById(id, userId);
 
     if (category.isSystemDefault) {
       throw new BadRequestException('Não é permitido alterar categorias padrão do sistema');
     }
 
-    if (category.userId && category.userId !== userId) {
+    if (category.familyId) {
+      await this.verifyFamilyAccess(userId, category.familyId, true);
+    } else if (category.userId && category.userId !== userId) {
       throw new ForbiddenException('Acesso negado para modificar esta categoria');
+    }
+
+    if (dto.parentId) {
+      await this.validateParentCategory(userId, dto.parentId, category.familyId, id);
     }
 
     return this.prisma.category.update({
@@ -109,18 +121,23 @@ export class CategoriesService {
   }
 
   async remove(userId: string, id: string) {
-    const category = await this.findById(id);
+    const category = await this.findById(id, userId);
 
     if (category.isSystemDefault) {
       throw new BadRequestException('Não é permitido excluir categorias padrão do sistema');
     }
 
-    if (category.userId && category.userId !== userId) {
+    if (category.familyId) {
+      await this.verifyFamilyAccess(userId, category.familyId, true);
+    } else if (category.userId && category.userId !== userId) {
       throw new ForbiddenException('Acesso negado para excluir esta categoria');
     }
 
     const hasTransactions = await this.prisma.transaction.findFirst({
-      where: { categoryId: id },
+      where: {
+        categoryId: id,
+        deletedAt: null,
+      },
     });
 
     if (hasTransactions) {
@@ -129,14 +146,15 @@ export class CategoriesService {
       );
     }
 
-    await this.prisma.category.delete({
+    await this.prisma.category.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     return { message: 'Categoria removida com sucesso' };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -146,5 +164,47 @@ export class CategoriesService {
     if (!member) {
       throw new ForbiddenException('Acesso negado à família especificada');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
+  }
+
+  private async validateParentCategory(
+    userId: string,
+    parentId: string,
+    targetFamilyId?: string | null,
+    currentCategoryId?: string,
+  ) {
+    if (currentCategoryId && parentId === currentCategoryId) {
+      throw new BadRequestException('Uma categoria não pode ser definida como pai de si mesma');
+    }
+
+    const parent = await this.prisma.category.findUnique({
+      where: { id: parentId },
+    });
+
+    if (!parent || parent.deletedAt) {
+      throw new NotFoundException('Categoria pai não encontrada');
+    }
+
+    if (!parent.isSystemDefault) {
+      if (targetFamilyId) {
+        if (parent.familyId !== targetFamilyId) {
+          throw new ForbiddenException('A categoria pai não pertence a este grupo familiar');
+        }
+        await this.verifyFamilyAccess(userId, targetFamilyId, true);
+      } else {
+        if (parent.familyId !== null || parent.userId !== userId) {
+          throw new ForbiddenException('A categoria pai não pertence ao seu escopo pessoal');
+        }
+      }
+    }
+
+    return parent;
   }
 }

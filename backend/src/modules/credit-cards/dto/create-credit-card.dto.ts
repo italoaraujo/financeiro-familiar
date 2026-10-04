@@ -1,14 +1,16 @@
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCreditCardDto {
-  @ApiProperty({ example: 'Nubank Ultravioleta' })
+  @ApiProperty({ example: 'Nubank Ultravioleta', maxLength: 100 })
   @IsString()
   @IsNotEmpty({ message: 'Nome do cartão é obrigatório' })
+  @MaxLength(100, { message: 'Nome do cartão não pode exceder 100 caracteres' })
   name: string;
 
-  @ApiProperty({ example: 'Mastercard', required: false })
+  @ApiProperty({ example: 'Mastercard', required: false, maxLength: 50 })
   @IsString()
+  @MaxLength(50, { message: 'Bandeira não pode exceder 50 caracteres' })
   @IsOptional()
   brand?: string;
 
@@ -29,8 +31,9 @@ export class CreateCreditCardDto {
   @Max(31)
   dueDay: number;
 
-  @ApiProperty({ example: '#8b5cf6', required: false })
+  @ApiProperty({ example: '#8b5cf6', required: false, maxLength: 7 })
   @IsString()
+  @MaxLength(7, { message: 'Cor não pode exceder 7 caracteres' })
   @IsOptional()
   color?: string;
 

@@ -45,8 +45,8 @@ export class CategoriesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obter categoria por ID' })
-  async findById(@Param('id') id: string) {
-    return this.categoriesService.findById(id);
+  async findById(@GetUser('id') userId: string, @Param('id') id: string) {
+    return this.categoriesService.findById(id, userId);
   }
 
   @Put(':id')

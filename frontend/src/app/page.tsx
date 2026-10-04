@@ -16,6 +16,8 @@ import {
   ArrowLeftRight,
   AlertCircle,
   Plus,
+  PiggyBank,
+  Target,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -52,7 +54,7 @@ const INVOICE_STATUS_MAP: Record<string, { label: string; className: string }> =
 };
 
 export default function DashboardPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<any>(null);
   const [categoryExpenses, setCategoryExpenses] = useState<any[]>([]);
@@ -113,47 +115,71 @@ export default function DashboardPage() {
                 className="w-full sm:w-auto bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
               />
             </div>
-            <Link
-              href="/transactions"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span>Novo Lançamento</span>
-            </Link>
+            {!isViewer && (
+              <Link
+                href="/transactions"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
+              >
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Novo Lançamento</span>
+              </Link>
+            )}
           </div>
         </div>
 
         {/* KPI Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {/* Total Balance */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-slate-700 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Saldo Geral</span>
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
-                <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+                <Wallet className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
+            <div className="mt-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white truncate">
                 {summary ? formatCurrency(summary.totalBalance) : '...'}
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Disponível em contas ativas</p>
+              <p className="text-[11px] text-slate-400 mt-1">Disponível em contas</p>
             </div>
           </div>
 
-          {/* Monthly Income */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+          {/* Goals / Reserves Balance */}
+          <Link
+            href="/goals"
+            className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-amber-500/40 hover:bg-slate-900 transition-all block cursor-pointer"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Receitas do Mês</span>
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover:text-amber-300 transition-colors">Guardado em Metas</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <PiggyBank className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-emerald-400 truncate">
+            <div className="mt-3">
+              <h3 className="text-lg sm:text-xl font-bold text-amber-400 truncate">
+                {summary ? formatCurrency(summary.goalsBalance ?? 0) : '...'}
+              </h3>
+              <div className="flex items-center gap-1 text-[11px] text-amber-500/80 mt-1">
+                <Target className="h-3 w-3 shrink-0" />
+                <span>Cofrinhos e reservas</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Monthly Income */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Receitas do Mês</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                <TrendingUp className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <h3 className="text-lg sm:text-xl font-bold text-emerald-400 truncate">
                 {summary ? formatCurrency(summary.monthlyIncome) : '...'}
               </h3>
-              <div className="flex items-center gap-1 text-xs text-emerald-500/80 mt-1">
+              <div className="flex items-center gap-1 text-[11px] text-emerald-500/80 mt-1">
                 <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
                 <span>Entradas efetivadas</span>
               </div>
@@ -161,18 +187,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Monthly Expense */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-slate-700 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Despesas do Mês</span>
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0">
-                <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5" />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0">
+                <TrendingDown className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-rose-400 truncate">
+            <div className="mt-3">
+              <h3 className="text-lg sm:text-xl font-bold text-rose-400 truncate">
                 {summary ? formatCurrency(summary.monthlyExpense) : '...'}
               </h3>
-              <div className="flex items-center gap-1 text-xs text-rose-500/80 mt-1">
+              <div className="flex items-center gap-1 text-[11px] text-rose-500/80 mt-1">
                 <ArrowDownRight className="h-3.5 w-3.5 shrink-0" />
                 <span>Saídas e faturas</span>
               </div>
@@ -180,22 +206,21 @@ export default function DashboardPage() {
           </div>
 
           {/* Net Balance */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-slate-700 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Balanço Líquido</span>
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
-                <Scale className="h-4 w-4 sm:h-5 sm:w-5" />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+                <Scale className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
+            <div className="mt-3">
               <h3
-                className={`text-xl sm:text-2xl font-bold truncate ${
-                  summary && Number(summary.netBalance) >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                }`}
+                className={`text-lg sm:text-xl font-bold truncate ${summary && Number(summary.netBalance) >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  }`}
               >
                 {summary ? formatCurrency(summary.netBalance) : '...'}
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Receitas vs. Despesas</p>
+              <p className="text-[11px] text-slate-400 mt-1">Receitas vs. Despesas</p>
             </div>
           </div>
         </div>
@@ -218,12 +243,15 @@ export default function DashboardPage() {
                   <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
                   <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
                   <Tooltip
+                    cursor={false}
                     contentStyle={{
                       backgroundColor: '#0f172a',
                       borderColor: '#334155',
                       borderRadius: '12px',
                       color: '#f8fafc',
                     }}
+                    itemStyle={{ fontSize: '12px' }}
+                    labelStyle={{ fontSize: '12px' }}
                     formatter={(val: any) => [formatCurrency(val), '']}
                   />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -277,6 +305,8 @@ export default function DashboardPage() {
                           borderRadius: '12px',
                           color: '#f8fafc',
                         }}
+                        itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+                        labelStyle={{ color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}
                         formatter={(val: any, name: any, item: any) => [
                           `${val}% (${formatCurrency(item.payload.amount)})`,
                           name,
@@ -326,13 +356,12 @@ export default function DashboardPage() {
                   <div key={tx.id} className="py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl flex items-center justify-center shrink-0 ${
-                          tx.type === 'INCOME'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : tx.type === 'EXPENSE'
+                        className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl flex items-center justify-center shrink-0 ${tx.type === 'INCOME'
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : tx.type === 'EXPENSE'
                             ? 'bg-rose-500/10 text-rose-400'
                             : 'bg-blue-500/10 text-blue-400'
-                        }`}
+                          }`}
                       >
                         {tx.type === 'INCOME' ? (
                           <ArrowUpRight className="h-4 w-4" />
@@ -350,11 +379,14 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-xs sm:text-sm font-bold shrink-0 ${
-                        tx.type === 'INCOME' ? 'text-emerald-400' : 'text-slate-200'
-                      }`}
+                      className={`text-xs sm:text-sm font-bold shrink-0 ${tx.type === 'INCOME'
+                        ? 'text-emerald-400'
+                        : tx.type === 'TRANSFER'
+                          ? 'text-blue-400'
+                          : 'text-rose-400'
+                        }`}
                     >
-                      {tx.type === 'INCOME' ? '+' : '-'} {formatCurrency(tx.amount)}
+                      {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'} {formatCurrency(tx.amount)}
                     </span>
                   </div>
                 ))}
@@ -393,9 +425,8 @@ export default function DashboardPage() {
                       <p className="text-xs sm:text-sm font-bold text-white">{formatCurrency(inv.totalAmount)}</p>
                       <div className="mt-0.5">
                         <span
-                          className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${
-                            (INVOICE_STATUS_MAP[inv.status] || { className: 'bg-slate-700/50 text-slate-300 border border-slate-600' }).className
-                          }`}
+                          className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded ${(INVOICE_STATUS_MAP[inv.status] || { className: 'bg-slate-700/50 text-slate-300 border border-slate-600' }).className
+                            }`}
                         >
                           {(INVOICE_STATUS_MAP[inv.status] || { label: inv.status }).label}
                         </span>

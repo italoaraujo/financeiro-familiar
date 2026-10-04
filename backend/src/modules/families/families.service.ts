@@ -112,13 +112,17 @@ export class FamiliesService {
       },
     });
 
-    if (!requester || (requester.role !== 'OWNER' && requester.role !== 'ADMIN')) {
+    if (!requester || (requester.role !== FamilyMemberRole.OWNER && requester.role !== FamilyMemberRole.ADMIN)) {
       throw new ForbiddenException('Apenas administradores podem adicionar novos membros');
+    }
+
+    if (dto.role === FamilyMemberRole.OWNER) {
+      throw new BadRequestException('Não é permitido adicionar novos membros com o papel de OWNER. O papel OWNER é exclusivo do proprietário da família.');
     }
 
     const targetUser = await this.usersService.findByEmail(dto.email);
     if (!targetUser) {
-      throw new NotFoundException(`Nenhum usuário cadastrado com o e-mail ${dto.email}`);
+      throw new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.');
     }
 
     const existingMember = await this.prisma.familyMember.findUnique({
@@ -128,7 +132,7 @@ export class FamiliesService {
     });
 
     if (existingMember) {
-      throw new BadRequestException('Este usuário já é membro do grupo familiar');
+      throw new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.');
     }
 
     const member = await this.prisma.familyMember.create({
@@ -169,7 +173,7 @@ export class FamiliesService {
       },
     });
 
-    if (!requester || (requester.role !== 'OWNER' && requester.role !== 'ADMIN')) {
+    if (!requester || (requester.role !== FamilyMemberRole.OWNER && requester.role !== FamilyMemberRole.ADMIN)) {
       throw new ForbiddenException('Apenas administradores podem remover membros');
     }
 
@@ -183,8 +187,12 @@ export class FamiliesService {
       throw new NotFoundException('Membro não encontrado no grupo familiar');
     }
 
-    if (targetMember.role === 'OWNER') {
+    if (targetMember.role === FamilyMemberRole.OWNER) {
       throw new BadRequestException('Não é possível remover o proprietário da família');
+    }
+
+    if (targetMember.role === FamilyMemberRole.ADMIN && requester.role !== FamilyMemberRole.OWNER && requester.userId !== targetUserId) {
+      throw new ForbiddenException('Apenas o proprietário da família pode remover outros administradores');
     }
 
     await this.prisma.familyMember.delete({
@@ -224,27 +232,38 @@ export class FamiliesService {
     });
 
     const existingPeople = await this.prisma.person.findMany({
-      where: { familyId },
+      where: { familyId, deletedAt: null },
     });
 
     const existingUserIds = new Set(existingPeople.map((p) => p.userId).filter(Boolean));
 
     for (const m of members) {
       if (!existingUserIds.has(m.userId)) {
-        await this.prisma.person.create({
-          data: {
-            familyId,
-            userId: m.userId,
-            name: m.user.name,
-            color: m.role === FamilyMemberRole.OWNER ? '#10b981' : '#3b82f6',
-            avatarUrl: m.user.avatarUrl,
-          },
+        const personForUser = await this.prisma.person.findFirst({
+          where: { familyId, userId: m.userId },
         });
+
+        if (!personForUser) {
+          await this.prisma.person.create({
+            data: {
+              familyId,
+              userId: m.userId,
+              name: m.user.name,
+              color: m.role === FamilyMemberRole.OWNER ? '#10b981' : '#3b82f6',
+              avatarUrl: m.user.avatarUrl,
+            },
+          });
+        } else if (personForUser.deletedAt) {
+          await this.prisma.person.update({
+            where: { id: personForUser.id },
+            data: { deletedAt: null },
+          });
+        }
       }
     }
 
     return this.prisma.person.findMany({
-      where: { familyId },
+      where: { familyId, deletedAt: null },
       include: {
         user: {
           select: { id: true, name: true, email: true, avatarUrl: true },
@@ -266,7 +285,7 @@ export class FamiliesService {
       where: { id: personId },
     });
 
-    if (!person || person.familyId !== familyId) {
+    if (!person || person.familyId !== familyId || person.deletedAt) {
       throw new NotFoundException('Pessoa não encontrada neste grupo familiar');
     }
 
@@ -287,7 +306,7 @@ export class FamiliesService {
       where: { id: personId },
     });
 
-    if (!person || person.familyId !== familyId) {
+    if (!person || person.familyId !== familyId || person.deletedAt) {
       throw new NotFoundException('Pessoa não encontrada neste grupo familiar');
     }
 
@@ -297,18 +316,12 @@ export class FamiliesService {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      await tx.transaction.updateMany({
-        where: { personId },
-        data: { personId: null },
-      });
-
-      await tx.person.delete({
-        where: { id: personId },
-      });
-
-      return { message: 'Pessoa removida da família com sucesso' };
+    await this.prisma.person.update({
+      where: { id: personId },
+      data: { deletedAt: new Date() },
     });
+
+    return { message: 'Pessoa removida da família com sucesso' };
   }
 
   private async verifyFamilyAccess(userId: string, familyId: string) {

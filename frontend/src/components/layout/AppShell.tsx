@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Eye,
 } from 'lucide-react';
 
 interface AppShellProps {
@@ -25,7 +26,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
-  const { user, selectedFamilyId, setSelectedFamilyId, logout, isLoading } = useAuth();
+  const { user, selectedFamilyId, setSelectedFamilyId, logout, isLoading, isViewer } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -158,14 +159,14 @@ export default function AppShell({ children }: AppShellProps) {
       </aside>
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 border-r border-slate-800 bg-slate-900/60 backdrop-blur-xl flex-col fixed inset-y-0 z-30">
+      <aside className="hidden lg:flex w-64 border-r border-slate-800 bg-slate-900/60 backdrop-blur-xl flex-col fixed inset-y-0 z-20">
         <NavContent />
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen w-full min-w-0">
         {/* Top Header */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20 gap-2 sm:gap-4">
+        <header className="h-16 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-10 gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             {/* Hamburger Button on Mobile */}
             <button
@@ -199,6 +200,13 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {isViewer && (
+              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Eye className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden xs:inline">Somente Leitura</span>
+                <span className="xs:hidden">Leitura</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
               <span className="truncate max-w-[90px] sm:max-w-[140px] md:max-w-none">
@@ -209,7 +217,7 @@ export default function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 max-w-full">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 max-w-full relative z-30">
           {children}
         </main>
       </div>

@@ -1,11 +1,12 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 
 export class CreateAccountDto {
-  @ApiProperty({ example: 'Nubank Conta Corrente' })
+  @ApiProperty({ example: 'Nubank Conta Corrente', maxLength: 100 })
   @IsString()
   @IsNotEmpty({ message: 'Nome da conta é obrigatório' })
+  @MaxLength(100, { message: 'Nome da conta não pode exceder 100 caracteres' })
   name: string;
 
   @ApiProperty({ enum: AccountType, default: AccountType.CHECKING })
@@ -18,18 +19,21 @@ export class CreateAccountDto {
   @IsOptional()
   initialBalance?: number;
 
-  @ApiProperty({ example: 'BRL', default: 'BRL' })
+  @ApiProperty({ example: 'BRL', default: 'BRL', maxLength: 3 })
   @IsString()
+  @MaxLength(3, { message: 'Moeda não pode exceder 3 caracteres' })
   @IsOptional()
   currency?: string;
 
-  @ApiProperty({ example: '#8b5cf6', required: false })
+  @ApiProperty({ example: '#8b5cf6', required: false, maxLength: 7 })
   @IsString()
+  @MaxLength(7, { message: 'Cor não pode exceder 7 caracteres' })
   @IsOptional()
   color?: string;
 
-  @ApiProperty({ example: 'Wallet', required: false })
+  @ApiProperty({ example: 'Wallet', required: false, maxLength: 50 })
   @IsString()
+  @MaxLength(50, { message: 'Ícone não pode exceder 50 caracteres' })
   @IsOptional()
   icon?: string;
 

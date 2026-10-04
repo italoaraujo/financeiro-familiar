@@ -64,21 +64,98 @@ describe('AccountsService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should reject deletion if account has transactions', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+  describe('remove (soft delete)', () => {
+    it('should reject deletion if account has active transactions (deletedAt: null)', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: null });
       prisma.transaction.findFirst.mockResolvedValue({ id: 'tx-1' });
 
       await expect(service.remove('user-1', 'acc-1')).rejects.toThrow(BadRequestException);
+      expect(prisma.transaction.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [{ accountId: 'acc-1' }, { destinationAccountId: 'acc-1' }],
+          deletedAt: null,
+        },
+      });
     });
 
-    it('should delete account if no transactions exist', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1' });
+    it('should soft delete account if no active transactions exist', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: null });
       prisma.transaction.findFirst.mockResolvedValue(null);
-      prisma.account.delete.mockResolvedValue({ id: 'acc-1' });
+      prisma.account.update.mockResolvedValue({ id: 'acc-1', deletedAt: new Date(), isActive: false });
 
       const result = await service.remove('user-1', 'acc-1');
+      expect(prisma.account.update).toHaveBeenCalledWith({
+        where: { id: 'acc-1' },
+        data: { deletedAt: expect.any(Date), isActive: false },
+      });
       expect(result.message).toContain('removida com sucesso');
+    });
+
+    it('should throw NotFoundException if account is already soft deleted', async () => {
+      prisma.account.findUnique.mockResolvedValue({ id: 'acc-1', userId: 'user-1', deletedAt: new Date() });
+
+      await expect(service.remove('user-1', 'acc-1')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('RBAC VIEWER permissions', () => {
+    it('should throw ForbiddenException when VIEWER tries to create family account', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.create('user-viewer', {
+          name: 'Conta Família',
+          type: AccountType.CHECKING,
+          familyId: 'family-1',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to update family account', async () => {
+      prisma.account.findUnique.mockResolvedValue({
+        id: 'acc-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        name: 'Conta Família',
+        type: AccountType.CHECKING,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('user-viewer', 'acc-fam-1', {
+          name: 'Nome Alterado',
+        }),
+      ).rejects.toThrow(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    });
+
+    it('should allow VIEWER to query family accounts via findAll', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      prisma.account.findMany.mockResolvedValue([
+        { id: 'acc-fam-1', name: 'Conta Família', familyId: 'family-1' },
+      ]);
+
+      const result = await service.findAll('user-viewer', 'family-1');
+      expect(result).toHaveLength(1);
     });
   });
 });

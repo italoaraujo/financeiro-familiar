@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { apiRequest } from '../lib/api';
+import { setAuthCookie, getAuthCookie, removeAuthCookie } from '../lib/cookies';
 
 export interface User {
   id: string;
@@ -24,9 +25,11 @@ interface AuthContextType {
   selectedFamilyId: string | null;
   setSelectedFamilyId: (id: string | null) => void;
   isLoading: boolean;
+  isViewer: boolean;
+  currentFamilyRole: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   refreshUserData: () => Promise<void>;
 }
 
@@ -39,12 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('financial_token');
+    const storedToken = getAuthCookie('financial_token') || localStorage.getItem('financial_token');
     const storedUser = localStorage.getItem('financial_user');
     const storedFamily = localStorage.getItem('financial_family_id');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
+      // Garantir sincronização no cookie
+      setAuthCookie('financial_token', storedToken);
       try {
         const parsed = JSON.parse(storedUser);
         setUser(parsed);
@@ -73,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setUser(data.user);
     setToken(data.accessToken);
+    setAuthCookie('financial_token', data.accessToken);
     localStorage.setItem('financial_token', data.accessToken);
     localStorage.setItem('financial_user', JSON.stringify(data.user));
 
@@ -89,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setUser(data.user);
     setToken(data.accessToken);
+    setAuthCookie('financial_token', data.accessToken);
     localStorage.setItem('financial_token', data.accessToken);
     localStorage.setItem('financial_user', JSON.stringify(data.user));
   };
@@ -112,15 +119,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    setSelectedFamilyId(null);
-    localStorage.removeItem('financial_token');
-    localStorage.removeItem('financial_user');
-    localStorage.removeItem('financial_family_id');
-    window.location.href = '/login';
+  const logout = async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' }).catch(() => {});
+    } finally {
+      setUser(null);
+      setToken(null);
+      setSelectedFamilyId(null);
+      removeAuthCookie('financial_token');
+      localStorage.removeItem('financial_token');
+      localStorage.removeItem('financial_user');
+      localStorage.removeItem('financial_family_id');
+      window.location.href = '/login';
+    }
   };
+
+  const currentMembership = user?.memberships?.find(
+    (m) => m.family.id === selectedFamilyId
+  );
+  const currentFamilyRole = currentMembership?.role || null;
+  const isViewer = Boolean(selectedFamilyId && currentFamilyRole === 'VIEWER');
 
   return (
     <AuthContext.Provider
@@ -130,6 +148,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         selectedFamilyId,
         setSelectedFamilyId: handleFamilyChange,
         isLoading,
+        isViewer,
+        currentFamilyRole,
         login,
         register,
         logout,

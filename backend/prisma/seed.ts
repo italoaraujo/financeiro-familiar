@@ -47,8 +47,8 @@ async function main() {
     }
   }
 
-  // Demo user: admin@exemplo.com / 123456 (only created in development environment)
-  const currentEnv = (process.env.APP_ENV || 'development').toLowerCase();
+  // Demo user: admin@exemplo.com / 123456 (only created when environment is explicitly development)
+  const currentEnv = (process.env.APP_ENV || process.env.NODE_ENV || 'production').toLowerCase();
 
   if (currentEnv === 'development') {
     const existingUser = await prisma.user.findUnique({

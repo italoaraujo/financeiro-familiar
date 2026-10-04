@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -12,7 +12,16 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  isRegistrationEnabled(): boolean {
+    const disableRegistration = (process.env.DISABLE_REGISTRATION || '').trim().toLowerCase();
+    return disableRegistration !== 'true' && disableRegistration !== '1' && disableRegistration !== 'yes';
+  }
+
   async register(dto: RegisterDto) {
+    if (!this.isRegistrationEnabled()) {
+      throw new ForbiddenException('O cadastro de novos usuários está desativado pelo administrador');
+    }
+
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException('Já existe um usuário cadastrado com este e-mail');

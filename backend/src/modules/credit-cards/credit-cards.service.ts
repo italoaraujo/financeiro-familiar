@@ -8,7 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
 import { UpdateCreditCardDto } from './dto/update-credit-card.dto';
 import { PayInvoiceDto } from './dto/pay-invoice.dto';
-import { InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
+import { FamilyMemberRole, InvoiceStatus, Prisma, TransactionStatus, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class CreditCardsService {
@@ -16,7 +16,11 @@ export class CreditCardsService {
 
   async create(userId: string, dto: CreateCreditCardDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
+    }
+
+    if (dto.accountId) {
+      await this.validateAccountAccess(userId, dto.accountId, dto.familyId);
     }
 
     const creditLimit = new Prisma.Decimal(dto.creditLimit);
@@ -51,7 +55,9 @@ export class CreditCardsService {
     await this.syncInvoiceStatuses();
 
     const cards = await this.prisma.creditCard.findMany({
-      where: familyId ? { familyId, isActive: true } : { userId, isActive: true },
+      where: familyId
+        ? { familyId, isActive: true, deletedAt: null }
+        : { userId, familyId: null, isActive: true, deletedAt: null },
       include: {
         invoices: {
           orderBy: { referenceMonth: 'asc' },
@@ -88,7 +94,7 @@ export class CreditCardsService {
       },
     });
 
-    if (!card) {
+    if (!card || card.deletedAt) {
       throw new NotFoundException('Cartão de crédito não encontrado');
     }
 
@@ -114,8 +120,17 @@ export class CreditCardsService {
   async update(userId: string, id: string, dto: UpdateCreditCardDto) {
     const card = await this.findById(userId, id);
 
-    if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    if (dto.familyId && dto.familyId !== card.familyId) {
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
+    }
+
+    if (dto.accountId) {
+      const targetFamilyId = dto.familyId !== undefined ? dto.familyId : card.familyId;
+      await this.validateAccountAccess(userId, dto.accountId, targetFamilyId);
     }
 
     if (dto.creditLimit !== undefined && dto.creditLimit <= 0) {
@@ -136,7 +151,7 @@ export class CreditCardsService {
       (dto.closingDay !== undefined && dto.closingDay !== card.closingDay) ||
       (dto.dueDay !== undefined && dto.dueDay !== card.dueDay);
 
-    await this.prisma.creditCard.update({
+    const updated = await this.prisma.creditCard.update({
       where: { id: card.id },
       data: {
         name: dto.name ?? card.name,
@@ -183,7 +198,10 @@ export class CreditCardsService {
     const card = await this.findById(userId, id);
 
     const hasTransactions = await this.prisma.transaction.findFirst({
-      where: { creditCardId: card.id },
+      where: {
+        creditCardId: card.id,
+        deletedAt: null,
+      },
     });
 
     if (hasTransactions) {
@@ -192,8 +210,9 @@ export class CreditCardsService {
       );
     }
 
-    await this.prisma.creditCard.delete({
+    await this.prisma.creditCard.update({
       where: { id: card.id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return { message: 'Cartão de crédito removido com sucesso' };
@@ -326,7 +345,9 @@ export class CreditCardsService {
       }
 
       if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
-        await this.verifyFamilyAccess(userId, invoice.creditCard.familyId);
+        await this.verifyFamilyAccess(userId, invoice.creditCard.familyId, true);
+      } else if (invoice.creditCard.userId !== userId) {
+        throw new ForbiddenException('Acesso negado à fatura informada');
       }
 
       if (invoice.status === InvoiceStatus.PAID) {
@@ -337,8 +358,14 @@ export class CreditCardsService {
         where: { id: dto.accountId },
       });
 
-      if (!paymentAccount) {
+      if (!paymentAccount || paymentAccount.deletedAt) {
         throw new NotFoundException('Conta bancária de pagamento não encontrada');
+      }
+
+      if (paymentAccount.userId !== userId && paymentAccount.familyId) {
+        await this.verifyFamilyAccess(userId, paymentAccount.familyId, true);
+      } else if (paymentAccount.userId !== userId) {
+        throw new ForbiddenException('Você não tem permissão para debitar desta conta bancária');
       }
 
       const amountToPay = dto.amount
@@ -434,7 +461,7 @@ export class CreditCardsService {
     }
 
     if (invoice.creditCard.userId !== userId && invoice.creditCard.familyId) {
-      await this.verifyFamilyAccess(userId, invoice.creditCard.familyId);
+      await this.verifyFamilyAccess(userId, invoice.creditCard.familyId, false);
     } else if (invoice.creditCard.userId !== userId) {
       throw new ForbiddenException('Acesso negado à fatura');
     }
@@ -465,15 +492,19 @@ export class CreditCardsService {
     const personBreakdown = Array.from(breakdownMap.values()).map((item) => ({
       ...item,
       totalAmount: item.totalAmount.toNumber(),
+      total: item.totalAmount.toNumber(),
+      personName: item.name,
+      personColor: item.color,
     }));
 
     return {
       ...invoice,
       personBreakdown,
+      personTotals: personBreakdown,
     };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -483,6 +514,14 @@ export class CreditCardsService {
     if (!member) {
       throw new ForbiddenException('Acesso negado à família especificada');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 
   async syncInvoiceStatuses(creditCardId?: string): Promise<void> {
@@ -501,5 +540,28 @@ export class CreditCardsService {
         status: InvoiceStatus.CLOSED,
       },
     });
+  }
+
+  private async validateAccountAccess(userId: string, accountId: string, familyId?: string | null) {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    });
+
+    if (!account || account.deletedAt) {
+      throw new NotFoundException('Conta bancária informada não encontrada');
+    }
+
+    if (familyId) {
+      if (account.familyId !== familyId) {
+        throw new ForbiddenException('A conta bancária informada não pertence ao grupo familiar do cartão');
+      }
+      await this.verifyFamilyAccess(userId, familyId, true);
+    } else {
+      if (account.familyId !== null || account.userId !== userId) {
+        throw new ForbiddenException('A conta bancária informada não pertence ao seu escopo pessoal');
+      }
+    }
+
+    return account;
   }
 }

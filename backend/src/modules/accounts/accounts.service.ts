@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
-import { Prisma } from '@prisma/client';
+import { FamilyMemberRole, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AccountsService {
@@ -15,7 +15,7 @@ export class AccountsService {
 
   async create(userId: string, dto: CreateAccountDto) {
     if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     const initial = new Prisma.Decimal(dto.initialBalance || 0);
@@ -37,11 +37,12 @@ export class AccountsService {
 
   async findAll(userId: string, familyId?: string) {
     if (familyId) {
-      await this.verifyFamilyAccess(userId, familyId);
+      await this.verifyFamilyAccess(userId, familyId, false);
       return this.prisma.account.findMany({
         where: {
           familyId,
           isArchived: false,
+          deletedAt: null,
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -50,7 +51,9 @@ export class AccountsService {
     return this.prisma.account.findMany({
       where: {
         userId,
+        familyId: null,
         isArchived: false,
+        deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -61,12 +64,12 @@ export class AccountsService {
       where: { id },
     });
 
-    if (!account) {
+    if (!account || account.deletedAt) {
       throw new NotFoundException('Conta não encontrada');
     }
 
     if (account.userId !== userId && account.familyId) {
-      await this.verifyFamilyAccess(userId, account.familyId);
+      await this.verifyFamilyAccess(userId, account.familyId, false);
     } else if (account.userId !== userId) {
       throw new ForbiddenException('Acesso negado à conta especificada');
     }
@@ -77,8 +80,12 @@ export class AccountsService {
   async update(userId: string, id: string, dto: UpdateAccountDto) {
     const account = await this.findById(userId, id);
 
-    if (dto.familyId) {
-      await this.verifyFamilyAccess(userId, dto.familyId);
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
+    if (dto.familyId && dto.familyId !== account.familyId) {
+      await this.verifyFamilyAccess(userId, dto.familyId, true);
     }
 
     return this.prisma.account.update({
@@ -96,6 +103,10 @@ export class AccountsService {
   async archive(userId: string, id: string) {
     const account = await this.findById(userId, id);
 
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
     return this.prisma.account.update({
       where: { id: account.id },
       data: { isArchived: true, isActive: false },
@@ -105,9 +116,14 @@ export class AccountsService {
   async remove(userId: string, id: string) {
     const account = await this.findById(userId, id);
 
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
     const hasTransactions = await this.prisma.transaction.findFirst({
       where: {
         OR: [{ accountId: account.id }, { destinationAccountId: account.id }],
+        deletedAt: null,
       },
     });
 
@@ -117,14 +133,15 @@ export class AccountsService {
       );
     }
 
-    await this.prisma.account.delete({
+    await this.prisma.account.update({
       where: { id: account.id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return { message: 'Conta removida com sucesso' };
   }
 
-  private async verifyFamilyAccess(userId: string, familyId: string) {
+  private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
     const member = await this.prisma.familyMember.findUnique({
       where: {
         familyId_userId: { familyId, userId },
@@ -134,5 +151,13 @@ export class AccountsService {
     if (!member) {
       throw new ForbiddenException('Você não tem acesso a este grupo familiar');
     }
+
+    if (isMutation && member.role === FamilyMemberRole.VIEWER) {
+      throw new ForbiddenException(
+        'Membros com perfil de apenas visualização não podem realizar alterações',
+      );
+    }
+
+    return member;
   }
 }

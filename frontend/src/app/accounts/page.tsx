@@ -6,9 +6,10 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { formatCurrency } from '../../lib/formatters';
 import { Plus, Wallet, Archive, Trash2, X } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 
 export default function AccountsPage() {
-  const { user, selectedFamilyId } = useAuth();
+  const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,13 +120,15 @@ export default function AccountsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            <span>Nova Conta</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Nova Conta</span>
+            </button>
+          )}
         </div>
 
         {/* Total Summary Banner */}
@@ -171,22 +174,24 @@ export default function AccountsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => handleArchive(acc.id)}
-                        title="Arquivar conta"
-                        className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
-                      >
-                        <Archive className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(acc.id)}
-                        title="Excluir conta"
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {!isViewer && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => handleArchive(acc.id)}
+                          title="Arquivar conta"
+                          className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        >
+                          <Archive className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(acc.id)}
+                          title="Excluir conta"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-800/80">
@@ -211,83 +216,82 @@ export default function AccountsPage() {
         </div>
 
         {/* Create Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Nova Conta Bancária / Carteira</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 pr-6">Nova Conta Bancária / Carteira</h2>
 
-              <form onSubmit={handleCreate} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome da Conta *</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Nubank, Itaú, Carteira física..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+            <form onSubmit={handleCreate} className="space-y-3.5 sm:space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome da Conta *</label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ex: Nubank, Itaú, Carteira física..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Conta *</label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                  >
-                    <option value="CHECKING">Conta Corrente</option>
-                    <option value="SAVINGS">Poupança</option>
-                    <option value="INVESTMENT">Investimento</option>
-                    <option value="CASH">Dinheiro / Carteira</option>
-                    <option value="OTHER">Outro</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Saldo Inicial (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={initialBalance}
-                    onChange={(e) => setInitialBalance(e.target.value)}
-                    placeholder="0,00"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor Identificadora</label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
-                    />
-                    <span className="text-xs text-slate-400">{color}</span>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Conta *</label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
-                  {submitting ? 'Criando conta...' : 'Cadastrar Conta'}
-                </button>
-              </form>
-            </div>
+                  <option value="CHECKING">Conta Corrente</option>
+                  <option value="SAVINGS">Poupança</option>
+                  <option value="INVESTMENT">Investimento</option>
+                  <option value="CASH">Dinheiro / Carteira</option>
+                  <option value="OTHER">Outro</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Saldo Inicial (R$) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={initialBalance}
+                  onChange={(e) => setInitialBalance(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Cor do Card</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="h-9 w-14 sm:h-10 sm:w-16 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer"
+                  />
+                  <span className="text-xs text-slate-400">{color}</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+              >
+                {submitting ? 'Criando conta...' : 'Cadastrar Conta'}
+              </button>
+            </form>
           </div>
-        )}
+        </Modal>
       </div>
     </AppShell>
   );

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsEnum,
@@ -8,6 +9,9 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
+  Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -27,12 +31,19 @@ export class CreateTransactionDto {
   @ApiProperty({ example: 'Compras da semana no mercado' })
   @IsString()
   @IsNotEmpty({ message: 'Descrição é obrigatória' })
+  @MaxLength(255, { message: 'Descrição não pode exceder 255 caracteres' })
   description: string;
 
   @ApiProperty({ example: '2026-09-01' })
   @IsDateString({}, { message: 'Data inválida (formato YYYY-MM-DD)' })
   @IsNotEmpty({ message: 'Data é obrigatória' })
   transactionDate: string;
+
+  @ApiProperty({ required: false, example: '14:30', description: 'Horário do lançamento no formato HH:mm' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Horário deve estar no formato HH:mm (ex: 14:30)' })
+  transactionTime?: string;
 
   @ApiProperty({ required: false })
   @IsUUID('4', { message: 'Categoria inválida' })
@@ -55,8 +66,9 @@ export class CreateTransactionDto {
   destinationAccountId?: string;
 
   @ApiProperty({ required: false, default: 1, description: 'Número total de parcelas (ex: 3 para 3x)' })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Número de parcelas deve ser inteiro' })
+  @Min(1, { message: 'Mínimo de 1 parcela' })
+  @Max(72, { message: 'O parcelamento máximo permitido é de 72 vezes' })
   @IsOptional()
   totalInstallments?: number;
 
@@ -72,6 +84,7 @@ export class CreateTransactionDto {
 
   @ApiProperty({ required: false })
   @IsString()
+  @MaxLength(1000, { message: 'Observações não podem exceder 1000 caracteres' })
   @IsOptional()
   notes?: string;
 
@@ -84,4 +97,11 @@ export class CreateTransactionDto {
   @IsUUID('4', { message: 'ID da pessoa inválido' })
   @IsOptional()
   personId?: string;
+
+  @ApiProperty({ required: false, type: [String], description: 'Tags para categorização transversal' })
+  @IsArray({ message: 'Tags deve ser uma lista de textos' })
+  @IsString({ each: true, message: 'Cada tag deve ser um texto' })
+  @MaxLength(50, { each: true, message: 'Cada tag não pode exceder 50 caracteres' })
+  @IsOptional()
+  tags?: string[];
 }
