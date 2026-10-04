@@ -62,6 +62,6 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Description | Source | Status |
 | -------------- | ----------- | ------ | ------ |
-| ZOOM-01 | Global 16px font size on mobile for inputs, selects, and textareas | spec.md | implementing |
-| ZOOM-02 | Touch action manipulation optimization | spec.md | implementing |
-| ZOOM-03 | Accessible viewport preservation and clean build | spec.md | in tasks |
+| ZOOM-01 | Global 16px font size on mobile for inputs, selects, and textareas | spec.md | verified |
+| ZOOM-02 | Touch action manipulation optimization | spec.md | verified |
+| ZOOM-03 | Accessible viewport preservation and clean build | spec.md | verified |

@@ -41,7 +41,7 @@ Gate: npm --prefix frontend run build
 
 Configurar regras CSS no globals.css com `@media screen and (max-width: 768px)` definindo `font-size: 16px !important` para `input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])`, `select` e `textarea`, além de `touch-action: manipulation` para elementos interativos.
 
-#### T2: Verificação do Viewport e Build Completo de Produção
+#### T2: Verificação do Viewport e Build Completo de Produção [DONE]
 Where: frontend/src/app/layout.tsx
 Depends on: T1
 Tests: frontend/src/app/layout.tsx
