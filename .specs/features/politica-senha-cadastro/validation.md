@@ -24,14 +24,14 @@
 
 | Criterion | Spec-defined outcome | `file:line` + assertion | Result |
 | --------- | -------------------- | ----------------------- | ------ |
-| PWD-01: Comprimento 10 a 128 | Rejeitar senhas com <10 ou >128 caracteres | `backend/test/unit/register-dto.spec.ts:24` - `expect(passwordError?.constraints?.minLength).toBe('A senha deve ter no mínimo 10 caracteres')` | ✅ PASS |
+| PWD-01: Comprimento 8 a 128 | Rejeitar senhas com <8 ou >128 caracteres | `backend/test/unit/register-dto.spec.ts:24` - `expect(passwordError?.constraints?.minLength).toBe('A senha deve ter no mínimo 8 caracteres')` | ✅ PASS |
 | PWD-02: Letra maiúscula obrigatória | Rejeitar senhas sem letra maiúscula | `backend/test/unit/register-dto.spec.ts:51` - `expect(passwordError?.constraints?.matches).toBe('A senha deve conter ao menos uma letra maiúscula')` | ✅ PASS |
 | PWD-03: Letra minúscula obrigatória | Rejeitar senhas sem letra minúscula | `backend/test/unit/register-dto.spec.ts:60` - `expect(passwordError?.constraints?.matches).toBe('A senha deve conter ao menos uma letra minúscula')` | ✅ PASS |
 | PWD-04: Número obrigatório | Rejeitar senhas sem dígito numérico | `backend/test/unit/register-dto.spec.ts:69` - `expect(passwordError?.constraints?.matches).toBe('A senha deve conter ao menos um número')` | ✅ PASS |
 | PWD-05: Caractere especial obrigatório | Rejeitar senhas sem caractere especial | `backend/test/unit/register-dto.spec.ts:78` - `expect(passwordError?.constraints?.matches).toBe('A senha deve conter ao menos um caractere especial')` | ✅ PASS |
 | PWD-06: Proibição de espaços | Rejeitar senhas contendo espaços | `backend/test/unit/register-dto.spec.ts:98` - `expect(passwordError?.constraints?.matches).toBe('A senha não pode conter espaços')` | ✅ PASS |
-| PWD-07: Proibição de igualdade com usuário/login | Rejeitar senhas iguais a e-mail, username do e-mail ou nome | `backend/test/unit/register-dto.spec.ts:127` - `expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe('A senha não pode ser igual ao usuário, e-mail ou nome')` | ✅ PASS |
-| PWD-08: Bloqueio de senhas comuns | Rejeitar senhas na lista de senhas comuns | `backend/test/unit/register-dto.spec.ts:167` - `expect(passwordError?.constraints?.IsNotCommonPassword).toBe('A senha não pode estar na lista de senhas comuns')` | ✅ PASS |
+| PWD-07: Proibição de igualdade com usuário/e-mail | Rejeitar senhas iguais a usuário/e-mail ou nome | `backend/test/unit/register-dto.spec.ts:135` - `expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe('A senha não pode ser igual ao usuário/e-mail')` | ✅ PASS |
+| PWD-08: Bloqueio de senhas comuns | Rejeitar senhas na lista de senhas comuns | `backend/test/unit/register-dto.spec.ts:187` - `expect(passwordError?.constraints?.IsNotCommonPassword).toBe('A senha não pode estar na lista de senhas comuns')` | ✅ PASS |
 | PWD-09: Processamento com senha forte | Aceitar registro com status 201 quando válida | `backend/test/unit/register-dto.spec.ts:17` - `expect(errors.length).toBe(0)` | ✅ PASS |
 | PWD-10: Checklist visual dinâmico | Exibir status de cada critério na tela `/register` | `frontend/src/app/register/page.tsx:210` - `{password.length > 0 && <div ...>}` | ✅ PASS |
 | PWD-11: Bloqueio no submit se inválida | Impedir envio e exibir mensagem explicativa no frontend | `frontend/src/app/register/page.tsx:57` - `if (!passwordEvaluation.isValid) { setError(...); return; }` | ✅ PASS |
@@ -45,12 +45,12 @@
 
 | Mutation | File:line | Description | Killed? |
 | -------- | --------- | ----------- | ------- |
-| 1 | `backend/src/modules/auth/dto/register.dto.ts:63` | Alterar `@MinLength(PASSWORD_MIN_LENGTH)` para `@MinLength(8)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:24`) |
+| 1 | `backend/src/modules/auth/dto/register.dto.ts:63` | Alterar `@MinLength(PASSWORD_MIN_LENGTH)` para `@MinLength(6)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:24`) |
 | 2 | `backend/src/modules/auth/dto/register.dto.ts:65` | Remover validação de maiúsculas `@Matches(UPPERCASE_REGEX)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:51`) |
 | 3 | `backend/src/modules/auth/dto/register.dto.ts:68` | Remover validação de caractere especial `@Matches(SPECIAL_CHAR_REGEX)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:78`) |
 | 4 | `backend/src/modules/auth/dto/register.dto.ts:70` | Permitir espaços removendo `@Matches(NO_WHITESPACE_REGEX)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:98`) |
-| 5 | `backend/src/modules/auth/dto/register.dto.ts:71` | Ignorar validação de usuário/login `@Validate(IsNotEqualToUserLoginConstraint)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:127`) |
-| 6 | `backend/src/modules/auth/dto/register.dto.ts:72` | Desativar bloqueio de senhas comuns `@Validate(IsNotCommonPasswordConstraint)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:167`) |
+| 5 | `backend/src/modules/auth/dto/register.dto.ts:71` | Ignorar validação de usuário/e-mail `@Validate(IsNotEqualToUserLoginConstraint)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:135`) |
+| 6 | `backend/src/modules/auth/dto/register.dto.ts:72` | Desativar bloqueio de senhas comuns `@Validate(IsNotCommonPasswordConstraint)` | ✅ Killed (`backend/test/unit/register-dto.spec.ts:187`) |
 
 **Sensor depth**: P0-full
 **Result**: 6/6 killed - PASS ✅

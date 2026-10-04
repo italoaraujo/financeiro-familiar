@@ -35,7 +35,7 @@ export class IsNotEqualToUserLoginConstraint implements ValidatorConstraintInter
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'A senha não pode ser igual ao usuário, e-mail ou nome';
+    return 'A senha não pode ser igual ao usuário/e-mail';
   }
 }
 
@@ -68,10 +68,10 @@ export class RegisterDto {
     example: 'Senha@Forte123',
     minLength: PASSWORD_MIN_LENGTH,
     maxLength: PASSWORD_MAX_LENGTH,
-    description: 'Senha de 10 a 128 caracteres contendo maiúscula, minúscula, número e caractere especial sem espaços',
+    description: 'Senha de no mínimo 8 caracteres contendo maiúscula, minúscula, número e caractere especial sem espaços',
   })
   @IsString({ message: 'A senha deve ser um texto' })
-  @MinLength(PASSWORD_MIN_LENGTH, { message: 'A senha deve ter no mínimo 10 caracteres' })
+  @MinLength(PASSWORD_MIN_LENGTH, { message: 'A senha deve ter no mínimo 8 caracteres' })
   @MaxLength(PASSWORD_MAX_LENGTH, { message: 'A senha não pode exceder 128 caracteres' })
   @Matches(UPPERCASE_REGEX, { message: 'A senha deve conter ao menos uma letra maiúscula' })
   @Matches(LOWERCASE_REGEX, { message: 'A senha deve conter ao menos uma letra minúscula' })

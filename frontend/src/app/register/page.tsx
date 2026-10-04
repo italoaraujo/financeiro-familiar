@@ -179,7 +179,7 @@ export default function RegisterPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Entre 10 e 128 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-10 sm:pl-11 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     />
                   </div>

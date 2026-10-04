@@ -2,7 +2,7 @@
  * Utilitário de validação de regras de senha para o Frontend.
  */
 
-export const PASSWORD_MIN_LENGTH = 10;
+export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 
 export const UPPERCASE_REGEX = /[A-Z]/;
@@ -179,7 +179,7 @@ export function evaluatePasswordRules(
   const rules: PasswordRuleItem[] = [
     {
       id: 'length',
-      label: 'Entre 10 e 128 caracteres',
+      label: 'Pelo menos 8 caracteres',
       passed: hasValidLength,
     },
     {
@@ -209,7 +209,7 @@ export function evaluatePasswordRules(
     },
     {
       id: 'user_login',
-      label: 'Não pode ser igual ao usuário/login',
+      label: 'Não pode ser igual ao usuário/e-mail',
       passed: isNotUserLogin,
     },
     {
@@ -223,7 +223,7 @@ export function evaluatePasswordRules(
 
   let firstError: string | undefined;
   if (!hasValidLength) {
-    firstError = `A senha deve possuir entre ${PASSWORD_MIN_LENGTH} e ${PASSWORD_MAX_LENGTH} caracteres`;
+    firstError = `A senha deve possuir pelo menos ${PASSWORD_MIN_LENGTH} caracteres`;
   } else if (!hasUppercase) {
     firstError = 'A senha deve conter pelo menos 1 letra maiúscula';
   } else if (!hasLowercase) {
@@ -235,7 +235,7 @@ export function evaluatePasswordRules(
   } else if (!hasNoWhitespace) {
     firstError = 'A senha não pode conter espaços';
   } else if (!isNotUserLogin) {
-    firstError = 'A senha não pode ser igual ao seu usuário, e-mail ou nome';
+    firstError = 'A senha não pode ser igual ao usuário/e-mail';
   } else if (!isNotCommon) {
     firstError = 'A senha escolhida é muito comum e fácil de adivinhar';
   }

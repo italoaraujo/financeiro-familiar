@@ -18,13 +18,13 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
     expect(errors.length).toBe(0);
   });
 
-  describe('Rule 1: Length between 10 and 128 characters', () => {
-    it('should fail when password has fewer than 10 characters', async () => {
-      const dto = createDto({ password: 'Pass@123' }); // 8 chars
+  describe('Rule 1: Length between 8 and 128 characters', () => {
+    it('should fail when password has fewer than 8 characters', async () => {
+      const dto = createDto({ password: 'Pass@1' }); // 6 chars
       const errors = await validate(dto);
       const passwordError = errors.find((e) => e.property === 'password');
       expect(passwordError).toBeDefined();
-      expect(passwordError?.constraints?.minLength).toBe('A senha deve ter no mínimo 10 caracteres');
+      expect(passwordError?.constraints?.minLength).toBe('A senha deve ter no mínimo 8 caracteres');
     });
 
     it('should fail when password exceeds 128 characters', async () => {
@@ -35,8 +35,8 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
       expect(passwordError?.constraints?.maxLength).toBe('A senha não pode exceder 128 caracteres');
     });
 
-    it('should pass with exactly 10 characters meeting other criteria', async () => {
-      const dto = createDto({ password: 'Abcd#12345' }); // exactly 10 chars
+    it('should pass with exactly 8 characters meeting other criteria', async () => {
+      const dto = createDto({ password: 'Pass@123' }); // exactly 8 chars
       const errors = await validate(dto);
       expect(errors.length).toBe(0);
     });
@@ -133,7 +133,7 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
       const passwordError = errors.find((e) => e.property === 'password');
       expect(passwordError).toBeDefined();
       expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe(
-        'A senha não pode ser igual ao usuário, e-mail ou nome',
+        'A senha não pode ser igual ao usuário/e-mail',
       );
     });
 
@@ -146,7 +146,7 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
       const passwordError = errors.find((e) => e.property === 'password');
       expect(passwordError).toBeDefined();
       expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe(
-        'A senha não pode ser igual ao usuário, e-mail ou nome',
+        'A senha não pode ser igual ao usuário/e-mail',
       );
     });
 
@@ -159,7 +159,7 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
       const passwordError = errors.find((e) => e.property === 'password');
       expect(passwordError).toBeDefined();
       expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe(
-        'A senha não pode ser igual ao usuário, e-mail ou nome',
+        'A senha não pode ser igual ao usuário/e-mail',
       );
     });
 
@@ -172,7 +172,7 @@ describe('RegisterDto Password Policy Validation (PWD-01 to PWD-09)', () => {
       const passwordError = errors.find((e) => e.property === 'password');
       expect(passwordError).toBeDefined();
       expect(passwordError?.constraints?.IsNotEqualToUserLogin).toBe(
-        'A senha não pode ser igual ao usuário, e-mail ou nome',
+        'A senha não pode ser igual ao usuário/e-mail',
       );
     });
   });

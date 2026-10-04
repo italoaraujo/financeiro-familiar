@@ -6,10 +6,10 @@ Atualmente, o cadastro de novos usuários exige apenas que a senha contenha entr
 
 ## Goals
 
-- [ ] Exigir que a senha no cadastro possua entre 10 e 128 caracteres.
+- [ ] Exigir que a senha no cadastro possua pelo menos 8 caracteres (máximo de 128 caracteres).
 - [ ] Exigir que a senha contenha pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial.
 - [ ] Bloquear senhas contendo espaços em qualquer posição.
-- [ ] Bloquear senhas idênticas ao e-mail/login ou ao nome informado no cadastro.
+- [ ] Bloquear senhas idênticas ao usuário/e-mail ou ao nome informado no cadastro.
 - [ ] Bloquear senhas presentes em uma lista conhecida de senhas comuns/fracas.
 - [ ] Aplicar todas as validações no backend (via `RegisterDto`) retornando HTTP 400 Bad Request com mensagens explicativas.
 - [ ] Fornecer feedback visual em tempo real e validação defensiva no formulário da tela de cadastro (`/register`).
@@ -33,7 +33,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 | --------------------- | -------------- | --------- | ---------- |
-| Definição de usuário/login para comparação | Comparação case-insensitive com o e-mail completo (`email`), com o nome de usuário do e-mail (parte anterior ao `@`), e com o nome completo (`name`) | Impede senhas óbvias baseadas no e-mail ou nome cadastrado | y |
+| Definição de usuário/e-mail para comparação | Comparação case-insensitive com o e-mail completo (`email`), com o nome de usuário do e-mail (parte anterior ao `@`), e com o nome completo (`name`) | Impede senhas óbvias baseadas no e-mail ou nome cadastrado | y |
 | Definição de caractere especial | Qualquer caractere diferente de letras (`a-z`, `A-Z`) e números (`0-9`), incluindo símbolos e pontuações | Padrão da indústria e de segurança que aceita símbolos ASCII (`!@#$%^&*()_+-=[]{}|;':",.<>/?~`) e Unicode | y |
 | Lista de senhas comuns | Lista estática de senhas fracas e recorrentes (top senhas conhecidas em vazamentos) verificadas de forma case-insensitive | Garante performance imediata no backend e frontend sem dependência externa | y |
 | Experiência visual no frontend | Indicadores dinâmicos dos requisitos de senha e bloqueio de envio com mensagem de alerta caso algum critério não seja atendido | Ajuda o usuário a criar uma senha válida sem frustração | y |
@@ -52,13 +52,13 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 **Acceptance Criteria**:
 
-1. IF a senha tiver menos de 10 caracteres ou mais de 128 caracteres THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
+1. IF a senha tiver menos de 8 caracteres ou mais de 128 caracteres THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 2. IF a senha não contiver ao menos uma letra maiúscula THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 3. IF a senha não contiver ao menos uma letra minúscula THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 4. IF a senha não contiver ao menos um número THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 5. IF a senha não contiver ao menos um caractere especial THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 6. IF a senha contiver qualquer espaço THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
-7. IF a senha for igual ao e-mail, ao usuário do e-mail ou ao nome do cadastro THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
+7. IF a senha for igual ao usuário/e-mail ou ao nome do cadastro THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 8. IF a senha constar na lista de senhas comuns THEN the backend SHALL rejeitar a requisição com status 400 e erro de validação.
 9. WHEN todos os critérios de senha forem atendidos e os dados estiverem válidos THEN the backend SHALL processar o registro com status 201 Created.
 
@@ -87,7 +87,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 - IF a senha contiver espaços no início, meio ou fim (incluindo espaços que seriam afetados por trim) THEN the backend SHALL rejeitar com status 400 informando que espaços não são permitidos.
 - IF o e-mail contiver letras maiúsculas e a senha for igual em minúsculas (ou vice-versa) THEN the backend SHALL rejeitar considerando a comparação case-insensitive.
 - IF a senha estiver na lista de senhas comuns com variações de maiúsculas/minúsculas THEN the backend SHALL rejeitar considerando a comparação case-insensitive.
-- IF o campo nome possuir menos de 10 caracteres e for testado contra uma senha válida de 10 caracteres diferente THEN the backend SHALL aceitar normalmente.
+- IF o campo nome possuir menos de 8 caracteres e for testado contra uma senha válida de 8 caracteres diferente THEN the backend SHALL aceitar normalmente.
 
 ---
 
@@ -123,5 +123,5 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 How we know the feature is successful:
 
 - [ ] 100% dos testes unitários de validação de senha do backend aprovados cobrindo cada um dos 8 critérios.
-- [ ] Nenhuma senha com <10 chars, sem maiúscula, sem minúscula, sem número, sem caractere especial, com espaços, igual ao login ou comum é aceita no registro.
+- [ ] Nenhuma senha com <8 chars, sem maiúscula, sem minúscula, sem número, sem caractere especial, com espaços, igual ao usuário/e-mail ou comum é aceita no registro.
 - [ ] O frontend fornece feedback em tempo real dos requisitos com visual limpo e moderno.
