@@ -97,15 +97,15 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| PWD-01 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-02 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-03 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-04 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-05 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-06 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-07 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-08 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
-| PWD-09 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Pending |
+| PWD-01 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-02 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-03 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-04 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-05 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-06 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-07 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-08 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
+| PWD-09 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
 | PWD-10 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
 | PWD-11 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
 | PWD-12 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
