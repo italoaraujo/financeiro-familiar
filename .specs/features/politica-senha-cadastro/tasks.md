@@ -56,7 +56,7 @@ Atualizar `RegisterDto` com anotações e decoradores de validação para os 8 c
 
 ### Phase 2: Frontend Experience & UI Feedback
 
-#### T3: Utilitário de Regras de Senha Frontend
+#### T3: Utilitário de Regras de Senha Frontend [DONE]
 Where: frontend/src/lib/password-rules.ts
 Depends on: T2
 Tests: manual verification via build
