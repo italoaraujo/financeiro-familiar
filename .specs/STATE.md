@@ -196,22 +196,30 @@
 - **Date**: 2026-10-03
 - **Status**: active
 
+### AD-025
+- **Decision**: Fortalecer a política de senhas no cadastro de novos usuários aplicando 8 regras determinísticas de validação em camadas (Backend via DTO e Frontend em tempo real): (1) Comprimento entre 10 e 128 caracteres; (2) Pelo menos 1 letra maiúscula; (3) Pelo menos 1 letra minúscula; (4) Pelo menos 1 número; (5) Pelo menos 1 caractere especial; (6) Proibição estrita de espaços; (7) Proibição de igualdade com usuário/login (e-mail completo, username do e-mail e nome cadastrado, case-insensitive); (8) Bloqueio de senhas conhecidas em lista estática de senhas fracas e recorrentes.
+- **Reason**: Atende aos requisitos explícitos do usuário e aos padrões de segurança recomendados por OWASP e NIST para prevenção contra ataques de dicionário, força bruta e credential stuffing.
+- **Trade-off**: Requer maior esforço de criação de senha por novos usuários, mitigado por um checklist visual dinâmico com feedback em tempo real na tela de registro.
+- **Scope**: `backend/src/common/utils/password-rules.util.ts`, `backend/src/modules/auth/dto/register.dto.ts`, `backend/test/unit/register-dto.spec.ts`, `frontend/src/lib/password-rules.ts` e `frontend/src/app/register/page.tsx`.
+- **Date**: 2026-10-03
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `correcao-baixas-auditoria`
-- **Total Tasks**: 5
-- **Completed Tasks**: 5 / 5 (100%)
+- **Active Feature**: `politica-senha-cadastro`
+- **Total Tasks**: 4
+- **Completed Tasks**: 4 / 4 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: 275 testes unitários e de integração passando, builds de backend e frontend 100% limpos
+- **Build Status**: 289 testes unitários e de integração passando, builds de backend e frontend 100% limpos
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/correcao-baixas-auditoria
-- **Phase / Task**: Phase 1 / T5 (All tasks complete)
-- **Completed**: T1 (Security Headers & CSP), T2 (SameSite=Strict cookies), T3 (IP spoofing prevention in audit logs), T4 (Docker Compose resource limits), T5 (Security secrets rotation guide)
+- **Feature**: .specs/features/politica-senha-cadastro
+- **Phase / Task**: Phase 2 / T4 (All tasks complete)
+- **Completed**: T1 (Backend password rules utility & common passwords blacklist), T2 (RegisterDto validation & comprehensive unit test suite), T3 (Frontend password rules utility), T4 (Real-time visual checklist & pre-submit validation on Register page)
 - **In-progress**: None
-- **Next step**: Validação do completion gate, commit do state e envio remoto (git push)
+- **Next step**: Revisão do usuário e sincronização com repositório remoto conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/correcao-baixas-auditoria
+- **Branch**: develop
