@@ -168,24 +168,37 @@
 - **Trade-off**: Requer verificações relacionais adicionais em banco e impede edições retroativas em períodos já consolidados.
 - **Scope**: `CreditCardsService`, `CategoriesService`, `TransactionsService`, `docker-compose.yml`, `backend/package.json`, `frontend/package.json` e testes unitários.
 - **Date**: 2026-10-02
+### AD-023
+- **Decision**: Mitigar as 7 vulnerabilidades de severidade Média (`SEC-MED-01` a `SEC-MED-07`) catalogadas na auditoria de segurança de software:
+  1. Configurar usuário sem privilégios `USER node` com `COPY --chown=node:node` nos Dockerfiles de produção do backend e frontend (`SEC-MED-01`).
+  2. Adotar fallback estrito para ambiente `production` em `seed.ts` e condicionar a criação de usuário de demonstração exclusivamente a `APP_ENV === 'development'`, evitando execução cega de seed no contêiner (`SEC-MED-02`).
+  3. Criar o modelo `RevokedToken` no schema Prisma e atualizar `TokenBlacklistService` para persistir hashes SHA-256 de tokens revogados de forma durável no PostgreSQL, mantendo cache em memória para baixa latência e compatibilidade multi-instância (`SEC-MED-03`).
+  4. Eliminar fallbacks com credenciais fracas padrão (`:-postgres`) no `docker-compose.yml`, exigindo variáveis obrigatórias via `${DB_USER:?...}` e `${DB_PASSWORD:?...}` (`SEC-MED-04`).
+  5. Bloquear a atribuição de papel `OWNER` a novos membros de famílias e impedir que um `ADMIN` remova outro `ADMIN`, preservando a soberania do proprietário (`SEC-MED-05`).
+  6. Adicionar anotações `@MaxLength()` nos campos de texto de entrada em todos os DTOs do NestJS condizentes com as restrições VarChar do PostgreSQL, eliminando erros não tratados HTTP 500 (`SEC-MED-06`).
+  7. Reforçar os requisitos de senha em `RegisterDto` e na tela de registro do frontend, exigindo tamanho mínimo de 8 caracteres, máximo de 72 caracteres e composição com letras e números (`SEC-MED-07`).
+- **Reason**: Neutraliza vetores de escalação de privilégios, impede ressuscitação de tokens revogados após restart de contêineres, elimina senhas fracas padrão, fecha brechas de negação de serviço por exceções HTTP 500 e melhora a postura de conformidade com OWASP ASVS e CIS Docker.
+- **Trade-off**: Requer persistência adicional de tokens revogados no banco e impõe regras mais estritas de tamanho e caracteres na entrada de dados.
+- **Scope**: Dockerfiles, `seed.ts`, `schema.prisma`, `TokenBlacklistService`, `docker-compose.yml`, `FamiliesService`, DTOs de entrada e página de registro do frontend.
+- **Date**: 2026-10-03
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `correcao-altas-auditoria`
-- **Total Tasks**: 6
-- **Completed Tasks**: 6 / 6 (100%)
+- **Active Feature**: `correcao-medias-auditoria`
+- **Total Tasks**: 7
+- **Completed Tasks**: 7 / 7 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: 249 testes unitários e de integração passando, builds de backend e frontend 100% limpos
+- **Build Status**: 272 testes unitários e de integração passando, builds de backend e frontend 100% limpos
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/correcao-altas-auditoria
-- **Phase / Task**: Phase 1 / T6 (All tasks complete)
-- **Completed**: T1 (BOLA credit cards), T2 (BOLA category parent), T3 (Invoice deletion integrity), T4 (Docker loopback binding), T5 (Backend deps overrides), T6 (Frontend deps audit fix)
+- **Feature**: .specs/features/correcao-medias-auditoria
+- **Phase / Task**: Phase 1 / T7 (All tasks complete)
+- **Completed**: T1 (Family privilege escalation), T2 (Password policy), T3 (DTO maxLength), T4 (Durable token blacklist), T5 (Seed hardening), T6 (Docker non-root), T7 (Compose credentials hardening)
 - **In-progress**: None
-- **Next step**: Revisão do usuário e preparação de PR ou avanço para correções de vulnerabilidades de severidade média
+- **Next step**: Validação do completion gate, commit do state e envio remoto (git push) mediante aprovação do usuário
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/correcao-altas-auditoria
+- **Branch**: feature/correcao-medias-auditoria

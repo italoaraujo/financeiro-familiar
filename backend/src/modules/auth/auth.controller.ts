@@ -65,7 +65,7 @@ export class AuthController {
     const authHeader = req.headers?.authorization;
     if (authHeader) {
       const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
-      this.blacklistService.add(token);
+      await this.blacklistService.add(token);
     }
     return { message: 'Sessão encerrada com sucesso' };
   }

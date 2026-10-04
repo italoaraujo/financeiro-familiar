@@ -112,8 +112,12 @@ export class FamiliesService {
       },
     });
 
-    if (!requester || (requester.role !== 'OWNER' && requester.role !== 'ADMIN')) {
+    if (!requester || (requester.role !== FamilyMemberRole.OWNER && requester.role !== FamilyMemberRole.ADMIN)) {
       throw new ForbiddenException('Apenas administradores podem adicionar novos membros');
+    }
+
+    if (dto.role === FamilyMemberRole.OWNER) {
+      throw new BadRequestException('Não é permitido adicionar novos membros com o papel de OWNER. O papel OWNER é exclusivo do proprietário da família.');
     }
 
     const targetUser = await this.usersService.findByEmail(dto.email);
@@ -169,7 +173,7 @@ export class FamiliesService {
       },
     });
 
-    if (!requester || (requester.role !== 'OWNER' && requester.role !== 'ADMIN')) {
+    if (!requester || (requester.role !== FamilyMemberRole.OWNER && requester.role !== FamilyMemberRole.ADMIN)) {
       throw new ForbiddenException('Apenas administradores podem remover membros');
     }
 
@@ -183,8 +187,12 @@ export class FamiliesService {
       throw new NotFoundException('Membro não encontrado no grupo familiar');
     }
 
-    if (targetMember.role === 'OWNER') {
+    if (targetMember.role === FamilyMemberRole.OWNER) {
       throw new BadRequestException('Não é possível remover o proprietário da família');
+    }
+
+    if (targetMember.role === FamilyMemberRole.ADMIN && requester.role !== FamilyMemberRole.OWNER && requester.userId !== targetUserId) {
+      throw new ForbiddenException('Apenas o proprietário da família pode remover outros administradores');
     }
 
     await this.prisma.familyMember.delete({

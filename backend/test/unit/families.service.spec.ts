@@ -125,6 +125,91 @@ describe('FamiliesService', () => {
         new BadRequestException('Não foi possível adicionar o membro com o e-mail informado. Verifique os dados fornecidos.'),
       );
     });
+
+    it('should throw BadRequestException if attempting to add member with OWNER role', async () => {
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        role: FamilyMemberRole.OWNER,
+      });
+
+      await expect(
+        service.addMember('owner-id', 'family-1', {
+          email: 'new@email.com',
+          role: FamilyMemberRole.OWNER,
+        }),
+      ).rejects.toThrow(
+        new BadRequestException('Não é permitido adicionar novos membros com o papel de OWNER. O papel OWNER é exclusivo do proprietário da família.'),
+      );
+    });
+  });
+
+  describe('removeMember', () => {
+    it('should throw ForbiddenException if requester is not OWNER or ADMIN', async () => {
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        role: FamilyMemberRole.MEMBER,
+      });
+
+      await expect(
+        service.removeMember('member-id', 'family-1', 'target-id'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw NotFoundException if target member is not found in family', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-id' })
+        .mockResolvedValueOnce(null);
+
+      await expect(
+        service.removeMember('admin-id', 'family-1', 'nonexistent-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if target member is OWNER', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-id' })
+        .mockResolvedValueOnce({ role: FamilyMemberRole.OWNER, userId: 'owner-id' });
+
+      await expect(
+        service.removeMember('admin-id', 'family-1', 'owner-id'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw ForbiddenException if requester is ADMIN attempting to remove another ADMIN', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-1' })
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-2' });
+
+      await expect(
+        service.removeMember('admin-1', 'family-1', 'admin-2'),
+      ).rejects.toThrow(
+        new ForbiddenException('Apenas o proprietário da família pode remover outros administradores'),
+      );
+    });
+
+    it('should allow OWNER to remove an ADMIN', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.OWNER, userId: 'owner-id' })
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-id' });
+      prisma.familyMember.delete.mockResolvedValueOnce({} as any);
+
+      const result = await service.removeMember('owner-id', 'family-1', 'admin-id');
+      expect(result.message).toContain('sucesso');
+      expect(prisma.familyMember.delete).toHaveBeenCalledWith({
+        where: { familyId_userId: { familyId: 'family-1', userId: 'admin-id' } },
+      });
+    });
+
+    it('should allow an ADMIN to remove a regular MEMBER', async () => {
+      prisma.familyMember.findUnique
+        .mockResolvedValueOnce({ role: FamilyMemberRole.ADMIN, userId: 'admin-id' })
+        .mockResolvedValueOnce({ role: FamilyMemberRole.MEMBER, userId: 'member-id' });
+      prisma.familyMember.delete.mockResolvedValueOnce({} as any);
+
+      const result = await service.removeMember('admin-id', 'family-1', 'member-id');
+      expect(result.message).toContain('sucesso');
+      expect(prisma.familyMember.delete).toHaveBeenCalledWith({
+        where: { familyId_userId: { familyId: 'family-1', userId: 'member-id' } },
+      });
+    });
   });
 
   describe('createPerson', () => {

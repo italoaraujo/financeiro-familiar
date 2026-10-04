@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(req: any, payload: JwtPayload) {
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    if (token && this.blacklistService.isBlacklisted(token)) {
+    if (token && (await this.blacklistService.isBlacklisted(token))) {
       throw new UnauthorizedException('Token revogado. Faça login novamente.');
     }
 

@@ -77,20 +77,47 @@ describe('JWT Security Configuration (SEC-CRIT-03)', () => {
       jwtStrategy = new JwtStrategy(mockUsersService, blacklistService);
     });
 
-    it('should correctly flag tokens as blacklisted when added', () => {
-      expect(blacklistService.isBlacklisted('token-123')).toBe(false);
-      blacklistService.add('token-123');
-      expect(blacklistService.isBlacklisted('token-123')).toBe(true);
+    it('should correctly flag tokens as blacklisted when added', async () => {
+      expect(await blacklistService.isBlacklisted('token-123')).toBe(false);
+      await blacklistService.add('token-123');
+      expect(await blacklistService.isBlacklisted('token-123')).toBe(true);
     });
 
-    it('should evict expired tokens from blacklist', () => {
-      blacklistService.add('token-short-lived', -1000); // Já expirado
-      expect(blacklistService.isBlacklisted('token-short-lived')).toBe(false);
+    it('should evict expired tokens from blacklist', async () => {
+      await blacklistService.add('token-short-lived', -1000); // Já expirado
+      expect(await blacklistService.isBlacklisted('token-short-lived')).toBe(false);
+    });
+
+    it('should persist and retrieve revoked token using Prisma database integration', async () => {
+      const mockPrisma: any = {
+        revokedToken: {
+          upsert: jest.fn().mockResolvedValue({}),
+          findUnique: jest.fn().mockResolvedValue({
+            tokenHash: 'mock-hash',
+            expiresAt: new Date(Date.now() + 60000),
+          }),
+          deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      };
+
+      const persistentService = new TokenBlacklistService(mockPrisma);
+      await persistentService.add('db-token');
+      expect(mockPrisma.revokedToken.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { tokenHash: expect.any(String) },
+          create: expect.objectContaining({ expiresAt: expect.any(Date) }),
+        }),
+      );
+
+      persistentService.clear(); // Limpa memória para forçar consulta ao banco
+      const isBlocked = await persistentService.isBlacklisted('db-token');
+      expect(isBlocked).toBe(true);
+      expect(mockPrisma.revokedToken.findUnique).toHaveBeenCalled();
     });
 
     it('should reject request with UnauthorizedException when token is blacklisted', async () => {
       const revokedToken = 'revoked.jwt.token';
-      blacklistService.add(revokedToken);
+      await blacklistService.add(revokedToken);
 
       const mockReq = {
         headers: {
@@ -139,7 +166,7 @@ describe('JWT Security Configuration (SEC-CRIT-03)', () => {
 
       const response = await controller.logout(mockReq);
       expect(response).toEqual({ message: 'Sessão encerrada com sucesso' });
-      expect(blacklistService.isBlacklisted(tokenToRevoke)).toBe(true);
+      expect(await blacklistService.isBlacklisted(tokenToRevoke)).toBe(true);
     });
   });
 });
