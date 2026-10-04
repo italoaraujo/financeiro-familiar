@@ -202,24 +202,30 @@
 - **Trade-off**: Requer maior esforço de criação de senha por novos usuários, mitigado por um checklist visual dinâmico com feedback em tempo real na tela de registro.
 - **Scope**: `backend/src/common/utils/password-rules.util.ts`, `backend/src/modules/auth/dto/register.dto.ts`, `backend/test/unit/register-dto.spec.ts`, `frontend/src/lib/password-rules.ts` e `frontend/src/app/register/page.tsx`.
 - **Date**: 2026-10-03
+### AD-026
+- **Decision**: Prevenir zoom automático indevido ("Focus Zoom") no iOS Safari (iPhone) e navegadores baseados em WebKit configurando via CSS global (`frontend/src/app/globals.css`) que todos os campos de texto (`input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])`), `select` e `textarea` possuam `font-size: 16px !important` em viewports com largura até 768px (`@media screen and (max-width: 768px)`), e aplicando `touch-action: manipulation` para elementos interativos. Preservar `maximumScale: 5` no viewport de `frontend/src/app/layout.tsx` para garantir conformidade estrita com acessibilidade WCAG.
+- **Reason**: No iOS WebKit, qualquer campo de formulário com tamanho de fonte inferior a 16px dispara zoom in involuntário ao focar, quebrando a renderização responsiva, cortando o viewport e prejudicando o uso em smartphones. A regra global protege todo o sistema e futuros componentes sem depender de estilização manual pontual e sem desativar a escala de acessibilidade para usuários com baixa visão.
+- **Trade-off**: Aumenta sutilmente o tamanho de fonte dos campos no mobile para 16px, em total harmonia com as diretrizes da Apple (Human Interface Guidelines).
+- **Scope**: `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx`, formulários e componentes interativos.
+- **Date**: 2026-10-04
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `politica-senha-cadastro`
-- **Total Tasks**: 4
-- **Completed Tasks**: 4 / 4 (100%)
+- **Active Feature**: `prevencao-zoom-ios`
+- **Total Tasks**: 2
+- **Completed Tasks**: 2 / 2 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: 289 testes unitários e de integração passando, builds de backend e frontend 100% limpos
+- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/politica-senha-cadastro
-- **Phase / Task**: Phase 2 / T4 (All tasks complete)
-- **Completed**: T1 (Backend password rules utility & common passwords blacklist), T2 (RegisterDto validation & comprehensive unit test suite), T3 (Frontend password rules utility), T4 (Real-time visual checklist & pre-submit validation on Register page)
+- **Feature**: .specs/features/prevencao-zoom-ios
+- **Phase / Task**: Phase 1 / T2 (All tasks complete)
+- **Completed**: T1 (Regras Globais de Tipografia Mobile e Touch Action), T2 (Verificação do Viewport e Build Completo de Produção)
 - **In-progress**: None
-- **Next step**: Revisão do usuário e sincronização com repositório remoto conforme autorizado
+- **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: develop
+- **Branch**: feature/prevencao-zoom-ios
