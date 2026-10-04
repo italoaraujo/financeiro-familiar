@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { getAuthStatus } from '../../lib/api';
-import { Lock, Mail, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { evaluatePasswordRules } from '../../lib/password-rules';
+import { Lock, Mail, User, ArrowRight, AlertCircle, Check, X } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -35,6 +36,8 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
+  const passwordEvaluation = evaluatePasswordRules(password, { email, name });
+
   useEffect(() => {
     let isMounted = true;
     getAuthStatus().then((status) => {
@@ -54,23 +57,13 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (!passwordEvaluation.isValid) {
+      setError(passwordEvaluation.firstError || 'A senha não atende a todos os critérios de segurança');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('As senhas não coincidem');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('A senha deve ter pelo menos 8 caracteres');
-      return;
-    }
-
-    if (password.length > 72) {
-      setError('A senha não pode exceder 72 caracteres');
-      return;
-    }
-
-    if (!/^(?=.*[a-zA-Z])(?=.*\d).+$/.test(password)) {
-      setError('A senha deve conter ao menos uma letra e um número');
       return;
     }
 
@@ -186,10 +179,34 @@ export default function RegisterPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 8 caracteres (letras e números)"
+                      placeholder="Entre 10 e 128 caracteres"
                       className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-10 sm:pl-11 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     />
                   </div>
+
+                  {/* Checklist visual interativo dos requisitos de senha */}
+                  {password.length > 0 && (
+                    <div className="mt-2.5 p-3 bg-slate-950/70 rounded-xl border border-slate-800/90 space-y-1.5 transition-all">
+                      <p className="text-[11px] font-semibold text-slate-400 mb-1">Requisitos de segurança da senha:</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {passwordEvaluation.rules.map((rule) => {
+                          const isPassed = rule.passed;
+                          return (
+                            <div key={rule.id} className="flex items-center gap-1.5 text-[11px]">
+                              {isPassed ? (
+                                <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                              ) : (
+                                <X className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                              )}
+                              <span className={isPassed ? 'text-emerald-300 font-medium' : 'text-slate-400'}>
+                                {rule.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -207,6 +224,21 @@ export default function RegisterPage() {
                       className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-10 sm:pl-11 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     />
                   </div>
+                  {confirmPassword.length > 0 && (
+                    <div className="mt-1 flex items-center gap-1 text-[11px]">
+                      {password === confirmPassword ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span className="text-emerald-400 font-medium">As senhas coincidem</span>
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-3.5 w-3.5 text-rose-400 shrink-0" />
+                          <span className="text-rose-400 font-medium">As senhas não coincidem</span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <button

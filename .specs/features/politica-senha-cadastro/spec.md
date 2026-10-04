@@ -106,9 +106,9 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | PWD-07 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
 | PWD-08 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
 | PWD-09 | P1: Validação de Senha Forte no Backend (RegisterDto) | Tasks | Verified |
-| PWD-10 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
-| PWD-11 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
-| PWD-12 | P2: Experiência e Validação no Frontend (/register) | Tasks | Pending |
+| PWD-10 | P2: Experiência e Validação no Frontend (/register) | Tasks | Verified |
+| PWD-11 | P2: Experiência e Validação no Frontend (/register) | Tasks | Verified |
+| PWD-12 | P2: Experiência e Validação no Frontend (/register) | Tasks | Verified |
 
 **ID format:** `PWD-[NUMBER]`
 

@@ -64,7 +64,7 @@ Gate: npm --prefix frontend run build
 
 Criar módulo utilitário no frontend espelhando os critérios de validação e lista de senhas comuns para avaliação síncrona dos requisitos no cliente.
 
-#### T4: Checklist Visual e Validação na Tela Register
+#### T4: Checklist Visual e Validação na Tela Register [DONE]
 Where: frontend/src/app/register/page.tsx
 Depends on: T3
 Tests: manual verification via build
