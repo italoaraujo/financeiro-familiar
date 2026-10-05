@@ -3,6 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { PasskeyService } from './passkey.service';
+import { PasskeyController } from './passkey.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { UsersModule } from '../users/users.module';
@@ -28,8 +30,8 @@ const jwtSecret = validateJwtSecret();
       },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, TokenBlacklistService],
-  exports: [AuthService, JwtStrategy, TokenBlacklistService, PassportModule],
+  controllers: [AuthController, PasskeyController],
+  providers: [AuthService, PasskeyService, JwtStrategy, TokenBlacklistService],
+  exports: [AuthService, PasskeyService, JwtStrategy, TokenBlacklistService, PassportModule],
 })
 export class AuthModule {}

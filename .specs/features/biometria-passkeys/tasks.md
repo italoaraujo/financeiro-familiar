@@ -149,7 +149,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Quick  
 
 **Done when**:
-- [ ] `PasskeyService` e `PasskeyController` exportados e registrados em `AuthModule`
+- [x] `PasskeyService` e `PasskeyController` exportados e registrados em `AuthModule`
 
 ---
 
