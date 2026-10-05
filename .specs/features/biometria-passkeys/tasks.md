@@ -166,7 +166,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Pacote `@simplewebauthn/browser` presente em `frontend/package.json`
+- [x] Pacote `@simplewebauthn/browser` presente em `frontend/package.json`
 
 ### T8: Implementar hook useBiometrics para WebAuthn no frontend
 

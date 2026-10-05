@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 6 / 11 (55%)
+- **Completed Tasks**: 7 / 11 (64%)
 - **Status**: **IN_PROGRESS**
-- **Build Status**: Fase 2 completa - AuthModule configurado com PasskeyService e PasskeyController
+- **Build Status**: Pacote @simplewebauthn/browser instalado e build do Next.js validado
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 3 / T7
-- **Completed**: T1 (Instalar @simplewebauthn/server no backend), T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema), T3 (Aplicar migration e gerar client Prisma), T4 (Implementar PasskeyService com lógica FIDO2 e testes unitários), T5 (Implementar PasskeyController com endpoints REST e testes), T6 (Conectar PasskeyService e PasskeyController no AuthModule)
-- **In-progress**: T7 (Instalar @simplewebauthn/browser no frontend)
-- **Next step**: Executar T7 (npm install no frontend)
+- **Phase / Task**: Phase 3 / T8
+- **Completed**: T1, T2, T3, T4, T5, T6, T7 (@simplewebauthn/browser instalado no frontend)
+- **In-progress**: T8 (Implementar hook useBiometrics para WebAuthn no frontend)
+- **Next step**: Implementar T8 (hook useBiometrics.ts)
 - **Blockers**: none
-- **Uncommitted files**: backend/src/modules/auth/auth.module.ts, .specs/*
+- **Uncommitted files**: frontend/package.json, frontend/package-lock.json, .specs/*
 - **Branch**: feature/biometria-passkeys
