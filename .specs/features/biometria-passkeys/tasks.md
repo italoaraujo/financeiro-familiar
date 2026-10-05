@@ -91,7 +91,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Modelos `UserPasskey` e `AuthChallenge` adicionados com campos de credencial, chave pública e counter
+- [x] Modelos `UserPasskey` e `AuthChallenge` adicionados com campos de credencial, chave pública e counter
 
 ### T3: Aplicar migration e gerar client Prisma
 

@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 1 / 11 (9%)
+- **Completed Tasks**: 2 / 11 (18%)
 - **Status**: **IN_PROGRESS**
-- **Build Status**: Build do backend aprovado com @simplewebauthn/server instalado
+- **Build Status**: Schema Prisma validado com modelos UserPasskey e AuthChallenge
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 1 / T2
-- **Completed**: T1 (Instalar @simplewebauthn/server no backend)
-- **In-progress**: T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema)
-- **Next step**: Implementar T2 (modelos no schema Prisma)
+- **Phase / Task**: Phase 1 / T3
+- **Completed**: T1 (Instalar @simplewebauthn/server no backend), T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema)
+- **In-progress**: T3 (Aplicar migration e gerar client Prisma)
+- **Next step**: Executar T3 (migration e prisma generate)
 - **Blockers**: none
-- **Uncommitted files**: backend/package.json, backend/package-lock.json, .specs/*
+- **Uncommitted files**: backend/prisma/schema.prisma, .specs/*
 - **Branch**: feature/biometria-passkeys
