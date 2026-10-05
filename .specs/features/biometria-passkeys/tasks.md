@@ -135,8 +135,8 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Quick  
 
 **Done when**:
-- [ ] Endpoints `/auth/passkey/register-options`, `/auth/passkey/register-verify`, `/auth/passkey/login-options`, `/auth/passkey/login-verify` e `/auth/passkey/credentials` implementados
-- [ ] Testes unitários validando chamadas e respostas do controller
+- [x] Endpoints `/auth/passkey/register-options`, `/auth/passkey/register-verify`, `/auth/passkey/login-options`, `/auth/passkey/login-verify` e `/auth/passkey/credentials` implementados
+- [x] Testes unitários validando chamadas e respostas do controller
 
 ### T6: Conectar PasskeyService e PasskeyController no AuthModule
 
