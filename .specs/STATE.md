@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 8 / 11 (73%)
+- **Completed Tasks**: 9 / 11 (82%)
 - **Status**: **IN_PROGRESS**
-- **Build Status**: Hook useBiometrics e suporte a setSession no AuthContext implementados e build Next.js validado
+- **Build Status**: Botão de login biométrico integrado em /login e build Next.js validado
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 3 / T9
-- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8 (Hook useBiometrics implementado)
-- **In-progress**: T9 (Integrar botão de login biométrico na página de login)
-- **Next step**: Implementar T9 (página /login)
+- **Phase / Task**: Phase 3 / T10
+- **Completed**: T1 a T9 (Botão de login biométrico integrado na página /login)
+- **In-progress**: T10 (Criar modal de gerenciamento de biometria nas configurações do usuário)
+- **Next step**: Implementar T10 (BiometricsSettingsModal.tsx)
 - **Blockers**: none
-- **Uncommitted files**: frontend/src/hooks/useBiometrics.ts, frontend/src/context/AuthContext.tsx, .specs/*
+- **Uncommitted files**: frontend/src/app/login/page.tsx, .specs/*
 - **Branch**: feature/biometria-passkeys

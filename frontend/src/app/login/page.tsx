@@ -5,8 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useBiometrics } from '../../hooks/useBiometrics';
 import { getAuthStatus } from '../../lib/api';
-import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, Fingerprint } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,6 +31,7 @@ export default function LoginPage() {
 
     return false;
   });
+  const { isSupported, isLoading: biometricLoading, loginWithBiometrics } = useBiometrics();
   const { login } = useAuth();
   const router = useRouter();
 
@@ -60,6 +62,16 @@ export default function LoginPage() {
       setError(err.message || 'Erro ao efetuar login. Verifique suas credenciais.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    setError('');
+    const res = await loginWithBiometrics();
+    if (res.success) {
+      router.push('/');
+    } else if (res.error && !res.error.toLowerCase().includes('cancelad')) {
+      setError(res.error);
     }
   };
 
@@ -143,6 +155,34 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {isSupported && (
+            <div className="mt-4">
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="border-t border-slate-800 w-full" />
+                <span className="bg-slate-900 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                  ou
+                </span>
+                <div className="border-t border-slate-800 w-full" />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={loading || biometricLoading}
+                className="w-full bg-slate-800/90 hover:bg-slate-800 hover:border-emerald-500/50 border border-slate-700/80 text-white font-medium py-2.5 sm:py-3 px-4 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition-all duration-200 disabled:opacity-50 text-xs sm:text-sm group"
+              >
+                {biometricLoading ? (
+                  <div className="h-5 w-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Fingerprint className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <span>Entrar com Biometria / Celular</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Quick Demo Credentials Help */}
           <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-slate-800/80 text-center">

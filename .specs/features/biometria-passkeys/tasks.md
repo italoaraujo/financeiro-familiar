@@ -192,7 +192,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Botão de biometria renderizado condicionalmente quando suportado e autenticação funcional
+- [x] Botão de biometria renderizado condicionalmente quando suportado e autenticação funcional
 
 ### T10: Criar modal de gerenciamento de biometria nas configurações do usuário
 
