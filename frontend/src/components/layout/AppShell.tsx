@@ -19,7 +19,9 @@ import {
   Menu,
   X,
   Eye,
+  Fingerprint,
 } from 'lucide-react';
+import { BiometricsSettingsModal } from '../profile/BiometricsSettingsModal';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -28,6 +30,7 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const { user, selectedFamilyId, setSelectedFamilyId, logout, isLoading, isViewer } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [biometricsModalOpen, setBiometricsModalOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -127,13 +130,22 @@ export default function AppShell({ children }: AppShellProps) {
             <p className="text-xs text-slate-400 truncate">{user?.email || ''}</p>
           </div>
         </div>
-        <button
-          onClick={logout}
-          title="Sair do sistema"
-          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors shrink-0"
-        >
-          <LogOut className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setBiometricsModalOpen(true)}
+            title="Biometria & Passkeys do Dispositivo"
+            className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+          >
+            <Fingerprint className="h-4 w-4" />
+          </button>
+          <button
+            onClick={logout}
+            title="Sair do sistema"
+            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </>
   );
@@ -213,6 +225,14 @@ export default function AppShell({ children }: AppShellProps) {
                 {selectedFamilyId ? `${currentFamilyName || 'Família'}` : 'Individual'}
               </span>
             </span>
+
+            <button
+              onClick={() => setBiometricsModalOpen(true)}
+              title="Biometria & Dispositivos"
+              className="p-1.5 sm:p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 rounded-lg transition-colors border border-slate-800"
+            >
+              <Fingerprint className="h-4 w-4" />
+            </button>
           </div>
         </header>
 
@@ -221,6 +241,11 @@ export default function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+
+      <BiometricsSettingsModal
+        isOpen={biometricsModalOpen}
+        onClose={() => setBiometricsModalOpen(false)}
+      />
     </div>
   );
 }

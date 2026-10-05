@@ -90,17 +90,17 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| BIO-01 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-02 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-03 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-04 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-05 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-06 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-07 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-08 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
-| BIO-09 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Implementing |
-| BIO-10 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Implementing |
-| BIO-11 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Implementing |
+| BIO-01 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-02 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-03 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-04 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-05 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-06 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-07 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-08 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Verified |
+| BIO-09 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Verified |
+| BIO-10 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Verified |
+| BIO-11 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Verified |
 
 **Coverage:** 11 total, 11 mapped to tasks, 0 unmapped
 

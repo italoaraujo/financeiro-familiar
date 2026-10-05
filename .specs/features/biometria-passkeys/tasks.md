@@ -218,4 +218,4 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Item "Biometria e Dispositivos" visível no menu do usuário e abrindo o modal de gerenciamento
+- [x] Item "Biometria e Dispositivos" visível no menu do usuário e abrindo o modal de gerenciamento

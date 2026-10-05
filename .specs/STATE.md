@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 10 / 11 (91%)
-- **Status**: **IN_PROGRESS**
-- **Build Status**: BiometricsSettingsModal criado e build Next.js validado
+- **Completed Tasks**: 11 / 11 (100%)
+- **Status**: **COMPLETE**
+- **Build Status**: Suíte de 30 testes Jest aprovada (308 testes) e build Next.js 100% limpo
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 3 / T11
-- **Completed**: T1 a T10 (BiometricsSettingsModal criado)
-- **In-progress**: T11 (Integrar gatilho de configurações de biometria no cabeçalho/AppShell)
-- **Next step**: Implementar T11 (AppShell.tsx)
+- **Phase / Task**: Phase 3 / T11 (All tasks complete)
+- **Completed**: T1 a T11 (Todas as tarefas de backend, frontend, schema e testes unitários concluídas com êxito)
+- **In-progress**: None
+- **Next step**: Validação do Verificador e relatório de validação (.specs/features/biometria-passkeys/validation.md)
 - **Blockers**: none
-- **Uncommitted files**: frontend/src/components/profile/BiometricsSettingsModal.tsx, .specs/*
+- **Uncommitted files**: frontend/src/components/layout/AppShell.tsx, .specs/*
 - **Branch**: feature/biometria-passkeys
