@@ -50,3 +50,22 @@ body {
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: rgba(16, 185, 129, 0.6);
 }
+
+/* Previne zoom automático indesejado no iOS Safari ao focar campos */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Otimização de toque em telas móveis: remove delay de 300ms e gestos acidentais */
+button,
+input,
+select,
+textarea,
+a {
+  touch-action: manipulation;
+}
+
