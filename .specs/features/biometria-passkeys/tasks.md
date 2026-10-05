@@ -104,7 +104,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Tabelas `user_passkeys` e `auth_challenges` criadas no banco e Prisma Client atualizado
+- [x] Tabelas `user_passkeys` e `auth_challenges` criadas no banco e Prisma Client atualizado
 
 ---
 
