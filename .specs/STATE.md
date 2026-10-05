@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 3 / 11 (27%)
+- **Completed Tasks**: 4 / 11 (36%)
 - **Status**: **IN_PROGRESS**
-- **Build Status**: Prisma Client gerado e migration de user_passkeys e auth_challenges sincronizada
+- **Build Status**: PasskeyService implementado e 13 testes unitários aprovados
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 2 / T4
-- **Completed**: T1 (Instalar @simplewebauthn/server no backend), T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema), T3 (Aplicar migration e gerar client Prisma)
-- **In-progress**: T4 (Implementar PasskeyService com lógica FIDO2 e testes unitários)
-- **Next step**: Implementar T4 (PasskeyService + passkey.service.spec.ts)
+- **Phase / Task**: Phase 2 / T5
+- **Completed**: T1 (Instalar @simplewebauthn/server no backend), T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema), T3 (Aplicar migration e gerar client Prisma), T4 (Implementar PasskeyService com lógica FIDO2 e testes unitários)
+- **In-progress**: T5 (Implementar PasskeyController com endpoints REST e testes)
+- **Next step**: Implementar T5 (PasskeyController + passkey.controller.spec.ts)
 - **Blockers**: none
-- **Uncommitted files**: backend/prisma/migrations/*, .specs/*
+- **Uncommitted files**: backend/src/modules/auth/passkey.service.ts, backend/test/unit/passkey.service.spec.ts, .specs/*
 - **Branch**: feature/biometria-passkeys

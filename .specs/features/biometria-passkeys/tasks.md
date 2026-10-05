@@ -121,8 +121,8 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Quick  
 
 **Done when**:
-- [ ] Lógica de geração de opções e verificação criptográfica implementada com prevenção a replay attack
-- [ ] Testes unitários cobrindo cenários de sucesso, erro de assinatura e desafio expirado
+- [x] Lógica de geração de opções e verificação criptográfica implementada com prevenção a replay attack
+- [x] Testes unitários cobrindo cenários de sucesso, erro de assinatura e desafio expirado
 
 ### T5: Implementar PasskeyController com endpoints REST e testes
 

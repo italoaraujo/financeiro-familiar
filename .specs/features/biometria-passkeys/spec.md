@@ -91,12 +91,12 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
 | BIO-01 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
-| BIO-02 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
-| BIO-03 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
+| BIO-02 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
+| BIO-03 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
 | BIO-04 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
-| BIO-05 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
-| BIO-06 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
-| BIO-07 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
+| BIO-05 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
+| BIO-06 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
+| BIO-07 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Implementing |
 | BIO-08 | P1: Registro e Autenticação Biométrica no Dispositivo | In Tasks | Pending |
 | BIO-09 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Pending |
 | BIO-10 | P2: Gerenciamento e Revogação de Dispositivos Biométricos | In Tasks | Pending |
