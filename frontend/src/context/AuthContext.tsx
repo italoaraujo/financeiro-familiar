@@ -31,6 +31,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void | Promise<void>;
   refreshUserData: () => Promise<void>;
+  setSession: (user: User, token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,21 +71,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setSession = (userData: User, accessToken: string) => {
+    setUser(userData);
+    setToken(accessToken);
+    setAuthCookie('financial_token', accessToken);
+    localStorage.setItem('financial_token', accessToken);
+    localStorage.setItem('financial_user', JSON.stringify(userData));
+
+    if (userData.memberships && userData.memberships.length > 0) {
+      handleFamilyChange(userData.memberships[0].family.id);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     const data = await apiRequest<{ user: User; accessToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
 
-    setUser(data.user);
-    setToken(data.accessToken);
-    setAuthCookie('financial_token', data.accessToken);
-    localStorage.setItem('financial_token', data.accessToken);
-    localStorage.setItem('financial_user', JSON.stringify(data.user));
-
-    if (data.user.memberships && data.user.memberships.length > 0) {
-      handleFamilyChange(data.user.memberships[0].family.id);
-    }
+    setSession(data.user, data.accessToken);
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -93,11 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ name, email, password }),
     });
 
-    setUser(data.user);
-    setToken(data.accessToken);
-    setAuthCookie('financial_token', data.accessToken);
-    localStorage.setItem('financial_token', data.accessToken);
-    localStorage.setItem('financial_user', JSON.stringify(data.user));
+    setSession(data.user, data.accessToken);
   };
 
   const refreshUserData = async () => {
@@ -154,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         refreshUserData,
+        setSession,
       }}
     >
       {children}

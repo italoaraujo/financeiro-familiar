@@ -222,18 +222,18 @@
 
 - **Active Feature**: `biometria-passkeys`
 - **Total Tasks**: 11
-- **Completed Tasks**: 7 / 11 (64%)
+- **Completed Tasks**: 8 / 11 (73%)
 - **Status**: **IN_PROGRESS**
-- **Build Status**: Pacote @simplewebauthn/browser instalado e build do Next.js validado
+- **Build Status**: Hook useBiometrics e suporte a setSession no AuthContext implementados e build Next.js validado
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
 - **Feature**: .specs/features/biometria-passkeys
-- **Phase / Task**: Phase 3 / T8
-- **Completed**: T1, T2, T3, T4, T5, T6, T7 (@simplewebauthn/browser instalado no frontend)
-- **In-progress**: T8 (Implementar hook useBiometrics para WebAuthn no frontend)
-- **Next step**: Implementar T8 (hook useBiometrics.ts)
+- **Phase / Task**: Phase 3 / T9
+- **Completed**: T1, T2, T3, T4, T5, T6, T7, T8 (Hook useBiometrics implementado)
+- **In-progress**: T9 (Integrar botão de login biométrico na página de login)
+- **Next step**: Implementar T9 (página /login)
 - **Blockers**: none
-- **Uncommitted files**: frontend/package.json, frontend/package-lock.json, .specs/*
+- **Uncommitted files**: frontend/src/hooks/useBiometrics.ts, frontend/src/context/AuthContext.tsx, .specs/*
 - **Branch**: feature/biometria-passkeys

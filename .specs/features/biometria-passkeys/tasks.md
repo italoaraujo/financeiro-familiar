@@ -179,7 +179,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Hook encapsulando `startRegistration` e `startAuthentication` com tratamento seguro de erros
+- [x] Hook encapsulando `startRegistration` e `startAuthentication` com tratamento seguro de erros
 
 ### T9: Integrar botão de login biométrico na página de login
 
