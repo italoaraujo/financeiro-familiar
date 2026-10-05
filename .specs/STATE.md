@@ -210,22 +210,30 @@
 - **Date**: 2026-10-04
 - **Status**: active
 
+### AD-027
+- **Decision**: Implementar autenticação biométrica nativa no PWA (Android e iOS) através do padrão internacional WebAuthn / Passkeys (FIDO2) utilizando `@simplewebauthn/server` no NestJS e `@simplewebauthn/browser` no Next.js 14, armazenando credenciais públicas na tabela `user_passkeys` e desafios temporários na tabela `auth_challenges` com TTL de 5 minutos, garantindo prevenção a ataques de replay via monotonic counter e fallback contínuo para login por senha.
+- **Reason**: Atende à solicitação direta do usuário para login biométrico quando o app estiver instalado no celular, garantindo experiência de usuário idêntica a apps nativos e preservando estritamente a privacidade (a biometria física nunca sai do chip seguro do dispositivo).
+- **Trade-off**: Requer persistência de credenciais públicas e verificação de hardware de plataforma no cliente via `isUserVerifyingPlatformAuthenticatorAvailable()`.
+- **Scope**: Backend (`schema.prisma`, `PasskeyService`, `PasskeyController`, `AuthModule`), Frontend (`useBiometrics`, `/login`, `BiometricsSettingsModal`, `AppShell`), migrations e testes unitários.
+- **Date**: 2026-10-05
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `prevencao-zoom-ios`
-- **Total Tasks**: 2
-- **Completed Tasks**: 2 / 2 (100%)
-- **Status**: **COMPLETE**
-- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Active Feature**: `biometria-passkeys`
+- **Total Tasks**: 11
+- **Completed Tasks**: 1 / 11 (9%)
+- **Status**: **IN_PROGRESS**
+- **Build Status**: Build do backend aprovado com @simplewebauthn/server instalado
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/prevencao-zoom-ios
-- **Phase / Task**: Phase 1 / T2 (All tasks complete)
-- **Completed**: T1 (Regras Globais de Tipografia Mobile e Touch Action), T2 (Verificação do Viewport e Build Completo de Produção)
-- **In-progress**: None
-- **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
+- **Feature**: .specs/features/biometria-passkeys
+- **Phase / Task**: Phase 1 / T2
+- **Completed**: T1 (Instalar @simplewebauthn/server no backend)
+- **In-progress**: T2 (Adicionar modelos UserPasskey e AuthChallenge no Prisma schema)
+- **Next step**: Implementar T2 (modelos no schema Prisma)
 - **Blockers**: none
-- **Uncommitted files**: none
-- **Branch**: feature/prevencao-zoom-ios
+- **Uncommitted files**: backend/package.json, backend/package-lock.json, .specs/*
+- **Branch**: feature/biometria-passkeys
