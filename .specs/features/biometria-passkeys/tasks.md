@@ -205,7 +205,7 @@ T7 -> T8 -> T9 -> T10 -> T11
 **Gate**: Build  
 
 **Done when**:
-- [ ] Modal permitindo cadastrar o aparelho atual e excluir credenciais antigas
+- [x] Modal permitindo cadastrar o aparelho atual e excluir credenciais antigas
 
 ### T11: Integrar gatilho de configurações de biometria no cabeçalho/AppShell
 
