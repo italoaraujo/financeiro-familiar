@@ -1,0 +1,24 @@
+# Exemplo de docker-compose.override.yml para servidores com proxy reverso (Nginx, Traefik, NPM)
+# Copie este arquivo para docker-compose.override.yml no servidor de produção/homologação:
+# cp docker-compose.override.example.yml docker-compose.override.yml
+
+services:
+  api:
+    networks:
+      rede-postgres:
+      rede-publica-proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:-financial}-api
+
+  frontend:
+    networks:
+      rede-postgres:
+      rede-publica-proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:-financial}-frontend
+
+networks:
+  rede-postgres:
+    external: true
+  rede-publica-proxy:
+    external: true
