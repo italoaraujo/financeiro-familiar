@@ -41,7 +41,7 @@ services:
     environment:
       NODE_ENV: production
       APP_ENV: ${APP_ENV:-development}
-      PORT: 3001
+      PORT: ${PORT:-3001}
       TZ: ${TZ:-America/Sao_Paulo}
       DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:?Variavel DB_USER obrigatoria}:${DB_PASSWORD:?Variavel DB_PASSWORD obrigatoria}@${DB_HOST:-financial-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
       JWT_SECRET: ${JWT_SECRET}
