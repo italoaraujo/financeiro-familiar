@@ -19,6 +19,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
@@ -40,15 +45,26 @@ services:
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
       APP_ENV: ${APP_ENV:-development}
-      PORT: ${PORT:-3001}
+      PORT: 3001
       TZ: ${TZ:-America/Sao_Paulo}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:?Variavel DB_USER obrigatoria}:${DB_PASSWORD:?Variavel DB_PASSWORD obrigatoria}@${DB_HOST:-financial-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: 1d
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:?Variavel DB_USER obrigatoria}:${DB_PASSWORD:?Variavel DB_PASSWORD obrigatoria}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-financial_db}?schema=public}
+      JWT_SECRET: ${JWT_SECRET:?Variavel JWT_SECRET obrigatoria}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-1d}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "127.0.0.1:${PORT:-3001}:3001"
+      - "${HOST_BIND_IP:-127.0.0.1}:${API_PORT:-${PORT:-3001}}:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
@@ -67,18 +83,30 @@ services:
     profiles: ["app"]
     restart: always
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+        required: false
     environment:
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
+      PORT: 3000
       TZ: ${TZ:-America/Sao_Paulo}
       NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       NEXT_PUBLIC_DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+      - "${HOST_BIND_IP:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 1024M
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-financial}_default
