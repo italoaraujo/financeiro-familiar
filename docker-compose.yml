@@ -10,12 +10,10 @@ services:
       POSTGRES_DB: ${DB_NAME:-financial_db}
       TZ: ${TZ:-America/Sao_Paulo}
       PGTZ: ${TZ:-America/Sao_Paulo}
-    #ports:
-    #  - "127.0.0.1:${DB_PORT:-5432}:5432"
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - ${PGDATA_PATH:-./pgdata}:/var/lib/postgresql/data
-    networks:
-      - financial-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?Variavel DB_USER obrigatoria} -d ${DB_NAME:-financial_db}"]
       interval: 5s
@@ -40,6 +38,7 @@ services:
         required: false
     environment:
       NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
       APP_ENV: ${APP_ENV:-development}
       PORT: ${PORT:-3001}
       TZ: ${TZ:-America/Sao_Paulo}
@@ -50,8 +49,6 @@ services:
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
       - "127.0.0.1:${PORT:-3001}:3001"
-    networks:
-      - financial-net
     deploy:
       resources:
         limits:
@@ -73,21 +70,15 @@ services:
       - api
     environment:
       NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
       TZ: ${TZ:-America/Sao_Paulo}
       NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       NEXT_PUBLIC_DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
-    networks:
-      - financial-net
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 1024M
-
-
-networks:
-  financial-net:
-    driver: bridge

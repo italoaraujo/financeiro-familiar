@@ -12,7 +12,6 @@ services:
 
   frontend:
     networks:
-      rede-postgres:
       rede-publica-proxy:
         aliases:
           - ${COMPOSE_PROJECT_NAME:-financial}-frontend
