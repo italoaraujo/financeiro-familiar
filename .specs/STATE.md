@@ -210,22 +210,30 @@
 - **Date**: 2026-10-04
 - **Status**: active
 
+### AD-027
+- **Decision**: Eliminar a persistência de credenciais e tokens JWT em `localStorage` no frontend, converter o cookie de autenticação `financial_token` exclusivamente em Session Cookie (RFC 6265, omitindo atributos `Expires` e `Max-Age`), adotar `sessionStorage` para dados voláteis de perfil e implementar hidratação resiliente via `GET /auth/me` para restauração automática de sessão em novas abas durante a execução do navegador.
+- **Reason**: Atende à solicitação direta do usuário de desconectar automaticamente a conta quando o navegador for fechado, protegendo a privacidade e segurança do usuário contra acesso indevido em máquinas compartilhadas ou reiniciadas, mantendo usabilidade multi-abas enquanto o navegador estiver aberto.
+- **Trade-off**: Usuários precisam autenticar novamente toda vez que reabrirem o navegador fechado, o que é o comportamento explicitamente desejado.
+- **Scope**: `frontend/src/lib/cookies.ts`, `frontend/src/lib/api.ts`, `frontend/src/context/AuthContext.tsx`.
+- **Date**: 2026-10-09
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `prevencao-zoom-ios`
-- **Total Tasks**: 2
-- **Completed Tasks**: 2 / 2 (100%)
+- **Active Feature**: `sessao-navegador-fechamento`
+- **Total Tasks**: 4
+- **Completed Tasks**: 4 / 4 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros
+- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros, 28 suítes do backend aprovadas (294 testes)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/prevencao-zoom-ios
-- **Phase / Task**: Phase 1 / T2 (All tasks complete)
-- **Completed**: T1 (Regras Globais de Tipografia Mobile e Touch Action), T2 (Verificação do Viewport e Build Completo de Produção)
+- **Feature**: .specs/features/sessao-navegador-fechamento
+- **Phase / Task**: Phase 2 / T4 (All tasks complete)
+- **Completed**: T1 (Session Cookie sem expiração fixa), T2 (Cliente HTTP apiRequest sem localStorage), T3 (Remoção de localStorage e limpeza defensiva), T4 (Hidratação multi-abas e validação completa de gates)
 - **In-progress**: None
 - **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/prevencao-zoom-ios
+- **Branch**: feature/sessao-navegador-fechamento

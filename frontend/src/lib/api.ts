@@ -25,7 +25,7 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
   }
 
   const token = typeof window !== 'undefined'
-    ? (getAuthCookie('financial_token') || localStorage.getItem('financial_token'))
+    ? (getAuthCookie('financial_token') || sessionStorage.getItem('financial_token'))
     : null;
 
   const defaultHeaders: HeadersInit = {
@@ -43,8 +43,12 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
     // Se não estiver na página de login, pode redirecionar ou limpar token
     if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
       removeAuthCookie('financial_token');
+      sessionStorage.removeItem('financial_token');
+      sessionStorage.removeItem('financial_user');
+      sessionStorage.removeItem('financial_family_id');
       localStorage.removeItem('financial_token');
       localStorage.removeItem('financial_user');
+      localStorage.removeItem('financial_family_id');
       window.location.href = '/login';
     }
   }
