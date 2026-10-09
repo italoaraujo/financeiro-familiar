@@ -52,6 +52,7 @@ export class CreditCardsService {
     }
 
     await this.syncInvoiceStatuses();
+    await this.cleanupOrphanZeroInvoices();
 
     const cards = await this.prisma.creditCard.findMany({
       where: familyId
@@ -83,6 +84,7 @@ export class CreditCardsService {
 
   async findById(userId: string, id: string) {
     await this.syncInvoiceStatuses(id);
+    await this.cleanupOrphanZeroInvoices(id);
 
     const card = await this.prisma.creditCard.findUnique({
       where: { id },
@@ -316,17 +318,12 @@ export class CreditCardsService {
     }
 
     let refMonth = `${year}-${String(month).padStart(2, '0')}`;
-    let invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+    const invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
 
-    // Se a fatura correspondente já estiver fechada ou paga, aloca na próxima fatura aberta
-    while (invoice.status === InvoiceStatus.CLOSED || invoice.status === InvoiceStatus.PAID) {
-      month += 1;
-      if (month > 12) {
-        month = 1;
-        year += 1;
-      }
-      refMonth = `${year}-${String(month).padStart(2, '0')}`;
-      invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+    if (invoice.status === InvoiceStatus.PAID) {
+      throw new BadRequestException(
+        `Não é possível adicionar lançamentos na fatura ${refMonth} porque ela já foi totalmente paga`,
+      );
     }
 
     return invoice;
@@ -542,6 +539,87 @@ export class CreditCardsService {
         status: InvoiceStatus.CLOSED,
       },
     });
+  }
+
+  async cleanupOrphanZeroInvoices(creditCardId?: string): Promise<void> {
+    try {
+      let cardIds: string[] = [];
+      if (creditCardId) {
+        cardIds = [creditCardId];
+      } else {
+        const cards = await this.prisma.creditCard.findMany({
+          where: { deletedAt: null },
+          select: { id: true },
+        });
+        cardIds = Array.isArray(cards) ? cards.map((c) => c.id) : [];
+      }
+
+      for (const id of cardIds) {
+        const invoices = await this.prisma.creditCardInvoice.findMany({
+          where: { creditCardId: id },
+          include: {
+            transactions: {
+              where: { deletedAt: null },
+              select: { id: true },
+            },
+          },
+          orderBy: { referenceMonth: 'asc' },
+        });
+
+        if (!Array.isArray(invoices) || invoices.length === 0) {
+          continue;
+        }
+
+        // Encontra a primeira fatura com movimentação (transações ativas, totalAmount > 0, paidAmount > 0 ou status PAID)
+        const firstValidIndex = invoices.findIndex(
+          (inv) =>
+            (inv.transactions && inv.transactions.length > 0) ||
+            new Prisma.Decimal(inv.totalAmount || 0).gt(0) ||
+            new Prisma.Decimal(inv.paidAmount || 0).gt(0) ||
+            inv.status === InvoiceStatus.PAID,
+        );
+
+        if (firstValidIndex > 0) {
+          // Apaga apenas as faturas zeradas e sem transações que estão estritamente antes da primeira fatura válida
+          const orphanIds = invoices
+            .slice(0, firstValidIndex)
+            .filter(
+              (inv) =>
+                (!inv.transactions || inv.transactions.length === 0) &&
+                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
+                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
+                inv.status !== InvoiceStatus.PAID,
+            )
+            .map((inv) => inv.id);
+
+          if (orphanIds.length > 0) {
+            await this.prisma.creditCardInvoice.deleteMany({
+              where: { id: { in: orphanIds } },
+            });
+          }
+        } else if (firstValidIndex === -1 && invoices.length > 1) {
+          // Se todas as faturas são zeradas e sem movimentação, preserva a última (ciclo ativo) e apaga as faturas anteriores órfãs
+          const orphanIds = invoices
+            .slice(0, invoices.length - 1)
+            .filter(
+              (inv) =>
+                (!inv.transactions || inv.transactions.length === 0) &&
+                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
+                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
+                inv.status !== InvoiceStatus.PAID,
+            )
+            .map((inv) => inv.id);
+
+          if (orphanIds.length > 0) {
+            await this.prisma.creditCardInvoice.deleteMany({
+              where: { id: { in: orphanIds } },
+            });
+          }
+        }
+      }
+    } catch {
+      // Ignora falhas defensivamente
+    }
   }
 
   private async validateAccountAccess(userId: string, accountId: string, familyId?: string | null) {

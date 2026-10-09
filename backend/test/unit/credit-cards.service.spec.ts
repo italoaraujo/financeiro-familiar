@@ -13,7 +13,7 @@ describe('CreditCardsService', () => {
       $transaction: jest.fn((cb) => cb(prisma)),
       creditCard: {
         create: jest.fn(),
-        findMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -21,9 +21,10 @@ describe('CreditCardsService', () => {
       creditCardInvoice: {
         create: jest.fn(),
         findUnique: jest.fn(),
-        findMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
         update: jest.fn(),
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       account: {
         findUnique: jest.fn(),
@@ -295,27 +296,60 @@ describe('CreditCardsService', () => {
       expect(invoice.referenceMonth).toBe('2026-10');
     });
 
-    it('should skip CLOSED invoice and allocate to next open invoice', async () => {
+    it('should allow retroactively allocating to CLOSED invoice without skipping', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-1',
         closingDay: 20,
         dueDay: 27,
       });
 
-      prisma.creditCardInvoice.findUnique
-        .mockResolvedValueOnce({
-          id: 'inv-sep',
-          referenceMonth: '2026-09',
-          status: InvoiceStatus.CLOSED,
-        })
-        .mockResolvedValueOnce({
-          id: 'inv-oct',
-          referenceMonth: '2026-10',
-          status: InvoiceStatus.OPEN,
-        });
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-sep',
+        referenceMonth: '2026-09',
+        status: InvoiceStatus.CLOSED,
+      });
 
       const invoice = await service.determineInvoiceForDate('card-1', '2026-09-10');
-      expect(invoice.referenceMonth).toBe('2026-10');
+      expect(invoice.referenceMonth).toBe('2026-09');
+      expect(invoice.status).toBe(InvoiceStatus.CLOSED);
+    });
+
+    it('should throw BadRequestException if invoice is already PAID', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        closingDay: 20,
+        dueDay: 27,
+      });
+
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-sep',
+        referenceMonth: '2026-09',
+        status: InvoiceStatus.PAID,
+      });
+
+      await expect(
+        service.determineInvoiceForDate('card-1', '2026-09-10'),
+      ).rejects.toThrow(new BadRequestException('Não é possível adicionar lançamentos na fatura 2026-09 porque ela já foi totalmente paga'));
+    });
+  });
+
+  describe('cleanupOrphanZeroInvoices', () => {
+    it('should delete zero invoices that precede the first valid invoice with expenses, preserving gap invoices', async () => {
+      prisma.creditCard.findMany.mockResolvedValue([{ id: 'card-1' }]);
+      prisma.creditCardInvoice.findMany.mockResolvedValue([
+        { id: 'inv-06', referenceMonth: '2026-06', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-07', referenceMonth: '2026-07', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-08', referenceMonth: '2026-08', totalAmount: new Prisma.Decimal(100), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [{ id: 'tx-1' }] },
+        { id: 'inv-09', referenceMonth: '2026-09', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-10', referenceMonth: '2026-10', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-11', referenceMonth: '2026-11', totalAmount: new Prisma.Decimal(150), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [{ id: 'tx-2' }] },
+      ]);
+
+      await service.cleanupOrphanZeroInvoices('card-1');
+
+      expect(prisma.creditCardInvoice.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ['inv-06', 'inv-07'] } },
+      });
     });
   });
 

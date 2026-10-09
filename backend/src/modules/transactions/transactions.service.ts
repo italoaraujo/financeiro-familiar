@@ -187,6 +187,12 @@ export class TransactionsService {
               invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
             }
 
+            if (invoice.status === InvoiceStatus.PAID) {
+              throw new BadRequestException(
+                `Não é possível gerar a parcela ${i}/${totalInstallments} na fatura ${refMonth} porque ela já foi totalmente paga`,
+              );
+            }
+
             const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
             const targetDay = Math.min(closingDay, maxDaysInMonth);
             installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
