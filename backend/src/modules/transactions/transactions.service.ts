@@ -541,14 +541,10 @@ export class TransactionsService {
         await this.verifyFamilyAccess(userId, transaction.familyId, true);
       }
 
-      // Bloqueio de exclusão em faturas de cartão já fechadas ou pagas
-      if (
-        transaction.invoice &&
-        (transaction.invoice.status === InvoiceStatus.CLOSED ||
-          transaction.invoice.status === InvoiceStatus.PAID)
-      ) {
+      // Bloqueio de exclusão em faturas de cartão já pagas
+      if (transaction.invoice && transaction.invoice.status === InvoiceStatus.PAID) {
         throw new BadRequestException(
-          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+          'Não é possível excluir lançamentos de faturas que já foram pagas',
         );
       }
 
