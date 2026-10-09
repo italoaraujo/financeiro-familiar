@@ -2,12 +2,12 @@
  * Utilitário seguro para manipulação de cookies de autenticação no frontend
  */
 
-export function setAuthCookie(name: string, value: string, days: number = 1): void {
+export function setAuthCookie(name: string, value: string, days?: number): void {
   if (typeof document === 'undefined') return;
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  const expiresPart = typeof days === 'number' ? `; expires=${new Date(Date.now() + days * 864e5).toUTCString()}` : '';
   const secureFlag = isSecure ? '; Secure' : '';
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict${secureFlag}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}${expiresPart}; path=/; SameSite=Strict${secureFlag}`;
 }
 
 export function getAuthCookie(name: string): string | null {
