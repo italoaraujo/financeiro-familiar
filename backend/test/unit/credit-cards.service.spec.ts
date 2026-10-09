@@ -534,6 +534,43 @@ describe('CreditCardsService', () => {
       expect(unassigned.totalAmount).toBe(300);
       expect(unassigned.count).toBe(1);
     });
+
+    it('should query only active transactions (where deletedAt is null) in invoice details', async () => {
+      prisma.creditCardInvoice.findUnique.mockResolvedValue({
+        id: 'inv-1',
+        referenceMonth: '2026-09',
+        totalAmount: new Prisma.Decimal(0),
+        creditCard: {
+          id: 'card-1',
+          userId: 'user-1',
+          familyId: null,
+        },
+        transactions: [],
+      });
+
+      const result = await service.getInvoiceDetails('user-1', 'inv-1');
+
+      expect(prisma.creditCardInvoice.findUnique).toHaveBeenCalledWith({
+        where: { id: 'inv-1' },
+        include: {
+          creditCard: true,
+          transactions: {
+            where: {
+              deletedAt: null,
+            },
+            include: {
+              category: true,
+              person: {
+                select: { id: true, name: true, color: true, avatarUrl: true },
+              },
+            },
+            orderBy: { transactionDate: 'desc' },
+          },
+        },
+      });
+      expect(result.transactions).toHaveLength(0);
+      expect(result.personTotals).toHaveLength(0);
+    });
   });
 
   describe('update', () => {

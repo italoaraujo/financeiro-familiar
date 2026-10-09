@@ -445,6 +445,9 @@ export class CreditCardsService {
       include: {
         creditCard: true,
         transactions: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             category: true,
             person: {
