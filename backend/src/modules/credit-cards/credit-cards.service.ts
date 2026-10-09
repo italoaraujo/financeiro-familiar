@@ -555,6 +555,28 @@ export class CreditCardsService {
       }
 
       for (const id of cardIds) {
+        const card = await this.prisma.creditCard.findUnique({
+          where: { id },
+          select: { id: true, closingDay: true },
+        });
+
+        if (!card) {
+          continue;
+        }
+
+        const now = new Date();
+        const day = now.getDate();
+        let month = now.getMonth() + 1;
+        let year = now.getFullYear();
+        if (day >= card.closingDay) {
+          month += 1;
+          if (month > 12) {
+            month = 1;
+            year += 1;
+          }
+        }
+        const currentCycleRefMonth = `${year}-${String(month).padStart(2, '0')}`;
+
         const invoices = await this.prisma.creditCardInvoice.findMany({
           where: { creditCardId: id },
           include: {
@@ -570,8 +592,7 @@ export class CreditCardsService {
           continue;
         }
 
-        // Encontra a primeira fatura com movimentação (transações ativas, totalAmount > 0, paidAmount > 0 ou status PAID)
-        const firstValidIndex = invoices.findIndex(
+        const validInvoices = invoices.filter(
           (inv) =>
             (inv.transactions && inv.transactions.length > 0) ||
             new Prisma.Decimal(inv.totalAmount || 0).gt(0) ||
@@ -579,12 +600,43 @@ export class CreditCardsService {
             inv.status === InvoiceStatus.PAID,
         );
 
-        if (firstValidIndex > 0) {
-          // Apaga apenas as faturas zeradas e sem transações que estão estritamente antes da primeira fatura válida
+        if (validInvoices.length > 0) {
+          const firstValidMonth = validInvoices[0].referenceMonth;
+          const lastValidMonth = validInvoices[validInvoices.length - 1].referenceMonth;
+          const maxPreserveMonth = lastValidMonth > currentCycleRefMonth ? lastValidMonth : currentCycleRefMonth;
+
           const orphanIds = invoices
-            .slice(0, firstValidIndex)
+            .filter((inv) => {
+              const isZero =
+                (!inv.transactions || inv.transactions.length === 0) &&
+                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
+                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
+                inv.status !== InvoiceStatus.PAID;
+
+              if (!isZero) return false;
+
+              // Apaga faturas zeradas no passado (antes da primeira fatura válida)
+              if (inv.referenceMonth < firstValidMonth) return true;
+
+              // Apaga faturas zeradas no futuro (além do último mês com compras e além do ciclo atual)
+              if (inv.referenceMonth > maxPreserveMonth) return true;
+
+              return false;
+            })
+            .map((inv) => inv.id);
+
+          if (orphanIds.length > 0) {
+            await this.prisma.creditCardInvoice.deleteMany({
+              where: { id: { in: orphanIds } },
+            });
+          }
+        } else {
+          // Todas as faturas do cartão estão sem movimentação/compras.
+          // Garante que faturas fora do ciclo vigente atual sejam removidas.
+          const orphanIds = invoices
             .filter(
               (inv) =>
+                inv.referenceMonth !== currentCycleRefMonth &&
                 (!inv.transactions || inv.transactions.length === 0) &&
                 new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
                 new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
@@ -597,23 +649,11 @@ export class CreditCardsService {
               where: { id: { in: orphanIds } },
             });
           }
-        } else if (firstValidIndex === -1 && invoices.length > 1) {
-          // Se todas as faturas são zeradas e sem movimentação, preserva a última (ciclo ativo) e apaga as faturas anteriores órfãs
-          const orphanIds = invoices
-            .slice(0, invoices.length - 1)
-            .filter(
-              (inv) =>
-                (!inv.transactions || inv.transactions.length === 0) &&
-                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
-                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
-                inv.status !== InvoiceStatus.PAID,
-            )
-            .map((inv) => inv.id);
 
-          if (orphanIds.length > 0) {
-            await this.prisma.creditCardInvoice.deleteMany({
-              where: { id: { in: orphanIds } },
-            });
+          // Se a fatura do ciclo ativo não existir, cria para manter o ciclo vigente
+          const hasCurrentInvoice = invoices.some((inv) => inv.referenceMonth === currentCycleRefMonth);
+          if (!hasCurrentInvoice) {
+            await this.getOrCreateInvoice(id, currentCycleRefMonth);
           }
         }
       }

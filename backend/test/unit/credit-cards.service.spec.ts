@@ -334,22 +334,48 @@ describe('CreditCardsService', () => {
   });
 
   describe('cleanupOrphanZeroInvoices', () => {
-    it('should delete zero invoices that precede the first valid invoice with expenses, preserving gap invoices', async () => {
+    it('should delete zero invoices that precede first valid invoice and zero invoices beyond active cycle, preserving gaps', async () => {
+      jest.useFakeTimers().setSystemTime(new Date(2026, 9, 9, 12, 0, 0));
+
       prisma.creditCard.findMany.mockResolvedValue([{ id: 'card-1' }]);
+      prisma.creditCard.findUnique.mockResolvedValue({ id: 'card-1', closingDay: 20 });
       prisma.creditCardInvoice.findMany.mockResolvedValue([
         { id: 'inv-06', referenceMonth: '2026-06', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
         { id: 'inv-07', referenceMonth: '2026-07', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
         { id: 'inv-08', referenceMonth: '2026-08', totalAmount: new Prisma.Decimal(100), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [{ id: 'tx-1' }] },
         { id: 'inv-09', referenceMonth: '2026-09', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
-        { id: 'inv-10', referenceMonth: '2026-10', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-10', referenceMonth: '2026-10', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [] },
         { id: 'inv-11', referenceMonth: '2026-11', totalAmount: new Prisma.Decimal(150), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [{ id: 'tx-2' }] },
+        { id: 'inv-future', referenceMonth: '2027-07', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [] },
       ]);
 
       await service.cleanupOrphanZeroInvoices('card-1');
 
       expect(prisma.creditCardInvoice.deleteMany).toHaveBeenCalledWith({
-        where: { id: { in: ['inv-06', 'inv-07'] } },
+        where: { id: { in: ['inv-06', 'inv-07', 'inv-future'] } },
       });
+
+      jest.useRealTimers();
+    });
+
+    it('should clean all orphan invoices when card has no valid expenses, keeping only active current cycle', async () => {
+      jest.useFakeTimers().setSystemTime(new Date(2026, 9, 9, 12, 0, 0));
+
+      prisma.creditCard.findMany.mockResolvedValue([{ id: 'card-1' }]);
+      prisma.creditCard.findUnique.mockResolvedValue({ id: 'card-1', closingDay: 20 });
+      prisma.creditCardInvoice.findMany.mockResolvedValue([
+        { id: 'inv-05', referenceMonth: '2026-05', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.CLOSED, transactions: [] },
+        { id: 'inv-10', referenceMonth: '2026-10', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [] },
+        { id: 'inv-27', referenceMonth: '2027-07', totalAmount: new Prisma.Decimal(0), paidAmount: new Prisma.Decimal(0), status: InvoiceStatus.OPEN, transactions: [] },
+      ]);
+
+      await service.cleanupOrphanZeroInvoices('card-1');
+
+      expect(prisma.creditCardInvoice.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ['inv-05', 'inv-27'] } },
+      });
+
+      jest.useRealTimers();
     });
   });
 
