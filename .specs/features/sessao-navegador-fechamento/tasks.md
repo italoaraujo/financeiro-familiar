@@ -69,7 +69,7 @@ T3 -> T4
 
 ### Phase 2: Contexto de Autenticação e Hidratação de Sessão
 
-#### T3: Remoção de Persistência em LocalStorage e Limpeza Defensiva [TODO]
+#### T3: Remoção de Persistência em LocalStorage e Limpeza Defensiva [DONE]
 
 **What**: No `AuthContext.tsx`, remover qualquer gravação de `financial_token` em `localStorage`. No hook de inicialização (`useEffect`), adicionar limpeza defensiva de chaves legadas (`financial_token`, `financial_user`) em `localStorage` e mover o armazenamento temporário de dados do usuário e família para `sessionStorage`.
 **Where**: `frontend/src/context/AuthContext.tsx`
