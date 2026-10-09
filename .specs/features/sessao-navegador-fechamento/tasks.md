@@ -56,7 +56,7 @@ T3 -> T4
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T2: Adequação do Cliente HTTP apiRequest [TODO]
+#### T2: Adequação do Cliente HTTP apiRequest [DONE]
 
 **What**: Atualizar `frontend/src/lib/api.ts` para que o token seja lido do cookie de sessão `financial_token` sem recorrer ao `localStorage`. Na interceptação de status HTTP 401, garantir a limpeza completa de cookies e chaves de sessão residuais antes de redirecionar para `/login`.
 **Where**: `frontend/src/lib/api.ts`
