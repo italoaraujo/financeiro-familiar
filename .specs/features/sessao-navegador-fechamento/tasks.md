@@ -78,7 +78,7 @@ T3 -> T4
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T4: Hidratação Automática Multi-Abas e Validação Final [TODO]
+#### T4: Hidratação Automática Multi-Abas e Validação Final [DONE]
 
 **What**: No `AuthContext.tsx`, implementar a lógica de hidratação resiliente: caso o cookie de sessão `financial_token` esteja presente mas o usuário não esteja no `sessionStorage` (ex: nova aba aberta pelo usuário), consultar `GET /auth/me` para restaurar o estado da sessão e papéis familiares. Validar build e suíte de testes.
 **Where**: `frontend/src/context/AuthContext.tsx`

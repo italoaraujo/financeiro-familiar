@@ -92,10 +92,10 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | SESS-01 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Phase 1 | Implemented |
 | SESS-02 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Phase 2 | Implemented |
 | SESS-03 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Phase 2 | Implemented |
-| SESS-04 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Specify | Pending |
+| SESS-04 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Phase 2 | Implemented |
 | SESS-05 | P1: Descarte de Sessão ao Fechar Navegador e Remoção de Persistência em Disco | Phase 1 | Implemented |
-| SESS-06 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Specify | Pending |
-| SESS-07 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Specify | Pending |
-| SESS-08 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Specify | Pending |
+| SESS-06 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Phase 2 | Implemented |
+| SESS-07 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Phase 2 | Implemented |
+| SESS-08 | P2: Continuidade de Sessão Multi-Abas e Hidratação de Perfil | Phase 2 | Implemented |
 
 **ID format:** `SESS-[NUMBER]`
