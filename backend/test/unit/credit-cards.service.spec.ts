@@ -87,6 +87,51 @@ describe('CreditCardsService', () => {
       expect(prisma.creditCardInvoice.create).toHaveBeenCalled();
     });
 
+    it('should initialize next open invoice when closingDay has already passed in current month', async () => {
+      jest.useFakeTimers().setSystemTime(new Date(2026, 9, 9, 10, 0, 0));
+
+      prisma.creditCard.create.mockResolvedValue({
+        id: 'card-past',
+        name: 'Inter',
+        creditLimit: new Prisma.Decimal(1000),
+        closingDay: 2,
+        dueDay: 5,
+      });
+
+      prisma.creditCardInvoice.findUnique.mockResolvedValue(null);
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-past',
+        closingDay: 2,
+        dueDay: 5,
+      });
+      prisma.creditCardInvoice.create.mockResolvedValue({
+        id: 'inv-next',
+        creditCardId: 'card-past',
+        referenceMonth: '2026-11',
+        status: InvoiceStatus.OPEN,
+      });
+
+      const result = await service.create('user-1', {
+        name: 'Inter',
+        creditLimit: 1000,
+        closingDay: 2,
+        dueDay: 5,
+      });
+
+      expect(result.id).toBe('card-past');
+      expect(prisma.creditCardInvoice.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            creditCardId: 'card-past',
+            referenceMonth: '2026-11',
+            status: InvoiceStatus.OPEN,
+          }),
+        }),
+      );
+
+      jest.useRealTimers();
+    });
+
     it('should throw NotFoundException if accountId does not exist (SEC-HIGH-01)', async () => {
       prisma.account.findUnique.mockResolvedValueOnce(null);
 

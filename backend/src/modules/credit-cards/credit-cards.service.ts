@@ -39,10 +39,9 @@ export class CreditCardsService {
       },
     });
 
-    // Inicializa fatura do mês atual
+    // Inicializa a fatura aberta do ciclo vigente
     const now = new Date();
-    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    await this.getOrCreateInvoice(card.id, currentMonthStr);
+    await this.determineInvoiceForDate(card.id, now);
 
     return card;
   }
