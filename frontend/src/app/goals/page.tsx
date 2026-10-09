@@ -514,13 +514,13 @@ export default function GoalsPage() {
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Limite Estimada</label>
                 <input
                   type="date"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 />
               </div>
 
@@ -616,13 +616,13 @@ export default function GoalsPage() {
                   />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Limite Estimada</label>
                   <input
                     type="date"
                     value={editDeadline}
                     onChange={(e) => setEditDeadline(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                   />
                 </div>
 
@@ -744,14 +744,14 @@ export default function GoalsPage() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data do Aporte *</label>
                     <input
                       type="date"
                       required
                       value={depositDate}
                       onChange={(e) => setDepositDate(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                      className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                     />
                   </div>
 
@@ -836,14 +836,14 @@ export default function GoalsPage() {
                   />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">Data do Resgate *</label>
                   <input
                     type="date"
                     required
                     value={withdrawDate}
                     onChange={(e) => setWithdrawDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+                    className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
                   />
                 </div>
 

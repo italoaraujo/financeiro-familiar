@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: dark;
   --foreground-rgb: 243, 244, 246;
   --background-start-rgb: 9, 13, 22;
   --background-end-rgb: 15, 23, 42;
@@ -67,5 +68,44 @@ select,
 textarea,
 a {
   touch-action: manipulation;
+}
+
+/* Normalização e prevenção de overflow para inputs de data, hora e mês no iOS Safari e WebKit */
+input[type="date"],
+input[type="time"],
+input[type="month"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Alinhamento de texto e altura consistente no iOS Safari */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.25em;
+}
+
+/* Ícone de calendário e seletores de data elegantes no tema escuro (WebKit/Blink) */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="month"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
