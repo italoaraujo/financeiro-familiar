@@ -104,11 +104,11 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `McpApiToken` model added to Prisma schema and Prisma client regenerated
-- [ ] `TokenBlacklistService.addHash` persists and caches revoked token hashes
-- [ ] `AuthService` & `AuthController` implement create, list, and revoke MCP tokens with BOLA protection
-- [ ] Unit tests in `backend/test/unit/mcp-tokens.spec.ts` pass covering creation, listing, revocation, and unauthorized access
-- [ ] Gate check passes: `npm --prefix backend test`
+- [x] `McpApiToken` model added to Prisma schema and Prisma client regenerated
+- [x] `TokenBlacklistService.addHash` persists and caches revoked token hashes
+- [x] `AuthService` & `AuthController` implement create, list, and revoke MCP tokens with BOLA protection
+- [x] Unit tests in `backend/test/unit/mcp-tokens.spec.ts` pass covering creation, listing, revocation, and unauthorized access
+- [x] Gate check passes: `npm --prefix backend test`
 
 **Tests**: unit
 **Gate**: quick

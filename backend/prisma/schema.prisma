@@ -80,6 +80,7 @@ model User {
   personProfiles Person[]
   auditLogs     AuditLog[]
   tags          Tag[]
+  mcpTokens     McpApiToken[]
 
   @@map("users")
 }
@@ -456,5 +457,23 @@ model RevokedToken {
   @@index([expiresAt])
   @@map("revoked_tokens")
 }
+
+model McpApiToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  name        String    @db.VarChar(100)
+  tokenHash   String    @unique @map("token_hash") @db.VarChar(64)
+  tokenPrefix String    @map("token_prefix") @db.VarChar(24)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz
+  lastUsedAt  DateTime? @map("last_used_at") @db.Timestamptz
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@map("mcp_api_tokens")
+}
+
 
 

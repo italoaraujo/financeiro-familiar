@@ -126,8 +126,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| MCP-01 | P1: Web Management of MCP Access Tokens (Create & List) | Phase 1 | Pending |
-| MCP-02 | P1: Web Management of MCP Access Tokens (Revoke & UI `/mcp`) | Phase 1 | Pending |
+| MCP-01 | P1: Web Management of MCP Access Tokens (Create & List) | Phase 1 | Verified |
+| MCP-02 | P1: Web Management of MCP Access Tokens (Revoke & UI `/mcp`) | Phase 1 | Implementing |
 | MCP-03 | P1: MCP Server Authentication & HTTP Client | Phase 2 | Pending |
 | MCP-04 | P1: Personal vs. Family Context Resolution | Phase 2 | Pending |
 | MCP-05 | P1: Context, Families & Accounts Tools | Phase 2 | Pending |

@@ -1,10 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { CreateMcpTokenDto } from './dto/create-mcp-token.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 
@@ -68,5 +80,38 @@ export class AuthController {
       await this.blacklistService.add(token);
     }
     return { message: 'Sessão encerrada com sucesso' };
+  }
+
+  @Post('mcp-tokens')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Gerar novo token de acesso para servidor MCP (IA)' })
+  @ApiResponse({ status: 201, description: 'Token MCP gerado com sucesso' })
+  async createMcpToken(
+    @GetUser() user: { id: string; email: string },
+    @Body() dto: CreateMcpTokenDto,
+  ) {
+    return this.authService.createMcpToken(user.id, user.email, dto);
+  }
+
+  @Get('mcp-tokens')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar tokens MCP gerados pelo usuário' })
+  @ApiResponse({ status: 200, description: 'Lista de tokens MCP retornada com sucesso' })
+  async listMcpTokens(@GetUser('id') userId: string) {
+    return this.authService.listMcpTokens(userId);
+  }
+
+  @Delete('mcp-tokens/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revogar um token MCP do usuário' })
+  @ApiResponse({ status: 200, description: 'Token MCP revogado com sucesso' })
+  async revokeMcpToken(
+    @GetUser('id') userId: string,
+    @Param('id') tokenId: string,
+  ) {
+    return this.authService.revokeMcpToken(userId, tokenId);
   }
 }

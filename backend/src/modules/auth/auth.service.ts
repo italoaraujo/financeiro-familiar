@@ -1,15 +1,28 @@
-import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  Optional,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { TokenBlacklistService } from './token-blacklist.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { CreateMcpTokenDto } from './dto/create-mcp-token.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    @Optional() private readonly prisma?: PrismaService,
+    @Optional() private readonly blacklistService?: TokenBlacklistService,
   ) {}
 
   isRegistrationEnabled(): boolean {
@@ -70,6 +83,111 @@ export class AuthService {
       },
       accessToken: token,
     };
+  }
+
+  async createMcpToken(userId: string, email: string, dto: CreateMcpTokenDto) {
+    const days = dto.expiresInDays && dto.expiresInDays > 0 ? dto.expiresInDays : 90;
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const jti = crypto.randomUUID();
+
+    const rawToken = this.jwtService.sign(
+      {
+        sub: userId,
+        email,
+        type: 'mcp_pat',
+        jti,
+      },
+      {
+        expiresIn: `${days}d`,
+      },
+    );
+
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenPrefix =
+      rawToken.length > 16
+        ? `${rawToken.slice(0, 10)}...${rawToken.slice(-4)}`
+        : rawToken;
+
+    if (!this.prisma) {
+      return {
+        id: jti,
+        name: dto.name.trim(),
+        token: rawToken,
+        tokenPrefix,
+        expiresAt,
+        createdAt: new Date(),
+      };
+    }
+
+    const created = await this.prisma.mcpApiToken.create({
+      data: {
+        userId,
+        name: dto.name.trim(),
+        tokenHash,
+        tokenPrefix,
+        expiresAt,
+      },
+    });
+
+    return {
+      id: created.id,
+      name: created.name,
+      token: rawToken,
+      tokenPrefix: created.tokenPrefix,
+      expiresAt: created.expiresAt,
+      createdAt: created.createdAt,
+    };
+  }
+
+  async listMcpTokens(userId: string) {
+    if (!this.prisma) {
+      return [];
+    }
+
+    return this.prisma.mcpApiToken.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        tokenPrefix: true,
+        expiresAt: true,
+        lastUsedAt: true,
+        revokedAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async revokeMcpToken(userId: string, tokenId: string) {
+    if (!this.prisma) {
+      throw new NotFoundException('Token MCP não encontrado');
+    }
+
+    const tokenRecord = await this.prisma.mcpApiToken.findUnique({
+      where: { id: tokenId },
+    });
+
+    if (!tokenRecord) {
+      throw new NotFoundException('Token MCP não encontrado');
+    }
+
+    if (tokenRecord.userId !== userId) {
+      throw new ForbiddenException('Acesso negado para revogar este token');
+    }
+
+    if (!tokenRecord.revokedAt) {
+      await this.prisma.mcpApiToken.update({
+        where: { id: tokenId },
+        data: { revokedAt: new Date() },
+      });
+    }
+
+    if (this.blacklistService) {
+      await this.blacklistService.addHash(tokenRecord.tokenHash, tokenRecord.expiresAt);
+    }
+
+    return { message: 'Token MCP revogado com sucesso' };
   }
 
   private generateToken(userId: string, email: string): string {

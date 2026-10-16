@@ -23,16 +23,25 @@ export class TokenBlacklistService {
   async add(token: string, ttlMs: number = 24 * 60 * 60 * 1000): Promise<void> {
     if (!token) return;
     const tokenHash = this.hashToken(token);
-    const expiresAtMs = Date.now() + ttlMs;
-    const expiresAt = new Date(expiresAtMs);
+    const expiresAt = new Date(Date.now() + ttlMs);
+    await this.addHash(tokenHash, expiresAt);
+  }
 
-    this.memoryBlacklist.set(tokenHash, expiresAtMs);
+  /**
+   * Adiciona um hash SHA-256 de token diretamente à blacklist até a data de expiração informada.
+   */
+  async addHash(tokenHash: string, expiresAt: Date): Promise<void> {
+    if (!tokenHash) return;
+    const normalizedHash = tokenHash.trim();
+    const expiresAtMs = expiresAt.getTime();
+
+    this.memoryBlacklist.set(normalizedHash, expiresAtMs);
 
     if (this.prisma) {
       try {
         await this.prisma.revokedToken.upsert({
-          where: { tokenHash },
-          create: { tokenHash, expiresAt },
+          where: { tokenHash: normalizedHash },
+          create: { tokenHash: normalizedHash, expiresAt },
           update: { expiresAt },
         });
       } catch (err) {
