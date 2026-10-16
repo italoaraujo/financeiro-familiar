@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { getAllowedCorsOrigins } from './common/utils/cors.util';
 import { isSwaggerEnabled } from './common/utils/swagger.util';
+import { getAppVersion } from './common/utils/version.util';
 
 process.env.TZ = process.env.TZ || 'America/Sao_Paulo';
 
@@ -33,7 +34,7 @@ async function bootstrap() {
     const config = new DocumentBuilder()
       .setTitle('Sistema Financeiro Pessoal e Familiar API')
       .setDescription('REST API para gestão financeira multiusuário e controle familiar')
-      .setVersion('1.0.0')
+      .setVersion(getAppVersion())
       .addBearerAuth()
       .build();
 

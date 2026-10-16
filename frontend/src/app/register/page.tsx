@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getAuthStatus } from '../../lib/api';
 import { evaluatePasswordRules } from '../../lib/password-rules';
 import { Lock, Mail, User, ArrowRight, AlertCircle, Check, X } from 'lucide-react';
+import { APP_VERSION } from '../../lib/version';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -268,6 +269,13 @@ export default function RegisterPage() {
               </div>
             </>
           )}
+
+          {/* Version Footer */}
+          <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+            <span>Finanças Familiar</span>
+            <span>•</span>
+            <span className="font-mono text-slate-400">v{APP_VERSION}</span>
+          </div>
         </div>
       </div>
     </div>

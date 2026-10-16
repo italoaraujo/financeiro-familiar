@@ -218,22 +218,31 @@
 - **Date**: 2026-10-09
 - **Status**: active
 
+### AD-028
+- **Decision**: Injetar dinamicamente a versão da aplicação no Next.js (`frontend/next.config.js`) a partir de `package.json` (`pkg.version`) via variável pública de ambiente `NEXT_PUBLIC_APP_VERSION`, disponibilizar constante centralizada `APP_VERSION` com fallback resiliente para `'1.0.0'` em `frontend/src/lib/version.ts`, e renderizar a versão de forma padronizada no rodapé da Sidebar do `AppShell` (desktop e mobile) e no rodapé das páginas de autenticação (`/login` e `/register`).
+- **Reason**: Atende à necessidade de identificar visualmente a versão em execução do sistema tanto para usuários autenticados quanto deslogados, garantindo sincronização automática com os releases de `package.json` sem necessidade de manutenção de strings duplicadas ou overhead de rede.
+- **Trade-off**: A versão do frontend é fixada em tempo de build (estática), compatível com o build standalone do Next.js.
+- **Scope**: `frontend/next.config.js`, `frontend/src/lib/version.ts`, `frontend/src/components/layout/AppShell.tsx`, `frontend/src/app/login/page.tsx` e `frontend/src/app/register/page.tsx`.
+- **Date**: 2026-10-16
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `sessao-navegador-fechamento`
-- **Total Tasks**: 4
-- **Completed Tasks**: 4 / 4 (100%)
+- **Active Feature**: `exibicao-versao-sistema`
+- **Total Tasks**: 5
+- **Completed Tasks**: 5 / 5 (100%)
 - **Status**: **COMPLETE**
 - **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros, 28 suítes do backend aprovadas (294 testes)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/sessao-navegador-fechamento
-- **Phase / Task**: Phase 2 / T4 (All tasks complete)
-- **Completed**: T1 (Session Cookie sem expiração fixa), T2 (Cliente HTTP apiRequest sem localStorage), T3 (Remoção de localStorage e limpeza defensiva), T4 (Hidratação multi-abas e validação completa de gates)
+- **Feature**: .specs/features/exibicao-versao-sistema
+- **Phase / Task**: Phase 2 / T5 (All tasks complete)
+- **Completed**: T1 (Injeção de NEXT_PUBLIC_APP_VERSION no Next.js), T2 (Criação de APP_VERSION com fallback), T3 (Exibição da versão no rodapé da Sidebar do AppShell), T4 (Exibição no rodapé da tela de Login), T5 (Exibição no rodapé da tela de Cadastro)
 - **In-progress**: None
 - **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/sessao-navegador-fechamento
+- **Branch**: feature/exibicao-versao-sistema
+
