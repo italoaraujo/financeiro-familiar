@@ -84,7 +84,7 @@ T3 -> T4 -> T5
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T5: Exibição da Versão no Rodapé da Tela de Cadastro
+#### T5: Exibição da Versão no Rodapé da Tela de Cadastro [DONE]
 
 **What**: No arquivo `frontend/src/app/register/page.tsx`, importar `APP_VERSION` e adicionar rodapé sutil harmonizado no card de cadastro exibindo `Finanças Familiar • v{APP_VERSION}`.
 **Where**: `frontend/src/app/register/page.tsx`
