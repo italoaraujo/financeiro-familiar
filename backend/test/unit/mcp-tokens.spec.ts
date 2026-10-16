@@ -151,6 +151,8 @@ describe('MCP Access Tokens (MCP-01 & MCP-02)', () => {
       });
 
       expect(result.id).toBe('token-uuid-1');
+      expect(result.clientId).toBe('token-uuid-1');
+      expect(result.clientSecret).toBe(expectedToken);
       expect(result.name).toBe('Claude Desktop');
       expect(result.token).toBe(expectedToken);
       expect(result.tokenPrefix).toContain('eyJhbGci');
@@ -228,5 +230,45 @@ describe('MCP Access Tokens (MCP-01 & MCP-02)', () => {
       );
       expect(mockPrisma.mcpApiToken.update).not.toHaveBeenCalled();
     });
+
+    it('AC5 (MCP-11): should verify valid OAuth clientId + clientSecret and reject invalid or revoked ones', async () => {
+      const rawToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyLTEifQ.signature123456';
+      const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+      const futureExpiry = new Date(Date.now() + 86_400_000);
+
+      mockPrisma.mcpApiToken.findUnique.mockResolvedValue({
+        id: 'token-uuid-1',
+        userId: 'user-1',
+        name: 'Google Gemini',
+        tokenHash,
+        expiresAt: futureExpiry,
+        revokedAt: null,
+      });
+      mockPrisma.mcpApiToken.update.mockResolvedValue({
+        id: 'token-uuid-1',
+        lastUsedAt: new Date(),
+      });
+
+      const verified = await authController.verifyMcpOAuthClient({
+        clientId: 'token-uuid-1',
+        clientSecret: rawToken,
+      });
+
+      expect(verified).toEqual({
+        valid: true,
+        clientId: 'token-uuid-1',
+        userId: 'user-1',
+        accessToken: rawToken,
+        expiresAt: futureExpiry,
+      });
+
+      await expect(
+        authController.verifyMcpOAuthClient({
+          clientId: 'token-uuid-1',
+          clientSecret: 'wrong-secret',
+        }),
+      ).rejects.toThrow();
+    });
   });
 });
+

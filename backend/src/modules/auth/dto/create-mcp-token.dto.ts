@@ -26,3 +26,24 @@ export class CreateMcpTokenDto {
   @IsOptional()
   expiresInDays?: number = 90;
 }
+
+export class VerifyMcpOAuthClientDto {
+  @ApiProperty({
+    example: 'token-uuid-1',
+    description: 'ID do cliente OAuth (ID do token MCP gerado na tela /mcp)',
+  })
+  @IsString({ message: 'ID do cliente OAuth deve ser um texto' })
+  @IsNotEmpty({ message: 'ID do cliente OAuth é obrigatório' })
+  @MaxLength(200)
+  clientId: string;
+
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'Chave secreta do cliente OAuth (Token MCP assinado)',
+  })
+  @IsString({ message: 'Chave secreta do cliente OAuth deve ser um texto' })
+  @IsNotEmpty({ message: 'Chave secreta do cliente OAuth é obrigatória' })
+  @MaxLength(4096)
+  clientSecret: string;
+}
+

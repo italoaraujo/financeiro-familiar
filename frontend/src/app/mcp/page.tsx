@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Terminal,
   AlertTriangle,
+  Globe,
 } from 'lucide-react';
 
 interface McpTokenItem {
@@ -31,6 +32,8 @@ interface CreatedMcpTokenResponse {
   id: string;
   name: string;
   token: string;
+  clientId?: string;
+  clientSecret?: string;
   tokenPrefix: string;
   expiresAt: string;
   createdAt: string;
@@ -47,10 +50,11 @@ export default function McpIntegrationPage() {
   const [tokenName, setTokenName] = useState('');
   const [expiresInDays, setExpiresInDays] = useState<number>(90);
 
-  // Newly created token (shown once)
+  // Newly created token (shown once) & mode selector
   const [newlyCreatedToken, setNewlyCreatedToken] = useState<CreatedMcpTokenResponse | null>(null);
-  const [copiedToken, setCopiedToken] = useState(false);
-  const [copiedConfig, setCopiedConfig] = useState(false);
+  const [connectionTab, setConnectionTab] = useState<'http' | 'stdio'>('http');
+  const [mcpPublicBaseUrl, setMcpPublicBaseUrl] = useState('https://seu-tunel-ou-dominio.com');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -97,7 +101,11 @@ export default function McpIntegrationPage() {
   };
 
   const handleRevokeToken = async (id: string, name: string) => {
-    if (!window.confirm(`Deseja realmente revogar o token "${name}"? Clientes de IA que utilizam este token perderão o acesso imediatamente.`)) {
+    if (
+      !window.confirm(
+        `Deseja realmente revogar o token "${name}"? Clientes de IA que utilizam este token perderão o acesso imediatamente.`,
+      )
+    ) {
       return;
     }
 
@@ -116,6 +124,7 @@ export default function McpIntegrationPage() {
 
   const buildMcpJsonSnippet = (rawToken: string) => {
     const envBlock: Record<string, string> = {
+      MCP_TRANSPORT: 'stdio',
       MCP_API_URL: apiBaseUrl,
       MCP_API_TOKEN: rawToken,
     };
@@ -139,16 +148,11 @@ export default function McpIntegrationPage() {
     );
   };
 
-  const copyToClipboard = async (text: string, type: 'token' | 'config') => {
+  const copyToClipboard = async (text: string, fieldKey: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      if (type === 'token') {
-        setCopiedToken(true);
-        setTimeout(() => setCopiedToken(false), 2500);
-      } else {
-        setCopiedConfig(true);
-        setTimeout(() => setCopiedConfig(false), 2500);
-      }
+      setCopiedField(fieldKey);
+      setTimeout(() => setCopiedField(null), 2500);
     } catch {
       // Fallback silencioso
     }
@@ -173,6 +177,8 @@ export default function McpIntegrationPage() {
     };
   };
 
+  const formattedMcpEndpointUrl = `${mcpPublicBaseUrl.trim().replace(/\/+$/, '')}/mcp`;
+
   return (
     <AppShell>
       <div className="space-y-6 max-w-5xl mx-auto">
@@ -184,7 +190,7 @@ export default function McpIntegrationPage() {
               Integração IA & Servidor MCP
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Gere tokens de acesso seguros para conectar assistentes de IA (Antigravity, Claude Desktop, Cursor) às suas finanças pessoais e familiares.
+              Conecte suas finanças tanto via <strong>URL HTTPS + OAuth</strong> (Google Gemini, Claude Web) quanto via <strong>STDIO Local</strong> (Claude Desktop, Cursor, Antigravity).
             </p>
           </div>
         </div>
@@ -200,7 +206,7 @@ export default function McpIntegrationPage() {
         <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
           <div className="flex items-center gap-2.5 mb-4">
             <KeyRound className="h-5 w-5 text-emerald-400" />
-            <h2 className="text-lg font-semibold text-white">Gerar Novo Token do MCP</h2>
+            <h2 className="text-lg font-semibold text-white">Gerar Nova Credencial MCP (HTTP OAuth & STDIO)</h2>
           </div>
 
           <form onSubmit={handleCreateToken} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
@@ -214,14 +220,14 @@ export default function McpIntegrationPage() {
                 maxLength={100}
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
-                placeholder="Ex: Antigravity IDE, Claude Desktop, Cursor..."
+                placeholder="Ex: Google Gemini, Claude Web, Cursor, Antigravity..."
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
             <div className="sm:col-span-3">
               <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Validade do Token
+                Validade da Credencial
               </label>
               <select
                 value={expiresInDays}
@@ -248,18 +254,18 @@ export default function McpIntegrationPage() {
           </form>
         </div>
 
-        {/* Banner de Exibição Única do Token Recém-Criado */}
+        {/* Banner de Exibição Única do Token Recém-Criado (Com Seletor HTTP vs STDIO) */}
         {newlyCreatedToken && (
-          <div className="bg-emerald-950/30 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl">
+          <div className="bg-emerald-950/30 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
                 <div>
                   <h3 className="text-base font-semibold text-emerald-300">
-                    Token &ldquo;{newlyCreatedToken.name}&rdquo; gerado com sucesso!
+                    Credencial &ldquo;{newlyCreatedToken.name}&rdquo; gerada com sucesso!
                   </h3>
                   <p className="text-xs text-emerald-200/80 mt-0.5">
-                    Copie seu token agora. Por motivos de segurança, o token completo não será exibido novamente.
+                    Escolha abaixo como deseja conectar (URL HTTPS/OAuth ou STDIO Local). Por segurança, a chave secreta completa só é exibida agora.
                   </p>
                 </div>
               </div>
@@ -271,46 +277,200 @@ export default function McpIntegrationPage() {
               </button>
             </div>
 
-            {/* Token Bruto */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-emerald-300">
-                1. Seu Token de Acesso (`MCP_API_TOKEN`):
-              </label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-300 break-all">
-                  {newlyCreatedToken.token}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(newlyCreatedToken.token, 'token')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium shrink-0 transition-colors"
-                >
-                  {copiedToken ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                  {copiedToken ? 'Copiado!' : 'Copiar Token'}
-                </button>
-              </div>
+            {/* Abas de Modo de Conexão */}
+            <div className="flex flex-wrap gap-2 border-b border-emerald-500/20 pb-3">
+              <button
+                type="button"
+                onClick={() => setConnectionTab('http')}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                  connectionTab === 'http'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md'
+                    : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Globe className="h-4 w-4" />
+                Modo 1: URL HTTPS + OAuth (Google Gemini / Claude Web)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setConnectionTab('stdio')}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                  connectionTab === 'stdio'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md'
+                    : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Terminal className="h-4 w-4" />
+                Modo 2: STDIO Local (Claude Desktop / Cursor / Antigravity)
+              </button>
             </div>
 
-            {/* Snippet JSON Pronto */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-medium text-emerald-300 flex items-center gap-1.5">
-                  <Terminal className="h-3.5 w-3.5" />
-                  2. Configuração JSON pronta para colar no seu Assistente de IA (`mcp_config.json`):
-                </label>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(buildMcpJsonSnippet(newlyCreatedToken.token), 'config')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-medium transition-colors"
-                >
-                  {copiedConfig ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copiedConfig ? 'JSON Copiado!' : 'Copiar JSON'}
-                </button>
+            {connectionTab === 'http' ? (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-300">
+                  Preencha exatamente estes <strong>3 campos</strong> na janela <em>&ldquo;Conectar-se a um servidor MCP&rdquo;</em> do Google Gemini ou Claude Web:
+                </p>
+
+                {/* Campo 1: URL do servidor MCP */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-emerald-300">
+                    1. URL do servidor MCP (deve começar com https://):
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                    <input
+                      type="text"
+                      value={mcpPublicBaseUrl}
+                      onChange={(e) => setMcpPublicBaseUrl(e.target.value)}
+                      placeholder="https://seu-dominio-ou-tunel.trycloudflare.com"
+                      className="sm:col-span-5 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <code className="sm:col-span-5 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-emerald-300 flex items-center break-all">
+                      {formattedMcpEndpointUrl}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(formattedMcpEndpointUrl, 'mcpUrl')}
+                      className="sm:col-span-2 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors"
+                    >
+                      {copiedField === 'mcpUrl' ? (
+                        <Check className="h-4 w-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedField === 'mcpUrl' ? 'Copiado!' : 'Copiar URL'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Campo 2: ID do cliente OAuth */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-emerald-300">
+                    2. ID do cliente (ID do cliente OAuth):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-300 break-all">
+                      {newlyCreatedToken.clientId || newlyCreatedToken.id}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          newlyCreatedToken.clientId || newlyCreatedToken.id,
+                          'clientId',
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium shrink-0 transition-colors"
+                    >
+                      {copiedField === 'clientId' ? (
+                        <Check className="h-4 w-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedField === 'clientId' ? 'Copiado!' : 'Copiar ID'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Campo 3: Chave secreta do cliente OAuth */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-emerald-300">
+                    3. Chave secreta do cliente (Chave secreta do cliente OAuth):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-300 break-all">
+                      {newlyCreatedToken.clientSecret || newlyCreatedToken.token}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          newlyCreatedToken.clientSecret || newlyCreatedToken.token,
+                          'clientSecret',
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium shrink-0 transition-colors"
+                    >
+                      {copiedField === 'clientSecret' ? (
+                        <Check className="h-4 w-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedField === 'clientSecret' ? 'Copiado!' : 'Copiar Chave'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Instrução Rápida de Execução HTTP + Túnel */}
+                <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2 text-xs text-slate-300">
+                  <p className="font-semibold text-white">
+                    Como subir o servidor MCP em modo HTTP (Porta 3333):
+                  </p>
+                  <pre className="font-mono text-emerald-300 overflow-x-auto">
+                    {`npm --prefix mcp-server run start:http`}
+                  </pre>
+                  <p className="text-slate-400 pt-1">
+                    Se estiver rodando localmente sem domínio HTTPS próprio, gere um link <code>https://</code> gratuito com Cloudflare Tunnel:
+                  </p>
+                  <pre className="font-mono text-sky-300 overflow-x-auto">
+                    {`npx cloudflared tunnel --url http://localhost:3333`}
+                  </pre>
+                </div>
               </div>
-              <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 overflow-x-auto">
-                {buildMcpJsonSnippet(newlyCreatedToken.token)}
-              </pre>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Token Bruto STDIO */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-emerald-300">
+                    1. Seu Token de Acesso (`MCP_API_TOKEN`):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-300 break-all">
+                      {newlyCreatedToken.token}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(newlyCreatedToken.token, 'token')}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium shrink-0 transition-colors"
+                    >
+                      {copiedField === 'token' ? (
+                        <Check className="h-4 w-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedField === 'token' ? 'Copiado!' : 'Copiar Token'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Snippet JSON Pronto STDIO */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-emerald-300 flex items-center gap-1.5">
+                      <Terminal className="h-3.5 w-3.5" />
+                      2. Configuração JSON pronta para colar no seu Assistente Desktop (`mcp_config.json`):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(buildMcpJsonSnippet(newlyCreatedToken.token), 'config')
+                      }
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-medium transition-colors"
+                    >
+                      {copiedField === 'config' ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                      {copiedField === 'config' ? 'JSON Copiado!' : 'Copiar JSON'}
+                    </button>
+                  </div>
+                  <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 overflow-x-auto">
+                    {buildMcpJsonSnippet(newlyCreatedToken.token)}
+                  </pre>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -318,9 +478,9 @@ export default function McpIntegrationPage() {
         <div className="bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">Tokens MCP Emitidos</h2>
+              <h2 className="text-lg font-semibold text-white">Credenciais & Tokens MCP Emitidos</h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Gerencie ou revogue o acesso de integrações conectadas à sua conta.
+                Gerencie ou revogue o acesso de integrações conectadas à sua conta (funciona tanto em HTTP/OAuth quanto em STDIO).
               </p>
             </div>
           </div>
@@ -329,7 +489,7 @@ export default function McpIntegrationPage() {
             <div className="p-8 text-center text-slate-400 text-sm">Carregando tokens...</div>
           ) : tokens.length === 0 ? (
             <div className="p-8 text-center text-slate-400 text-sm">
-              Nenhum token MCP gerado ainda. Utilize o formulário acima para criar seu primeiro token.
+              Nenhum token MCP gerado ainda. Utilize o formulário acima para criar sua primeira credencial.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -337,7 +497,8 @@ export default function McpIntegrationPage() {
                 <thead>
                   <tr className="border-b border-slate-800 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-950/40">
                     <th className="py-3.5 px-4 sm:px-6">Integração</th>
-                    <th className="py-3.5 px-4">Prefixo</th>
+                    <th className="py-3.5 px-4">ID do Cliente (OAuth)</th>
+                    <th className="py-3.5 px-4">Prefixo da Chave</th>
                     <th className="py-3.5 px-4">Criado em</th>
                     <th className="py-3.5 px-4">Expira em</th>
                     <th className="py-3.5 px-4">Status</th>
@@ -351,6 +512,23 @@ export default function McpIntegrationPage() {
                     return (
                       <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
                         <td className="py-3.5 px-4 sm:px-6 font-medium text-white">{item.name}</td>
+                        <td className="py-3.5 px-4 font-mono text-xs text-slate-300">
+                          <div className="flex items-center gap-1.5">
+                            <span>{item.id}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(item.id, `row-${item.id}`)}
+                              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white"
+                              title="Copiar ID do Cliente OAuth"
+                            >
+                              {copiedField === `row-${item.id}` ? (
+                                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
                         <td className="py-3.5 px-4 font-mono text-xs text-slate-400">{item.tokenPrefix}</td>
                         <td className="py-3.5 px-4 text-slate-300">{formatDate(item.createdAt)}</td>
                         <td className="py-3.5 px-4 text-slate-300">{formatDate(item.expiresAt)}</td>

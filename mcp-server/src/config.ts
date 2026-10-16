@@ -1,3 +1,5 @@
+export type McpTransportMode = 'stdio' | 'http';
+
 export interface McpConfig {
   apiUrl: string;
   apiToken?: string;
@@ -5,9 +7,16 @@ export interface McpConfig {
   userPassword?: string;
   defaultFamilyId?: string;
   httpTimeoutMs: number;
+  transport?: McpTransportMode;
+  httpPort?: number;
+  httpHost?: string;
+  publicUrl?: string;
 }
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
+export function loadConfig(
+  env: NodeJS.ProcessEnv = process.env,
+  argv: string[] = process.argv,
+): McpConfig {
   const rawUrl = (env.MCP_API_URL || 'http://localhost:3001').trim();
   const apiUrl = rawUrl.replace(/\/+$/, '') || 'http://localhost:3001';
 
@@ -20,6 +29,26 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
   const httpTimeoutMs =
     Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 15000;
 
+  let transport: McpTransportMode = 'stdio';
+  const envTransport = env.MCP_TRANSPORT?.trim().toLowerCase();
+  if (envTransport === 'http') {
+    transport = 'http';
+  }
+  if (argv.includes('--http') || argv.includes('--transport=http')) {
+    transport = 'http';
+  } else if (argv.includes('--stdio') || argv.includes('--transport=stdio')) {
+    transport = 'stdio';
+  }
+
+  const parsedPort = Number(env.MCP_HTTP_PORT || env.PORT);
+  const httpPort =
+    Number.isFinite(parsedPort) && parsedPort > 0 && parsedPort <= 65535
+      ? parsedPort
+      : 3333;
+
+  const httpHost = env.MCP_HTTP_HOST?.trim() || '0.0.0.0';
+  const publicUrl = env.MCP_PUBLIC_URL?.trim().replace(/\/+$/, '') || undefined;
+
   return {
     apiUrl,
     apiToken,
@@ -27,6 +56,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
     userPassword,
     defaultFamilyId,
     httpTimeoutMs,
+    transport,
+    httpPort,
+    httpHost,
+    publicUrl,
   };
 }
 

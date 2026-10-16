@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { CreateMcpTokenDto } from './dto/create-mcp-token.dto';
+import { CreateMcpTokenDto, VerifyMcpOAuthClientDto } from './dto/create-mcp-token.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 
@@ -114,4 +114,15 @@ export class AuthController {
   ) {
     return this.authService.revokeMcpToken(userId, tokenId);
   }
+
+  @Post('mcp-oauth/verify')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @ApiOperation({ summary: 'Validar Client ID e Client Secret OAuth de um servidor MCP remoto' })
+  @ApiResponse({ status: 200, description: 'Credencial OAuth MCP validada com sucesso' })
+  @ApiResponse({ status: 401, description: 'Credencial OAuth MCP inválida, expirada ou revogada' })
+  async verifyMcpOAuthClient(@Body() dto: VerifyMcpOAuthClientDto) {
+    return this.authService.verifyMcpOAuthClient(dto.clientId, dto.clientSecret);
+  }
 }
+

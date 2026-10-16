@@ -1,19 +1,22 @@
 # 🤖 Servidor MCP — Sistema de Gestão Financeira Pessoal & Familiar
 
-Servidor **Model Context Protocol (MCP)** oficial para integração do Sistema de Gestão Financeira Pessoal & Familiar com assistentes de IA (Claude Desktop, Cursor, Antigravity, Windsurf e clientes MCP compatíveis).
+Servidor **Model Context Protocol (MCP)** oficial para integração do Sistema de Gestão Financeira Pessoal & Familiar com assistentes de IA — suportando simultaneamente:
+- **Modo 1 — HTTP / OAuth Remoto (`Streamable HTTP` + `SSE`)**: compatível com **Google Gemini (Apps Conectados)**, **Claude Web** e conectores baseados em `URL do servidor MCP` + `ID do cliente OAuth` + `Chave secreta do cliente OAuth`.
+- **Modo 2 — STDIO Local**: compatível com **Claude Desktop**, **Cursor**, **Antigravity** e **Windsurf**.
 
-Opera via transporte padrão `stdio` e consome a API REST do backend (`http://localhost:3001`), preservando **100% das regras de negócio**, precisão monetária (`DECIMAL(15,2)`), controle de acesso baseado em papéis (`OWNER`, `ADMIN`, `MEMBER`, `VIEWER`) e trilha de auditoria (`AuditLogInterceptor`).
+Consome a API REST do backend (`http://localhost:3001`), preservando **100% das regras de negócio**, precisão monetária (`DECIMAL(15,2)`), controle de acesso baseado em papéis (`OWNER`, `ADMIN`, `MEMBER`, `VIEWER`) e trilha de auditoria (`AuditLogInterceptor`).
 
 ---
 
-## 🔑 Como Obter o Token MCP (Pela Interface Web)
+## 🔑 Como Obter as Credenciais MCP (Pela Interface Web `/mcp`)
 
 1. Acesse a aplicação web (`http://localhost:3000`) e faça login.
 2. No menu lateral esquerdo, clique em **Integração IA (MCP)** (`/mcp`).
-3. Informe um nome para identificar o seu cliente (ex.: `Claude Desktop`, `Cursor IDE`) e escolha a validade desejada (30, 90, 365 dias ou Sem expiração).
-4. Clique em **Gerar Token MCP**.
-5. Copie o **Token de Acesso** ou diretamente o **Snippet JSON (`mcpServers`)** pronto para colar no seu cliente de IA.
-6. Caso precise invalidar o acesso de algum dispositivo no futuro, basta clicar em **Revogar** na tabela de tokens ativos na mesma página `/mcp`.
+3. Informe um nome para identificar o seu cliente (ex.: `Google Gemini`, `Claude Desktop`, `Cursor IDE`) e escolha a validade desejada.
+4. Clique em **Gerar Token MCP** e escolha a aba correspondente ao seu uso:
+   - **Aba Modo 1 (URL HTTPS + OAuth — Gemini / Claude Web)**: copie a **URL do servidor MCP**, o **ID do cliente OAuth** e a **Chave secreta do cliente OAuth**.
+   - **Aba Modo 2 (STDIO Local — Desktop / IDE)**: copie o **Snippet JSON (`mcpServers`)** pronto.
+5. Caso precise invalidar o acesso de algum dispositivo no futuro, basta clicar em **Revogar** na tabela de credenciais ativas na página `/mcp`.
 
 ---
 
@@ -21,8 +24,12 @@ Opera via transporte padrão `stdio` e consome a API REST do backend (`http://lo
 
 | Variável | Obrigatória | Padrão | Descrição |
 | :--- | :---: | :---: | :--- |
+| `MCP_TRANSPORT` | Não | `stdio` | Define o modo de transporte: `stdio` (local) ou `http` (servidor remoto HTTP + OAuth). |
+| `MCP_HTTP_PORT` | Não | `3333` | Porta do servidor quando `MCP_TRANSPORT=http` (ou `--http`). |
+| `MCP_HTTP_HOST` | Não | `0.0.0.0` | Host de bind do servidor HTTP. |
+| `MCP_PUBLIC_URL` | Não | Auto-detectado | URL pública HTTPS (ex.: `https://meu-tunel.trycloudflare.com`) para metadados OAuth. |
 | `MCP_API_URL` | Não | `http://localhost:3001` | URL base da API REST do backend financeiro. |
-| `MCP_API_TOKEN` | Sim (Recomendado) | — | Token JWT gerado em 1 clique na tela web `/mcp`. |
+| `MCP_API_TOKEN` | Recomendado (`stdio`) | — | Token JWT gerado em 1 clique na tela web `/mcp`. |
 | `MCP_USER_EMAIL` | Alternativa | — | E-mail do usuário (usado para login automático caso `MCP_API_TOKEN` não seja definido). |
 | `MCP_USER_PASSWORD` | Alternativa | — | Senha do usuário (usado junto com `MCP_USER_EMAIL`). |
 | `MCP_DEFAULT_FAMILY_ID` | Não | Visão Pessoal | UUID da família padrão para consultas e lançamentos compartilhados. |
@@ -38,11 +45,26 @@ npm install
 npm run build
 ```
 
-O binário compilado ficará disponível em `dist/index.js`.
+---
+
+## 🌐 Opção A: Conectando no Google Gemini / Claude Web (Modo HTTP + OAuth)
+
+1. Inicie o servidor MCP em modo HTTP (porta `3333`):
+```bash
+npm --prefix mcp-server run start:http
+```
+2. Caso esteja rodando localmente sem domínio HTTPS próprio, exponha a porta `3333` com Cloudflare Tunnel:
+```bash
+npx cloudflared tunnel --url http://localhost:3333
+```
+3. No modal **"Conectar-se a um servidor MCP"** do Gemini, preencha os 3 campos gerados na tela web `/mcp`:
+   - **URL do servidor MCP**: `https://<seu-dominio-ou-tunel>/mcp`
+   - **ID do cliente**: `<ID do cliente OAuth copiado na tela /mcp>`
+   - **Chave secreta do cliente**: `<Chave secreta copiada na tela /mcp>`
 
 ---
 
-## 🖥️ Configuração nos Clientes de IA (`mcpServers`)
+## 🖥️ Opção B: Conectando no Desktop / IDE (Modo STDIO — `mcpServers`)
 
 Adicione o bloco abaixo no arquivo de configuração do seu cliente MCP (ex.: `claude_desktop_config.json` ou `.cursor/mcp.json`):
 
@@ -53,6 +75,7 @@ Adicione o bloco abaixo no arquivo de configuração do seu cliente MCP (ex.: `c
       "command": "node",
       "args": ["/var/www/financeiro-familiar/mcp-server/dist/index.js"],
       "env": {
+        "MCP_TRANSPORT": "stdio",
         "MCP_API_URL": "http://localhost:3001",
         "MCP_API_TOKEN": "SEU_TOKEN_GERADO_NA_TELA_WEB_MCP"
       }

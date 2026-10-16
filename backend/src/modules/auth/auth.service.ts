@@ -113,6 +113,8 @@ export class AuthService {
         id: jti,
         name: dto.name.trim(),
         token: rawToken,
+        clientId: jti,
+        clientSecret: rawToken,
         tokenPrefix,
         expiresAt,
         createdAt: new Date(),
@@ -133,9 +135,72 @@ export class AuthService {
       id: created.id,
       name: created.name,
       token: rawToken,
+      clientId: created.id,
+      clientSecret: rawToken,
       tokenPrefix: created.tokenPrefix,
       expiresAt: created.expiresAt,
       createdAt: created.createdAt,
+    };
+  }
+
+  async verifyMcpOAuthClient(clientId: string, clientSecret: string) {
+    const trimmedId = (clientId || '').trim();
+    const trimmedSecret = (clientSecret || '').trim();
+    if (!trimmedId || !trimmedSecret) {
+      throw new UnauthorizedException('Credenciais OAuth MCP ausentes');
+    }
+
+    if (this.blacklistService && (await this.blacklistService.isBlacklisted(trimmedSecret))) {
+      throw new UnauthorizedException('Token MCP foi revogado');
+    }
+
+    const secretHash = crypto.createHash('sha256').update(trimmedSecret).digest('hex');
+
+    if (this.prisma) {
+      let tokenRecord = await this.prisma.mcpApiToken.findUnique({
+        where: { id: trimmedId },
+      });
+
+      if (!tokenRecord) {
+        tokenRecord = await this.prisma.mcpApiToken.findUnique({
+          where: { tokenHash: secretHash },
+        });
+      }
+
+      if (!tokenRecord) {
+        throw new UnauthorizedException('Cliente OAuth MCP não encontrado');
+      }
+
+      if (tokenRecord.tokenHash !== secretHash) {
+        throw new UnauthorizedException('Chave secreta do cliente OAuth inválida');
+      }
+
+      if (tokenRecord.revokedAt) {
+        throw new UnauthorizedException('Token MCP revogado');
+      }
+
+      if (tokenRecord.expiresAt && new Date(tokenRecord.expiresAt).getTime() <= Date.now()) {
+        throw new UnauthorizedException('Token MCP expirado');
+      }
+
+      await this.prisma.mcpApiToken.update({
+        where: { id: tokenRecord.id },
+        data: { lastUsedAt: new Date() },
+      });
+
+      return {
+        valid: true,
+        clientId: tokenRecord.id,
+        userId: tokenRecord.userId,
+        accessToken: trimmedSecret,
+        expiresAt: tokenRecord.expiresAt,
+      };
+    }
+
+    return {
+      valid: true,
+      clientId: trimmedId,
+      accessToken: trimmedSecret,
     };
   }
 
