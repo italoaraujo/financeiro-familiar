@@ -30,10 +30,12 @@ async function bootstrap() {
   );
 
   if (isSwaggerEnabled()) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pkg = require('../package.json');
     const config = new DocumentBuilder()
       .setTitle('Sistema Financeiro Pessoal e Familiar API')
       .setDescription('REST API para gestão financeira multiusuário e controle familiar')
-      .setVersion('1.0.0')
+      .setVersion(pkg.version || '1.0.0')
       .addBearerAuth()
       .build();
 
