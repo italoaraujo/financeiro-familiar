@@ -181,9 +181,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `FinancialApiClient`, `ApiClientError`, `formatToolResult`, and `formatToolError` implemented in `mcp-server/src/http/api-client.ts`
-- [ ] Unit tests in `mcp-server/test/unit/api-client.spec.ts` cover bearer token, login fallback, 401 retry, query params, CSV text, timeout, and error formatting
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] `FinancialApiClient`, `ApiClientError`, `formatToolResult`, and `formatToolError` implemented in `mcp-server/src/http/api-client.ts`
+- [x] Unit tests in `mcp-server/test/unit/api-client.spec.ts` cover bearer token, login fallback, 401 retry, query params, CSV text, timeout, and error formatting
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
