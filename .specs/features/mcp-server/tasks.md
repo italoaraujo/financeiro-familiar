@@ -253,9 +253,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] 4 tools registered in `mcp-server/src/tools/credit-cards-tools.ts`
-- [ ] Unit tests in `mcp-server/test/unit/credit-cards-tools.spec.ts` verify card listing, creation, invoice breakdown, and invoice payment
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] 4 tools registered in `mcp-server/src/tools/credit-cards-tools.ts`
+- [x] Unit tests in `mcp-server/test/unit/credit-cards-tools.spec.ts` verify card listing, creation, invoice breakdown, and invoice payment
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
