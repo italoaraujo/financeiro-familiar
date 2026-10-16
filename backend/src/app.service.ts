@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../package.json');
+import { getAppVersion } from './common/utils/version.util';
 
 export interface HealthStatus {
   status: string;
@@ -14,7 +12,7 @@ export class AppService {
   getHealth(): HealthStatus {
     return {
       status: 'ok',
-      version: pkg.version || '1.0.0',
+      version: getAppVersion(),
       timestamp: new Date().toISOString(),
     };
   }
