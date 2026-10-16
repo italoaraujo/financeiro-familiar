@@ -75,7 +75,7 @@ T3 -> T4 -> T5
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T4: Exibição da Versão no Rodapé da Tela de Login
+#### T4: Exibição da Versão no Rodapé da Tela de Login [DONE]
 
 **What**: No arquivo `frontend/src/app/login/page.tsx`, importar `APP_VERSION` e adicionar rodapé sutil centralizado no card de formulário exibindo `Finanças Familiar • v{APP_VERSION}`.
 **Where**: `frontend/src/app/login/page.tsx`

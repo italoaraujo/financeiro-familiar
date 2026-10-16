@@ -87,5 +87,5 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 | VER-01 | P1: Injeção da Versão e Exibição no Menu Lateral (AppShell) | Phase 1 | Implemented |
 | VER-02 | P1: Injeção da Versão e Exibição no Menu Lateral (AppShell) | Phase 1 | Implemented |
 | VER-03 | P1: Injeção da Versão e Exibição no Menu Lateral (AppShell) | Phase 1 | Implemented |
-| VER-04 | P2: Exibição da Versão nas Telas de Autenticação (Login e Cadastro) | Phase 2 | Pending |
+| VER-04 | P2: Exibição da Versão nas Telas de Autenticação (Login e Cadastro) | Phase 2 | Implemented |
 | VER-05 | P2: Exibição da Versão nas Telas de Autenticação (Login e Cadastro) | Phase 2 | Pending |
