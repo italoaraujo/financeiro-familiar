@@ -130,9 +130,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `AppShell.tsx` includes navigation item to `/mcp`
-- [ ] `frontend/src/app/mcp/page.tsx` allows creating tokens, copying raw token + MCP JSON config snippet, and revoking tokens
-- [ ] Gate check passes: `npm --prefix frontend run build`
+- [x] `AppShell.tsx` includes navigation item to `/mcp`
+- [x] `frontend/src/app/mcp/page.tsx` allows creating tokens, copying raw token + MCP JSON config snippet, and revoking tokens
+- [x] Gate check passes: `npm --prefix frontend run build`
 
 **Tests**: none
 **Gate**: build

@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   Eye,
+  Bot,
 } from 'lucide-react';
 import { APP_VERSION } from '../../lib/version';
 
@@ -60,6 +61,7 @@ export default function AppShell({ children }: AppShellProps) {
     { name: 'Metas Financeiras', href: '/goals', icon: Target },
     { name: 'Grupo Familiar', href: '/family', icon: Users },
     { name: 'Relatórios & Exportação', href: '/reports', icon: FileSpreadsheet },
+    { name: 'Integração IA (MCP)', href: '/mcp', icon: Bot },
   ];
 
   const currentFamilyName = user.memberships?.find(
