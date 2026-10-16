@@ -53,7 +53,7 @@ T3 -> T4 -> T5
 **Tests**: `npm --prefix frontend run build`
 **Gate**: `npm --prefix frontend run build`
 
-#### T2: Criação da Constante Centralizada APP_VERSION
+#### T2: Criação da Constante Centralizada APP_VERSION [DONE]
 
 **What**: Criar o arquivo `frontend/src/lib/version.ts` exportando a constante `APP_VERSION` com valor derivado de `process.env.NEXT_PUBLIC_APP_VERSION` e fallback para `'1.0.0'`.
 **Where**: `frontend/src/lib/version.ts`
