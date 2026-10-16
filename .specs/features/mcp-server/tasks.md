@@ -156,10 +156,10 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `mcp-server/package.json`, `tsconfig.json`, and `.env.example` created and dependencies installed
-- [ ] `loadConfig` and `resolveFamilyId` implemented in `mcp-server/src/config.ts`
-- [ ] Unit tests in `mcp-server/test/unit/config.spec.ts` pass
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] `mcp-server/package.json`, `tsconfig.json`, and `.env.example` created and dependencies installed
+- [x] `loadConfig` and `resolveFamilyId` implemented in `mcp-server/src/config.ts`
+- [x] Unit tests in `mcp-server/test/unit/config.spec.ts` pass
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
