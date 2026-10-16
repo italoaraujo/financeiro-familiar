@@ -66,7 +66,7 @@ T3 -> T4 -> T5
 
 ### Phase 2: Interface do Usuário e Telas
 
-#### T3: Exibição da Versão no Rodapé da Sidebar do AppShell
+#### T3: Exibição da Versão no Rodapé da Sidebar do AppShell [DONE]
 
 **What**: No componente `frontend/src/components/layout/AppShell.tsx`, importar `APP_VERSION` e adicionar um divisor elegante com texto `Versão` e badge mono `v{APP_VERSION}` no rodapé da área de navegação lateral (`NavContent`), visível tanto no desktop quanto no drawer mobile.
 **Where**: `frontend/src/components/layout/AppShell.tsx`

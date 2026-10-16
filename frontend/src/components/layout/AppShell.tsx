@@ -20,6 +20,7 @@ import {
   X,
   Eye,
 } from 'lucide-react';
+import { APP_VERSION } from '../../lib/version';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -117,23 +118,30 @@ export default function AppShell({ children }: AppShellProps) {
       </nav>
 
       {/* User Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="h-9 w-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-            {user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')}
+      <div className="p-4 border-t border-slate-800/80 bg-slate-900/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-9 w-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+              {user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')}
+            </div>
+            <div className="min-w-0 truncate">
+              <p className="text-sm font-semibold text-slate-200 truncate">{user?.name || user?.email || 'Usuário'}</p>
+              <p className="text-xs text-slate-400 truncate">{user?.email || ''}</p>
+            </div>
           </div>
-          <div className="min-w-0 truncate">
-            <p className="text-sm font-semibold text-slate-200 truncate">{user?.name || user?.email || 'Usuário'}</p>
-            <p className="text-xs text-slate-400 truncate">{user?.email || ''}</p>
-          </div>
+          <button
+            onClick={logout}
+            title="Sair do sistema"
+            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors shrink-0"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
-        <button
-          onClick={logout}
-          title="Sair do sistema"
-          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors shrink-0"
-        >
-          <LogOut className="h-4 w-4" />
-        </button>
+
+        <div className="pt-2.5 mt-2.5 border-t border-slate-800/40 flex items-center justify-between text-[11px] text-slate-500">
+          <span>Versão</span>
+          <span className="font-mono text-slate-400 font-medium">v{APP_VERSION}</span>
+        </div>
       </div>
     </>
   );
