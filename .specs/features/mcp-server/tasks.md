@@ -351,9 +351,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `mcp-server/README.md` documents setup, environment variables, web token generation at `/mcp`, and client configurations
-- [ ] Root `README.md` and `.specs/STATE.md` (`AD-029`) updated
-- [ ] Full build gate passes across backend, frontend, and mcp-server
+- [x] `mcp-server/README.md` documents setup, environment variables, web token generation at `/mcp`, and client configurations
+- [x] Root `README.md` and `.specs/STATE.md` (`AD-029`) updated
+- [x] Full build gate passes across backend, frontend, and mcp-server
 
 **Tests**: none
 **Gate**: build

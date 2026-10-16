@@ -40,6 +40,9 @@ Plataforma completa e moderna para controle financeiro pessoal e em grupo famili
   - Dashboard consolidado com KPIs (Saldo Geral, Receitas, Despesas e Balanço Líquido).
   - Gráficos interativos com **Recharts** (distribuição por categoria e fluxo de caixa de 6 meses).
   - Exportação completa do extrato filtrado em planilha **CSV**.
+- **🤖 Integração com Assistentes de IA (Servidor MCP)**:
+  - Servidor **Model Context Protocol (MCP)** dedicado (`/mcp-server`) com **31 Tools** e **3 Resources** cobrindo todos os módulos financeiros via `stdio`.
+  - Geração, cópia de configuração JSON (`mcpServers`) e revogação instantânea de tokens de acesso pela página web `/mcp` (**Integração IA (MCP)**).
 
 ---
 
@@ -49,21 +52,25 @@ Plataforma completa e moderna para controle financeiro pessoal e em grupo famili
 financeiro-familiar/
 ├── backend/                     # API RESTful em NestJS 10 + TypeScript
 │   ├── prisma/                  # Modelagem Relacional e Seed Script
-│   │   ├── schema.prisma        # 11 Tabelas com tipos PostgreSQL DECIMAL(15,2)
+│   │   ├── schema.prisma        # Tabelas com tipos PostgreSQL DECIMAL(15,2) + McpApiToken
 │   │   └── seed.ts              # Categorias padrão e usuário administrador
 │   ├── src/
 │   │   ├── modules/             # Auth, Users, Families, Accounts, Credit Cards,
 │   │   │                        # Categories, Transactions, Budgets, Goals, Reports
 │   │   └── common/              # Guards JWT, Decorators, Interceptors
-│   └── test/                    # 11 Suítes de Teste (Unitários e Integração E2E)
+│   └── test/                    # Suítes de Teste (Unitários e Integração E2E)
 │
-├── frontend/                    # Web App em Next.js 14 (App Router) + React 18
+├── frontend/                    # Web App em Next.js 16 (App Router) + React 18
 │   ├── src/
 │   │   ├── app/                 # Rotas: /, /login, /register, /transactions,
-│   │   │                        # /accounts, /cards, /budgets, /goals, /family, /reports
+│   │   │                        # /accounts, /cards, /budgets, /goals, /family, /reports, /mcp
 │   │   ├── components/layout/   # AppShell responsivo com Sidebar e Context Switcher
 │   │   ├── context/             # AuthProvider com persistência e RBAC
 │   │   └── lib/                 # Cliente HTTP fetch e formatadores monetários
+│
+├── mcp-server/                  # Servidor Model Context Protocol (MCP) em TypeScript
+│   ├── src/                     # 31 Tools, 3 Resources, FinancialApiClient e CLI stdio
+│   └── test/                    # Suítes Unitárias e Integração E2E (InMemoryTransport)
 │
 └── docker-compose.yml           # Orquestração de Containers (Postgres, API, Web)
 ```

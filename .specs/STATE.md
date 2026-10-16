@@ -226,23 +226,32 @@
 - **Date**: 2026-10-16
 - **Status**: active
 
+### AD-029
+- **Decision**: Implementar o servidor Model Context Protocol (MCP) em um pacote TypeScript desacoplado (`/mcp-server`) utilizando `@modelcontextprotocol/sdk` (`StdioServerTransport`) e `zod` que consome a API REST do `/backend` via cliente HTTP (`FinancialApiClient`), expondo 31 Tools e 3 Resources (`financeiro://dashboard/summary`, `financeiro://accounts/list`, `financeiro://categories/catalog`). Prover gerenciamento self-service de tokens MCP pela interface web (`/mcp` no frontend e endpoints `POST/GET/DELETE /auth/mcp-tokens` com tabela `McpApiToken` no Prisma integrada ao `TokenBlacklistService.addHash`), exibindo o token bruto apenas uma vez na criação e gerando automaticamente o snippet JSON (`mcpServers`).
+- **Reason**: Preserva 100% das regras de negócio existentes no NestJS (cálculos `DECIMAL(15,2)`, corte e liquidação de faturas, parcelamentos em até 72x, controle RBAC `VIEWER`, sanitização CSV e `AuditLogInterceptor`) sem duplicar lógica ou abrir conexões concorrentes diretas ao PostgreSQL, enquanto permite ao usuário gerar e revogar tokens de IA em 1 clique pela web.
+- **Trade-off**: Requer que o serviço `/backend` esteja em execução e acessível via HTTP pelo processo local do `mcp-server`.
+- **Scope**: `backend/prisma/schema.prisma`, `backend/src/modules/auth/*`, `frontend/src/app/mcp/page.tsx`, `frontend/src/components/layout/AppShell.tsx` e pacote completo `mcp-server/`.
+- **Date**: 2026-10-16
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `exibicao-versao-sistema`
-- **Total Tasks**: 5
-- **Completed Tasks**: 5 / 5 (100%)
+- **Active Feature**: `mcp-server`
+- **Total Tasks**: 12
+- **Completed Tasks**: 12 / 12 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros, 28 suítes do backend aprovadas (294 testes)
+- **Build Status**: Backend (`31 suítes / 306 testes`), Frontend Next.js 16.3.8 Turbopack (`build` limpo com `/mcp`) e MCP Server (`build` limpo + `8 suítes / 45 testes`) 100% aprovados
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/exibicao-versao-sistema
-- **Phase / Task**: Phase 2 / T5 (All tasks complete)
-- **Completed**: T1 (Injeção de NEXT_PUBLIC_APP_VERSION no Next.js), T2 (Criação de APP_VERSION com fallback), T3 (Exibição da versão no rodapé da Sidebar do AppShell), T4 (Exibição no rodapé da tela de Login), T5 (Exibição no rodapé da tela de Cadastro)
+- **Feature**: .specs/features/mcp-server
+- **Phase / Task**: Phase 3 / T12 (All tasks complete)
+- **Completed**: T1 (Spec, Context, Design & Tasks), T2 (Backend MCP Access Tokens), T3 (Frontend `/mcp` Page), T4 (`mcp-server` Setup & `config.ts`), T5 (`FinancialApiClient`), T6 (Context, Accounts, Categories & Tags Tools), T7 (Transactions & Transfers Tools), T8 (Credit Cards & Invoices Tools), T9 (Budgets & Goals Tools), T10 (Reports Tools & MCP Resources), T11 (`server.ts`, `index.ts` & Integration Tests), T12 (Documentation & `STATE.md`)
 - **In-progress**: None
-- **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
+- **Next step**: Revisão final do usuário na branch `feature/mcp-server`
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/exibicao-versao-sistema
+- **Branch**: feature/mcp-server
+
 
