@@ -22,20 +22,21 @@ export default function LoginPage() {
       return false;
     }
 
-    if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('registrationEnabled');
-      if (cached !== null) {
-        return cached === 'true';
-      }
-    }
-
-    return false;
+    return true;
   });
   const { login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     let isMounted = true;
+
+    try {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null && isMounted) {
+        setRegistrationEnabled(cached === 'true');
+      }
+    } catch (_) {}
+
     getAuthStatus().then((status) => {
       if (isMounted) {
         setRegistrationEnabled(status.registrationEnabled);

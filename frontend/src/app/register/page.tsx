@@ -25,13 +25,6 @@ export default function RegisterPage() {
       return false;
     }
 
-    if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('registrationEnabled');
-      if (cached !== null) {
-        return cached === 'true';
-      }
-    }
-
     return null;
   });
   const { register } = useAuth();
@@ -41,6 +34,14 @@ export default function RegisterPage() {
 
   useEffect(() => {
     let isMounted = true;
+
+    try {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null && isMounted) {
+        setRegistrationEnabled(cached === 'true');
+      }
+    } catch (_) {}
+
     getAuthStatus().then((status) => {
       if (isMounted) {
         setRegistrationEnabled(status.registrationEnabled);
