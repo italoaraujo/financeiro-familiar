@@ -8,9 +8,14 @@ try {
   apiOrigin = apiUrl;
 }
 
+const pkg = require('./package.json');
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+  },
   async headers() {
     return [
       {
