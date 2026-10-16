@@ -303,9 +303,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] 5 report tools and 3 MCP resources registered in `mcp-server/src/tools/reports-tools.ts`
-- [ ] Unit tests in `mcp-server/test/unit/reports-tools.spec.ts` verify all 5 tools and 3 resources
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] 5 report tools and 3 MCP resources registered in `mcp-server/src/tools/reports-tools.ts`
+- [x] Unit tests in `mcp-server/test/unit/reports-tools.spec.ts` verify all 5 tools and 3 resources
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
