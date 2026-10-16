@@ -229,9 +229,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] 4 tools registered in `mcp-server/src/tools/transactions-tools.ts`
-- [ ] Unit tests in `mcp-server/test/unit/transactions-tools.spec.ts` verify filters, installment payloads, transfers, deletions, and backend error propagation
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] 4 tools registered in `mcp-server/src/tools/transactions-tools.ts`
+- [x] Unit tests in `mcp-server/test/unit/transactions-tools.spec.ts` verify filters, installment payloads, transfers, deletions, and backend error propagation
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
