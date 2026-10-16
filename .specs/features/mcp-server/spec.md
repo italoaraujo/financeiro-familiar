@@ -130,8 +130,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | MCP-02 | P1: Web Management of MCP Access Tokens (Revoke & UI `/mcp`) | Phase 1 | Verified |
 | MCP-03 | P1: MCP Server Authentication & HTTP Client | Phase 2 | Verified |
 | MCP-04 | P1: Personal vs. Family Context Resolution | Phase 2 | Verified |
-| MCP-05 | P1: Context, Families & Accounts Tools | Phase 2 | Pending |
-| MCP-06 | P1: Categories & Tags Tools | Phase 2 | Pending |
+| MCP-05 | P1: Context, Families & Accounts Tools | Phase 2 | Verified |
+| MCP-06 | P1: Categories & Tags Tools | Phase 2 | Verified |
 | MCP-07 | P1: Transactions & Transfers Tools | Phase 2 | Pending |
 | MCP-08 | P2: Credit Cards & Invoices Tools | Phase 2 | Pending |
 | MCP-09 | P2: Budgets & Goals Tools | Phase 3 | Pending |

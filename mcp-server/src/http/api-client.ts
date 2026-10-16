@@ -14,6 +14,22 @@ export interface McpToolResponse {
   isError?: boolean;
 }
 
+export interface McpToolRegistrar {
+  tool(
+    name: string,
+    description: string,
+    paramsSchema: Record<string, any>,
+    cb: (args: any) => Promise<McpToolResponse>,
+  ): any;
+  resource?(
+    name: string,
+    uri: string,
+    cb: (uri: URL) => Promise<{
+      contents: Array<{ uri: string; mimeType?: string; text: string }>;
+    }>,
+  ): any;
+}
+
 export class ApiClientError extends Error {
   constructor(
     public readonly statusCode: number,

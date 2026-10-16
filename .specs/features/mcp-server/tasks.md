@@ -205,9 +205,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] 10 tools registered across `context-tools.ts` and `accounts-tools.ts`
-- [ ] Unit tests in `mcp-server/test/unit/accounts-context-tools.spec.ts` verify all 10 tools and error handling
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] 10 tools registered across `context-tools.ts` and `accounts-tools.ts`
+- [x] Unit tests in `mcp-server/test/unit/accounts-context-tools.spec.ts` verify all 10 tools and error handling
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
