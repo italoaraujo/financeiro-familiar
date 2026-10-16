@@ -134,7 +134,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | MCP-06 | P1: Categories & Tags Tools | Phase 2 | Verified |
 | MCP-07 | P1: Transactions & Transfers Tools | Phase 2 | Verified |
 | MCP-08 | P2: Credit Cards & Invoices Tools | Phase 2 | Verified |
-| MCP-09 | P2: Budgets & Goals Tools | Phase 3 | Pending |
+| MCP-09 | P2: Budgets & Goals Tools | Phase 3 | Verified |
 | MCP-10 | P2: Reports Tools, MCP Resources & Server Bootstrap | Phase 3 | Pending |
 
 **Coverage:** 10 total, 10 mapped to tasks, 0 unmapped

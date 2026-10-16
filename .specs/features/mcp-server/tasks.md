@@ -279,9 +279,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] 8 tools registered in `mcp-server/src/tools/budgets-goals-tools.ts`
-- [ ] Unit tests in `mcp-server/test/unit/budgets-goals-tools.spec.ts` verify all 8 tools and error paths
-- [ ] Gate check passes: `npm --prefix mcp-server test`
+- [x] 8 tools registered in `mcp-server/src/tools/budgets-goals-tools.ts`
+- [x] Unit tests in `mcp-server/test/unit/budgets-goals-tools.spec.ts` verify all 8 tools and error paths
+- [x] Gate check passes: `npm --prefix mcp-server test`
 
 **Tests**: unit
 **Gate**: quick
