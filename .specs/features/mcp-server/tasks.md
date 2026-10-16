@@ -327,9 +327,9 @@ T9 -> T10 -> T11 -> T12
 
 **Done when**:
 
-- [ ] `src/server.ts` and `src/index.ts` compile cleanly to `dist/`
-- [ ] Integration test suite in `mcp-server/test/integration/mcp-server.spec.ts` connects an MCP `Client` over `InMemoryTransport` to `createFinancialMcpServer`, lists all 31 tools and 3 resources, and executes sample calls end-to-end
-- [ ] Gate check passes: `npm --prefix mcp-server run build && npm --prefix mcp-server test`
+- [x] `src/server.ts` and `src/index.ts` compile cleanly to `dist/`
+- [x] Integration test suite in `mcp-server/test/integration/mcp-server.spec.ts` connects an MCP `Client` over `InMemoryTransport` to `createFinancialMcpServer`, lists all 31 tools and 3 resources, and executes sample calls end-to-end
+- [x] Gate check passes: `npm --prefix mcp-server run build && npm --prefix mcp-server test`
 
 **Tests**: integration
 **Gate**: full

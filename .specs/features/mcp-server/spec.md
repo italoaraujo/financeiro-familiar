@@ -135,7 +135,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | MCP-07 | P1: Transactions & Transfers Tools | Phase 2 | Verified |
 | MCP-08 | P2: Credit Cards & Invoices Tools | Phase 2 | Verified |
 | MCP-09 | P2: Budgets & Goals Tools | Phase 3 | Verified |
-| MCP-10 | P2: Reports Tools, MCP Resources & Server Bootstrap | Phase 3 | Pending |
+| MCP-10 | P2: Reports Tools, MCP Resources & Server Bootstrap | Phase 3 | Verified |
 
 **Coverage:** 10 total, 10 mapped to tasks, 0 unmapped
 
@@ -143,6 +143,6 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] Authenticated users can create, copy JSON config, and revoke MCP tokens from `/mcp`.
-- [ ] All 31 MCP tools and 3 MCP resources execute against the backend API and pass unit and integration test suites.
-- [ ] `validate_spec.py`, `validate_tasks.py`, and `validate_state.py` pass with 0 errors.
+- [x] Authenticated users can create, copy JSON config, and revoke MCP tokens from `/mcp`.
+- [x] All 31 MCP tools and 3 MCP resources execute against the backend API and pass unit and integration test suites.
+- [x] `validate_spec.py`, `validate_tasks.py`, and `validate_state.py` pass with 0 errors.
