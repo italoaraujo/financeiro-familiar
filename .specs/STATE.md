@@ -202,24 +202,47 @@
 - **Trade-off**: Requer maior esforço de criação de senha por novos usuários, mitigado por um checklist visual dinâmico com feedback em tempo real na tela de registro.
 - **Scope**: `backend/src/common/utils/password-rules.util.ts`, `backend/src/modules/auth/dto/register.dto.ts`, `backend/test/unit/register-dto.spec.ts`, `frontend/src/lib/password-rules.ts` e `frontend/src/app/register/page.tsx`.
 - **Date**: 2026-10-03
+### AD-026
+- **Decision**: Prevenir zoom automático indevido ("Focus Zoom") no iOS Safari (iPhone) e navegadores baseados em WebKit configurando via CSS global (`frontend/src/app/globals.css`) que todos os campos de texto (`input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])`), `select` e `textarea` possuam `font-size: 16px !important` em viewports com largura até 768px (`@media screen and (max-width: 768px)`), e aplicando `touch-action: manipulation` para elementos interativos. Preservar `maximumScale: 5` no viewport de `frontend/src/app/layout.tsx` para garantir conformidade estrita com acessibilidade WCAG.
+- **Reason**: No iOS WebKit, qualquer campo de formulário com tamanho de fonte inferior a 16px dispara zoom in involuntário ao focar, quebrando a renderização responsiva, cortando o viewport e prejudicando o uso em smartphones. A regra global protege todo o sistema e futuros componentes sem depender de estilização manual pontual e sem desativar a escala de acessibilidade para usuários com baixa visão.
+- **Trade-off**: Aumenta sutilmente o tamanho de fonte dos campos no mobile para 16px, em total harmonia com as diretrizes da Apple (Human Interface Guidelines).
+- **Scope**: `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx`, formulários e componentes interativos.
+- **Date**: 2026-10-04
+- **Status**: active
+
+### AD-027
+- **Decision**: Eliminar a persistência de credenciais e tokens JWT em `localStorage` no frontend, converter o cookie de autenticação `financial_token` exclusivamente em Session Cookie (RFC 6265, omitindo atributos `Expires` e `Max-Age`), adotar `sessionStorage` para dados voláteis de perfil e implementar hidratação resiliente via `GET /auth/me` para restauração automática de sessão em novas abas durante a execução do navegador.
+- **Reason**: Atende à solicitação direta do usuário de desconectar automaticamente a conta quando o navegador for fechado, protegendo a privacidade e segurança do usuário contra acesso indevido em máquinas compartilhadas ou reiniciadas, mantendo usabilidade multi-abas enquanto o navegador estiver aberto.
+- **Trade-off**: Usuários precisam autenticar novamente toda vez que reabrirem o navegador fechado, o que é o comportamento explicitamente desejado.
+- **Scope**: `frontend/src/lib/cookies.ts`, `frontend/src/lib/api.ts`, `frontend/src/context/AuthContext.tsx`.
+- **Date**: 2026-10-09
+- **Status**: active
+
+### AD-028
+- **Decision**: Injetar dinamicamente a versão da aplicação no Next.js (`frontend/next.config.js`) a partir de `package.json` (`pkg.version`) via variável pública de ambiente `NEXT_PUBLIC_APP_VERSION`, disponibilizar constante centralizada `APP_VERSION` com fallback resiliente para `'1.0.0'` em `frontend/src/lib/version.ts`, e renderizar a versão de forma padronizada no rodapé da Sidebar do `AppShell` (desktop e mobile) e no rodapé das páginas de autenticação (`/login` e `/register`).
+- **Reason**: Atende à necessidade de identificar visualmente a versão em execução do sistema tanto para usuários autenticados quanto deslogados, garantindo sincronização automática com os releases de `package.json` sem necessidade de manutenção de strings duplicadas ou overhead de rede.
+- **Trade-off**: A versão do frontend é fixada em tempo de build (estática), compatível com o build standalone do Next.js.
+- **Scope**: `frontend/next.config.js`, `frontend/src/lib/version.ts`, `frontend/src/components/layout/AppShell.tsx`, `frontend/src/app/login/page.tsx` e `frontend/src/app/register/page.tsx`.
+- **Date**: 2026-10-16
 - **Status**: active
 
 ## Current Execution State
 
-- **Active Feature**: `politica-senha-cadastro`
-- **Total Tasks**: 4
-- **Completed Tasks**: 4 / 4 (100%)
+- **Active Feature**: `exibicao-versao-sistema`
+- **Total Tasks**: 5
+- **Completed Tasks**: 5 / 5 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: 289 testes unitários e de integração passando, builds de backend e frontend 100% limpos
+- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros, 28 suítes do backend aprovadas (294 testes)
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
 
 ## Handoff
 
-- **Feature**: .specs/features/politica-senha-cadastro
-- **Phase / Task**: Phase 2 / T4 (All tasks complete)
-- **Completed**: T1 (Backend password rules utility & common passwords blacklist), T2 (RegisterDto validation & comprehensive unit test suite), T3 (Frontend password rules utility), T4 (Real-time visual checklist & pre-submit validation on Register page)
+- **Feature**: .specs/features/exibicao-versao-sistema
+- **Phase / Task**: Phase 2 / T5 (All tasks complete)
+- **Completed**: T1 (Injeção de NEXT_PUBLIC_APP_VERSION no Next.js), T2 (Criação de APP_VERSION com fallback), T3 (Exibição da versão no rodapé da Sidebar do AppShell), T4 (Exibição no rodapé da tela de Login), T5 (Exibição no rodapé da tela de Cadastro)
 - **In-progress**: None
-- **Next step**: Revisão do usuário e sincronização com repositório remoto conforme autorizado
+- **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: develop
+- **Branch**: feature/exibicao-versao-sistema
+

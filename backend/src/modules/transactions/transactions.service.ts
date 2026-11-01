@@ -187,6 +187,12 @@ export class TransactionsService {
               invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
             }
 
+            if (invoice.status === InvoiceStatus.PAID) {
+              throw new BadRequestException(
+                `Não é possível gerar a parcela ${i}/${totalInstallments} na fatura ${refMonth} porque ela já foi totalmente paga`,
+              );
+            }
+
             const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
             const targetDay = Math.min(closingDay, maxDaysInMonth);
             installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
@@ -535,14 +541,10 @@ export class TransactionsService {
         await this.verifyFamilyAccess(userId, transaction.familyId, true);
       }
 
-      // Bloqueio de exclusão em faturas de cartão já fechadas ou pagas
-      if (
-        transaction.invoice &&
-        (transaction.invoice.status === InvoiceStatus.CLOSED ||
-          transaction.invoice.status === InvoiceStatus.PAID)
-      ) {
+      // Bloqueio de exclusão em faturas de cartão já pagas
+      if (transaction.invoice && transaction.invoice.status === InvoiceStatus.PAID) {
         throw new BadRequestException(
-          'Não é possível excluir lançamentos de faturas que já foram fechadas ou pagas',
+          'Não é possível excluir lançamentos de faturas que já foram pagas',
         );
       }
 

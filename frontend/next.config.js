@@ -1,7 +1,21 @@
-/** @type {import('next').NextConfig} */
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// Garante apenas a origem (protocolo + host + porta), caso a URL venha com subcaminhos
+let apiOrigin = '';
+try {
+  apiOrigin = new URL(apiUrl).origin;
+} catch {
+  apiOrigin = apiUrl;
+}
+
+const pkg = require('./package.json');
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+  },
   async headers() {
     return [
       {
@@ -29,7 +43,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' http://localhost:3001 http://127.0.0.1:3001 https:;",
+            value: `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ${apiOrigin} https:;`,
           },
         ],
       },

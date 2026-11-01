@@ -777,8 +777,8 @@ export default function CreditCardsPage() {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {selectedInvoiceDetails.personTotals.map((pt: any) => {
-                        const total = selectedInvoiceDetails.totalAmount || 1;
-                        const pct = Math.round((pt.total / total) * 100);
+                        const total = Number(selectedInvoiceDetails.totalAmount) || 0;
+                        const pct = total > 0 ? Math.round((Number(pt.total) / total) * 100) : 0;
                         return (
                           <div
                             key={pt.personId || 'unassigned'}

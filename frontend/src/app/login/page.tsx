@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { getAuthStatus } from '../../lib/api';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { APP_VERSION } from '../../lib/version';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,20 +22,21 @@ export default function LoginPage() {
       return false;
     }
 
-    if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('registrationEnabled');
-      if (cached !== null) {
-        return cached === 'true';
-      }
-    }
-
-    return false;
+    return true;
   });
   const { login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     let isMounted = true;
+
+    try {
+      const cached = sessionStorage.getItem('registrationEnabled');
+      if (cached !== null && isMounted) {
+        setRegistrationEnabled(cached === 'true');
+      }
+    } catch (_) {}
+
     getAuthStatus().then((status) => {
       if (isMounted) {
         setRegistrationEnabled(status.registrationEnabled);
@@ -159,6 +161,13 @@ export default function LoginPage() {
                 Conta de demonstração: <span className="text-slate-400">admin@exemplo.com</span> / <span className="text-slate-400">123456</span>
               </p>
             )}
+          </div>
+
+          {/* Version Footer */}
+          <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+            <span>Finanças Familiar</span>
+            <span>•</span>
+            <span className="font-mono text-slate-400">v{APP_VERSION}</span>
           </div>
         </div>
       </div>

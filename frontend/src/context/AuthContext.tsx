@@ -42,13 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = getAuthCookie('financial_token') || localStorage.getItem('financial_token');
-    const storedUser = localStorage.getItem('financial_user');
-    const storedFamily = localStorage.getItem('financial_family_id');
+    // Limpeza defensiva de tokens e dados legados gravados em disco
+    try {
+      localStorage.removeItem('financial_token');
+      localStorage.removeItem('financial_user');
+      localStorage.removeItem('financial_family_id');
+    } catch (_) {}
+
+    const storedToken = getAuthCookie('financial_token') || sessionStorage.getItem('financial_token');
+    const storedUser = sessionStorage.getItem('financial_user');
+    const storedFamily = sessionStorage.getItem('financial_family_id') || getAuthCookie('financial_family_id');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
-      // Garantir sincronização no cookie
       setAuthCookie('financial_token', storedToken);
       try {
         const parsed = JSON.parse(storedUser);
@@ -57,16 +63,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('Error parsing stored user', e);
       }
+      setIsLoading(false);
+    } else if (storedToken) {
+      // Caso exista o cookie de sessão mas não o cache local (ex: nova aba aberta)
+      setToken(storedToken);
+      apiRequest<User>('/auth/me')
+        .then((userData) => {
+          setUser(userData);
+          sessionStorage.setItem('financial_user', JSON.stringify(userData));
+          if (userData.memberships && userData.memberships.length > 0) {
+            const initialFamily = storedFamily || userData.memberships[0].family.id;
+            setSelectedFamilyId(initialFamily);
+            setAuthCookie('financial_family_id', initialFamily);
+          }
+        })
+        .catch(() => {
+          removeAuthCookie('financial_token');
+          removeAuthCookie('financial_family_id');
+          sessionStorage.clear();
+          setToken(null);
+          setUser(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+      return;
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const handleFamilyChange = (id: string | null) => {
     setSelectedFamilyId(id);
     if (id) {
-      localStorage.setItem('financial_family_id', id);
+      sessionStorage.setItem('financial_family_id', id);
+      setAuthCookie('financial_family_id', id);
     } else {
-      localStorage.removeItem('financial_family_id');
+      sessionStorage.removeItem('financial_family_id');
+      removeAuthCookie('financial_family_id');
     }
   };
 
@@ -79,8 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data.user);
     setToken(data.accessToken);
     setAuthCookie('financial_token', data.accessToken);
-    localStorage.setItem('financial_token', data.accessToken);
-    localStorage.setItem('financial_user', JSON.stringify(data.user));
+    sessionStorage.setItem('financial_user', JSON.stringify(data.user));
 
     if (data.user.memberships && data.user.memberships.length > 0) {
       handleFamilyChange(data.user.memberships[0].family.id);
@@ -96,8 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data.user);
     setToken(data.accessToken);
     setAuthCookie('financial_token', data.accessToken);
-    localStorage.setItem('financial_token', data.accessToken);
-    localStorage.setItem('financial_user', JSON.stringify(data.user));
+    sessionStorage.setItem('financial_user', JSON.stringify(data.user));
   };
 
   const refreshUserData = async () => {
@@ -112,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })),
         };
         setUser(updated);
-        localStorage.setItem('financial_user', JSON.stringify(updated));
+        sessionStorage.setItem('financial_user', JSON.stringify(updated));
       }
     } catch (e) {
       console.error('Failed to refresh user data', e);
@@ -127,9 +159,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(null);
       setSelectedFamilyId(null);
       removeAuthCookie('financial_token');
-      localStorage.removeItem('financial_token');
-      localStorage.removeItem('financial_user');
-      localStorage.removeItem('financial_family_id');
+      removeAuthCookie('financial_family_id');
+      sessionStorage.removeItem('financial_token');
+      sessionStorage.removeItem('financial_user');
+      sessionStorage.removeItem('financial_family_id');
+      try {
+        localStorage.removeItem('financial_token');
+        localStorage.removeItem('financial_user');
+        localStorage.removeItem('financial_family_id');
+      } catch (_) {}
       window.location.href = '/login';
     }
   };

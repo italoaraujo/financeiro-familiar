@@ -39,10 +39,9 @@ export class CreditCardsService {
       },
     });
 
-    // Inicializa fatura do mês atual
+    // Inicializa a fatura aberta do ciclo vigente
     const now = new Date();
-    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    await this.getOrCreateInvoice(card.id, currentMonthStr);
+    await this.determineInvoiceForDate(card.id, now);
 
     return card;
   }
@@ -53,6 +52,7 @@ export class CreditCardsService {
     }
 
     await this.syncInvoiceStatuses();
+    await this.cleanupOrphanZeroInvoices();
 
     const cards = await this.prisma.creditCard.findMany({
       where: familyId
@@ -84,6 +84,7 @@ export class CreditCardsService {
 
   async findById(userId: string, id: string) {
     await this.syncInvoiceStatuses(id);
+    await this.cleanupOrphanZeroInvoices(id);
 
     const card = await this.prisma.creditCard.findUnique({
       where: { id },
@@ -317,17 +318,12 @@ export class CreditCardsService {
     }
 
     let refMonth = `${year}-${String(month).padStart(2, '0')}`;
-    let invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+    const invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
 
-    // Se a fatura correspondente já estiver fechada ou paga, aloca na próxima fatura aberta
-    while (invoice.status === InvoiceStatus.CLOSED || invoice.status === InvoiceStatus.PAID) {
-      month += 1;
-      if (month > 12) {
-        month = 1;
-        year += 1;
-      }
-      refMonth = `${year}-${String(month).padStart(2, '0')}`;
-      invoice = await this.getOrCreateInvoice(creditCardId, refMonth);
+    if (invoice.status === InvoiceStatus.PAID) {
+      throw new BadRequestException(
+        `Não é possível adicionar lançamentos na fatura ${refMonth} porque ela já foi totalmente paga`,
+      );
     }
 
     return invoice;
@@ -445,6 +441,9 @@ export class CreditCardsService {
       include: {
         creditCard: true,
         transactions: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             category: true,
             person: {
@@ -540,6 +539,127 @@ export class CreditCardsService {
         status: InvoiceStatus.CLOSED,
       },
     });
+  }
+
+  async cleanupOrphanZeroInvoices(creditCardId?: string): Promise<void> {
+    try {
+      let cardIds: string[] = [];
+      if (creditCardId) {
+        cardIds = [creditCardId];
+      } else {
+        const cards = await this.prisma.creditCard.findMany({
+          where: { deletedAt: null },
+          select: { id: true },
+        });
+        cardIds = Array.isArray(cards) ? cards.map((c) => c.id) : [];
+      }
+
+      for (const id of cardIds) {
+        const card = await this.prisma.creditCard.findUnique({
+          where: { id },
+          select: { id: true, closingDay: true },
+        });
+
+        if (!card) {
+          continue;
+        }
+
+        const now = new Date();
+        const day = now.getDate();
+        let month = now.getMonth() + 1;
+        let year = now.getFullYear();
+        if (day >= card.closingDay) {
+          month += 1;
+          if (month > 12) {
+            month = 1;
+            year += 1;
+          }
+        }
+        const currentCycleRefMonth = `${year}-${String(month).padStart(2, '0')}`;
+
+        const invoices = await this.prisma.creditCardInvoice.findMany({
+          where: { creditCardId: id },
+          include: {
+            transactions: {
+              where: { deletedAt: null },
+              select: { id: true },
+            },
+          },
+          orderBy: { referenceMonth: 'asc' },
+        });
+
+        if (!Array.isArray(invoices) || invoices.length === 0) {
+          continue;
+        }
+
+        const validInvoices = invoices.filter(
+          (inv) =>
+            (inv.transactions && inv.transactions.length > 0) ||
+            new Prisma.Decimal(inv.totalAmount || 0).gt(0) ||
+            new Prisma.Decimal(inv.paidAmount || 0).gt(0) ||
+            inv.status === InvoiceStatus.PAID,
+        );
+
+        if (validInvoices.length > 0) {
+          const firstValidMonth = validInvoices[0].referenceMonth;
+          const lastValidMonth = validInvoices[validInvoices.length - 1].referenceMonth;
+          const maxPreserveMonth = lastValidMonth > currentCycleRefMonth ? lastValidMonth : currentCycleRefMonth;
+
+          const orphanIds = invoices
+            .filter((inv) => {
+              const isZero =
+                (!inv.transactions || inv.transactions.length === 0) &&
+                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
+                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
+                inv.status !== InvoiceStatus.PAID;
+
+              if (!isZero) return false;
+
+              // Apaga faturas zeradas no passado (antes da primeira fatura válida)
+              if (inv.referenceMonth < firstValidMonth) return true;
+
+              // Apaga faturas zeradas no futuro (além do último mês com compras e além do ciclo atual)
+              if (inv.referenceMonth > maxPreserveMonth) return true;
+
+              return false;
+            })
+            .map((inv) => inv.id);
+
+          if (orphanIds.length > 0) {
+            await this.prisma.creditCardInvoice.deleteMany({
+              where: { id: { in: orphanIds } },
+            });
+          }
+        } else {
+          // Todas as faturas do cartão estão sem movimentação/compras.
+          // Garante que faturas fora do ciclo vigente atual sejam removidas.
+          const orphanIds = invoices
+            .filter(
+              (inv) =>
+                inv.referenceMonth !== currentCycleRefMonth &&
+                (!inv.transactions || inv.transactions.length === 0) &&
+                new Prisma.Decimal(inv.totalAmount || 0).eq(0) &&
+                new Prisma.Decimal(inv.paidAmount || 0).eq(0) &&
+                inv.status !== InvoiceStatus.PAID,
+            )
+            .map((inv) => inv.id);
+
+          if (orphanIds.length > 0) {
+            await this.prisma.creditCardInvoice.deleteMany({
+              where: { id: { in: orphanIds } },
+            });
+          }
+
+          // Se a fatura do ciclo ativo não existir, cria para manter o ciclo vigente
+          const hasCurrentInvoice = invoices.some((inv) => inv.referenceMonth === currentCycleRefMonth);
+          if (!hasCurrentInvoice) {
+            await this.getOrCreateInvoice(id, currentCycleRefMonth);
+          }
+        }
+      }
+    } catch {
+      // Ignora falhas defensivamente
+    }
   }
 
   private async validateAccountAccess(userId: string, accountId: string, familyId?: string | null) {

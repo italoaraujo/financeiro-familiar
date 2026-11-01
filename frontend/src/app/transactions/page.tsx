@@ -276,7 +276,7 @@ export default function TransactionsPage() {
             </div>
 
             {/* Start Date */}
-            <div>
+            <div className="min-w-0">
               <input
                 type="date"
                 value={startDate}
@@ -284,12 +284,12 @@ export default function TransactionsPage() {
                   setStartDate(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                className="w-full max-w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
 
             {/* End Date */}
-            <div>
+            <div className="min-w-0">
               <input
                 type="date"
                 value={endDate}
@@ -297,7 +297,7 @@ export default function TransactionsPage() {
                   setEndDate(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                className="w-full max-w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               />
             </div>
 
@@ -655,7 +655,7 @@ export default function TransactionsPage() {
 
                 {/* Date and Time */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
                       Data do Lançamento *
                     </label>
@@ -664,10 +664,10 @@ export default function TransactionsPage() {
                       required
                       value={transactionDate}
                       onChange={(e) => setTransactionDate(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                      className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
                       Horário (Opcional)
                     </label>
@@ -675,7 +675,7 @@ export default function TransactionsPage() {
                       type="time"
                       value={transactionTime}
                       onChange={(e) => setTransactionTime(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                      className="w-full max-w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                     />
                   </div>
                 </div>

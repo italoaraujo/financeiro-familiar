@@ -1,0 +1,58 @@
+# ==============================================================================
+# DOCKER COMPOSE OVERRIDE (Exemplo para Produção / Proxy Reverso)
+# ==============================================================================
+# Como usar:
+# 1. Copie este arquivo para docker-compose.override.yml no servidor:
+#      cp docker-compose.override.example.yml docker-compose.override.yml
+#
+# 2. Certifique-se de que a rede pública do seu proxy já existe no Docker:
+#      docker network create rede-publica-proxy
+#    (ou defina PROXY_NETWORK_NAME no .env com o nome da rede existente do seu proxy)
+#
+# 3. No Nginx Proxy Manager (NPM):
+#    - Frontend: Forward Hostname: financial-frontend | Port: 3000
+#    - API:      Forward Hostname: financial-api      | Port: 3001
+# ==============================================================================
+
+services:
+  api:
+    networks:
+      default:
+      rede-publica-proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:-financial}-api
+      # (Opcional) Descomente se o PostgreSQL estiver em outro container fora deste compose:
+      # rede-postgres:
+
+    # (Opcional) Exemplo de configuração para quem usa Traefik:
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.financial-api.rule=Host(`api.seudominio.com.br`)"
+    #   - "traefik.http.routers.financial-api.entrypoints=websecure"
+    #   - "traefik.http.routers.financial-api.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.financial-api.loadbalancer.server.port=3001"
+
+  frontend:
+    networks:
+      default:
+      rede-publica-proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:-financial}-frontend
+
+    # (Opcional) Exemplo de configuração para quem usa Traefik:
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.financial-web.rule=Host(`app.seudominio.com.br`)"
+    #   - "traefik.http.routers.financial-web.entrypoints=websecure"
+    #   - "traefik.http.routers.financial-web.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.financial-web.loadbalancer.server.port=3000"
+
+networks:
+  # Rede externa do proxy reverso (Nginx Proxy Manager, Traefik, NPM, etc.)
+  rede-publica-proxy:
+    external: true
+    name: ${PROXY_NETWORK_NAME:-rede-publica-proxy}
+
+  # (Opcional) Descomente se for conectar a um banco PostgreSQL externo pré-existente:
+  # rede-postgres:
+  #   external: true
