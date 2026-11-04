@@ -159,21 +159,28 @@ export class TransactionsService {
 
         const createdTransactions = [];
 
-        const baseYear = baseDate.getFullYear();
-        const baseMonth = baseDate.getMonth() + 1;
+        const firstInvoice = await this.creditCardsService.determineInvoiceForDate(
+          dto.creditCardId!,
+          baseDate,
+        );
+        const refMonthBase =
+          firstInvoice?.referenceMonth ||
+          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`;
+        const [firstYear, firstMonth] = refMonthBase.split('-').map(Number);
         const closingDay = card?.closingDay || 1;
 
         for (let i = 1; i <= totalInstallments; i++) {
           let installmentDate: Date;
-          const targetMonth = baseMonth + (i - 1);
-          const targetYear = baseYear + Math.floor((targetMonth - 1) / 12);
+          let invoice = firstInvoice;
+
+          const targetMonth = firstMonth + (i - 1);
+          const targetYear = firstYear + Math.floor((targetMonth - 1) / 12);
           const normalizedMonth = ((targetMonth - 1) % 12) + 1;
           const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
 
-          const invoice = await this.creditCardsService.getOrCreateInvoice(
-            dto.creditCardId!,
-            refMonth,
-          );
+          if (i > 1) {
+            invoice = await this.creditCardsService.getOrCreateInvoice(dto.creditCardId!, refMonth);
+          }
 
           if (invoice.status === InvoiceStatus.PAID) {
             throw new BadRequestException(

@@ -280,7 +280,7 @@ describe('TransactionsService', () => {
       );
     });
 
-    it('should generate consecutive monthly installments without skipping month when purchase date is after card closingDay', async () => {
+    it('should generate consecutive monthly installments starting in the next month when purchase date is after card closingDay', async () => {
       prisma.creditCard.findUnique.mockResolvedValue({
         id: 'card-nubank',
         userId: 'user-1',
@@ -289,6 +289,10 @@ describe('TransactionsService', () => {
         dueDay: 9,
         creditLimit: new Prisma.Decimal(5000),
         invoices: [],
+      });
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({
+        id: 'inv-2026-08',
+        referenceMonth: '2026-08',
       });
       creditCardsService.getOrCreateInvoice.mockImplementation((cardId: string, refMonth: string) =>
         Promise.resolve({ id: `inv-${refMonth}`, referenceMonth: refMonth }),
@@ -310,37 +314,37 @@ describe('TransactionsService', () => {
 
       expect(prisma.transaction.create).toHaveBeenCalledTimes(10);
 
-      // Parcela 1: 18/07/2026 15:00
+      // Parcela 1: data 18/07/2026 15:00 na fatura de Agosto (2026-08)
       const call1 = prisma.transaction.create.mock.calls[0][0];
       const date1: Date = call1.data.transactionDate;
       expect(date1.getFullYear()).toBe(2026);
       expect(date1.getMonth()).toBe(6); // Julho (0-indexed: 6)
       expect(date1.getDate()).toBe(18);
-      expect(call1.data.invoiceId).toBe('inv-2026-07');
+      expect(call1.data.invoiceId).toBe('inv-2026-08');
 
-      // Parcela 2: 02/08/2026 00:00 (NÃO pode pular Agosto!)
+      // Parcela 2: data 02/09/2026 00:00 na fatura de Setembro (2026-09)
       const call2 = prisma.transaction.create.mock.calls[1][0];
       const date2: Date = call2.data.transactionDate;
       expect(date2.getFullYear()).toBe(2026);
-      expect(date2.getMonth()).toBe(7); // Agosto (0-indexed: 7)
+      expect(date2.getMonth()).toBe(8); // Setembro (0-indexed: 8)
       expect(date2.getDate()).toBe(2);
-      expect(call2.data.invoiceId).toBe('inv-2026-08');
+      expect(call2.data.invoiceId).toBe('inv-2026-09');
 
-      // Parcela 3: 02/09/2026 00:00 (Setembro)
+      // Parcela 3: data 02/10/2026 00:00 na fatura de Outubro (2026-10)
       const call3 = prisma.transaction.create.mock.calls[2][0];
       const date3: Date = call3.data.transactionDate;
       expect(date3.getFullYear()).toBe(2026);
-      expect(date3.getMonth()).toBe(8); // Setembro (0-indexed: 8)
+      expect(date3.getMonth()).toBe(9); // Outubro (0-indexed: 9)
       expect(date3.getDate()).toBe(2);
-      expect(call3.data.invoiceId).toBe('inv-2026-09');
+      expect(call3.data.invoiceId).toBe('inv-2026-10');
 
-      // Parcela 10: 02/04/2027 00:00 (Abril de 2027)
+      // Parcela 10: data 02/05/2027 00:00 na fatura de Maio (2027-05)
       const call10 = prisma.transaction.create.mock.calls[9][0];
       const date10: Date = call10.data.transactionDate;
       expect(date10.getFullYear()).toBe(2027);
-      expect(date10.getMonth()).toBe(3); // Abril (0-indexed: 3)
+      expect(date10.getMonth()).toBe(4); // Maio (0-indexed: 4)
       expect(date10.getDate()).toBe(2);
-      expect(call10.data.invoiceId).toBe('inv-2027-04');
+      expect(call10.data.invoiceId).toBe('inv-2027-05');
     });
   });
 
