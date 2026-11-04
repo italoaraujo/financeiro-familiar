@@ -234,24 +234,33 @@
 - **Date**: 2026-10-16
 - **Status**: active
 
+### AD-030
+- **Decision**: Containerizar o servidor Model Context Protocol (MCP) com imagem Docker dedicada multi-stage baseada em `node:20-alpine` executando como usuário não-root `node`, e orquestrar como serviço `mcp` no `docker-compose.yml` sob perfis `["mcp", "all"]`. O container opera por padrão em modo `http` (`MCP_TRANSPORT=http`), escuta na porta interna `3333` mapeável via `MCP_PORT`, comunica-se diretamente com o backend na rede interna (`http://api:3001`), conta com healthcheck periódico em `GET /health` e limites de recursos de 0.5 CPU e 512MB RAM.
+- **Reason**: Permite executar o servidor MCP em segundo plano como parte da infraestrutura Docker do projeto sem depender de processos Node instalados no host, suportando conectividade HTTP/SSE remota para assistentes como Google Gemini e Claude Web, mantendo isolamento e segurança.
+- **Trade-off**: Adiciona uma imagem Docker e serviço opcional ao compose; o modo `stdio` para clientes de desktop locais ainda pode ser executado via Node local ou mapeamento interativo de terminal.
+- **Scope**: `mcp-server/Dockerfile`, `mcp-server/.dockerignore`, `docker-compose.yml`, `.env.example`, `.env`, `mcp-server/README.md`, `README.md` e `.specs/features/mcp-docker/`.
+- **Date**: 2026-10-28
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `mcp-server`
-- **Total Tasks**: 12
-- **Completed Tasks**: 12 / 12 (100%)
+- **Active Feature**: `mcp-docker`
+- **Total Tasks**: 1
+- **Completed Tasks**: 1 / 1 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Backend (`31 suítes / 306 testes`), Frontend Next.js 16.3.8 Turbopack (`build` limpo com `/mcp`) e MCP Server (`build` limpo + `8 suítes / 45 testes`) 100% aprovados
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Build Status**: MCP Docker Image `financial-mcp` construída e testada com sucesso; Container saudável (`healthy`) com resposta HTTP 200 em `GET /health`; Testes unitários do MCP 100% aprovados (9 suítes, 50 testes).
+- **Gates Verified**: `validate_spec.py mcp-docker` (0 errors, 0 warnings)
 
 ## Handoff
 
-- **Feature**: .specs/features/mcp-server
-- **Phase / Task**: Phase 3 / T12 (All tasks complete)
-- **Completed**: T1 (Spec, Context, Design & Tasks), T2 (Backend MCP Access Tokens), T3 (Frontend `/mcp` Page), T4 (`mcp-server` Setup & `config.ts`), T5 (`FinancialApiClient`), T6 (Context, Accounts, Categories & Tags Tools), T7 (Transactions & Transfers Tools), T8 (Credit Cards & Invoices Tools), T9 (Budgets & Goals Tools), T10 (Reports Tools & MCP Resources), T11 (`server.ts`, `index.ts` & Integration Tests), T12 (Documentation & `STATE.md`)
+- **Feature**: .specs/features/mcp-docker
+- **Phase / Task**: Execute / Containerização concluída
+- **Completed**: `mcp-server/Dockerfile`, `mcp-server/.dockerignore`, serviço `mcp` em `docker-compose.yml`, variáveis de ambiente em `.env.example` e `.env`, atualização da documentação em `README.md` e `mcp-server/README.md`, especificação em `.specs/features/mcp-docker/spec.md`.
 - **In-progress**: None
-- **Next step**: Revisão final do usuário na branch `feature/mcp-server`
+- **Next step**: Container em execução e pronto para uso pelo usuário.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: feature/mcp-server
+
 
 

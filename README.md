@@ -102,6 +102,7 @@ docker compose up --build
 - **Aplicação Web (Frontend)**: [http://localhost:3000](http://localhost:3000)
 - **API REST (Backend)**: [http://localhost:3001](http://localhost:3001)
 - **Documentação Interativa (Swagger)**: [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
+- **Servidor MCP (HTTP / SSE / Health)**: [http://localhost:3333](http://localhost:3333) (via `docker compose --profile mcp up -d`)
 - **Banco de Dados PostgreSQL**: `localhost:5432`
 
 ---

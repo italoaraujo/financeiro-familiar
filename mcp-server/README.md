@@ -39,6 +39,22 @@ Consome a API REST do backend (`http://localhost:3001`), preservando **100% das 
 
 ## 🚀 Instalação e Compilação
 
+### Opção 1: Via Docker Compose (Recomendado)
+
+O servidor MCP possui container Docker oficial integrado ao `docker-compose.yml` da raiz do projeto.
+
+```bash
+# Na raiz do projeto:
+# Iniciar o container MCP em segundo plano (porta 3333)
+docker compose --profile mcp up -d --build
+
+# Verificar logs e healthcheck
+docker compose logs -f mcp
+curl http://localhost:3333/health
+```
+
+### Opção 2: Localmente via Node.js
+
 ```bash
 cd mcp-server
 npm install

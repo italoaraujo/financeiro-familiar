@@ -107,6 +107,50 @@ services:
           cpus: '1.0'
           memory: 1024M
 
+  mcp:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-financial}-mcp
+    profiles: ["mcp", "all"]
+    restart: always
+    depends_on:
+      api:
+        condition: service_healthy
+        required: false
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      TZ: ${TZ:-America/Sao_Paulo}
+      MCP_TRANSPORT: ${MCP_TRANSPORT:-http}
+      MCP_HTTP_PORT: 3333
+      MCP_HTTP_HOST: "0.0.0.0"
+      MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-}
+      MCP_API_URL: ${MCP_API_URL:-http://api:3001}
+      MCP_API_TOKEN: ${MCP_API_TOKEN:-}
+      MCP_USER_EMAIL: ${MCP_USER_EMAIL:-}
+      MCP_USER_PASSWORD: ${MCP_USER_PASSWORD:-}
+      MCP_DEFAULT_FAMILY_ID: ${MCP_DEFAULT_FAMILY_ID:-}
+      MCP_HTTP_TIMEOUT_MS: ${MCP_HTTP_TIMEOUT_MS:-15000}
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${MCP_PORT:-3333}:3333"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3333/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
 networks:
   default:
     name: ${COMPOSE_PROJECT_NAME:-financial}_default
