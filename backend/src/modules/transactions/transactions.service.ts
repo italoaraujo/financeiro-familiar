@@ -159,40 +159,31 @@ export class TransactionsService {
 
         const createdTransactions = [];
 
-        const firstInvoice = await this.creditCardsService.determineInvoiceForDate(
-          dto.creditCardId!,
-          baseDate,
-        );
-        const refMonthBase =
-          firstInvoice?.referenceMonth ||
-          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`;
-        const [firstYear, firstMonth] = refMonthBase.split('-').map(Number);
+        const baseYear = baseDate.getFullYear();
+        const baseMonth = baseDate.getMonth() + 1;
         const closingDay = card?.closingDay || 1;
 
         for (let i = 1; i <= totalInstallments; i++) {
           let installmentDate: Date;
-          let invoice = firstInvoice;
+          const targetMonth = baseMonth + (i - 1);
+          const targetYear = baseYear + Math.floor((targetMonth - 1) / 12);
+          const normalizedMonth = ((targetMonth - 1) % 12) + 1;
+          const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
+
+          const invoice = await this.creditCardsService.getOrCreateInvoice(
+            dto.creditCardId!,
+            refMonth,
+          );
+
+          if (invoice.status === InvoiceStatus.PAID) {
+            throw new BadRequestException(
+              `Não é possível gerar a parcela ${i}/${totalInstallments} na fatura ${refMonth} porque ela já foi totalmente paga`,
+            );
+          }
 
           if (i === 1) {
             installmentDate = baseDate;
           } else {
-            const targetMonth = firstMonth + (i - 1);
-            const targetYear = firstYear + Math.floor((targetMonth - 1) / 12);
-            const normalizedMonth = ((targetMonth - 1) % 12) + 1;
-            const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
-
-            if (this.creditCardsService.getOrCreateInvoice) {
-              invoice = await this.creditCardsService.getOrCreateInvoice(dto.creditCardId!, refMonth);
-            } else {
-              invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
-            }
-
-            if (invoice.status === InvoiceStatus.PAID) {
-              throw new BadRequestException(
-                `Não é possível gerar a parcela ${i}/${totalInstallments} na fatura ${refMonth} porque ela já foi totalmente paga`,
-              );
-            }
-
             const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
             const targetDay = Math.min(closingDay, maxDaysInMonth);
             installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
