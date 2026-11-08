@@ -1043,6 +1043,57 @@ describe('TransactionsService', () => {
       expect(secondDate.getMonth()).toBe(10);
       expect(secondDate.getHours()).toBe(0);
     });
+
+    it('should not skip subsequent month when purchase date is after closingDay (e.g. 18/07 with closingDay 2)', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        isActive: true,
+        closingDay: 2,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+      });
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({
+        id: 'inv-aug',
+        referenceMonth: '2026-08',
+      });
+      creditCardsService.getOrCreateInvoice.mockResolvedValue({
+        id: 'inv-sep',
+        referenceMonth: '2026-09',
+      });
+      prisma.transaction.create
+        .mockResolvedValueOnce({ id: 'tx-inst-1' })
+        .mockResolvedValueOnce({ id: 'tx-inst-2' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 500,
+        description: 'Compra parcelada dia 18/07',
+        transactionDate: '2026-07-18',
+        transactionTime: '16:00',
+        categoryId: 'cat-1',
+        creditCardId: 'card-1',
+        totalInstallments: 2,
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledTimes(2);
+
+      const firstCall = prisma.transaction.create.mock.calls[0][0];
+      const firstDate: Date = firstCall.data.transactionDate;
+      expect(firstDate.getDate()).toBe(18);
+      expect(firstDate.getMonth()).toBe(6); // Julho (0-indexed: 6)
+      expect(firstDate.getFullYear()).toBe(2026);
+      expect(firstDate.getHours()).toBe(16);
+      expect(firstCall.data.invoiceId).toBe('inv-aug');
+
+      const secondCall = prisma.transaction.create.mock.calls[1][0];
+      const secondDate: Date = secondCall.data.transactionDate;
+      expect(secondDate.getDate()).toBe(2); // Fechamento no mês seguinte à compra
+      expect(secondDate.getMonth()).toBe(7); // Agosto (0-indexed: 7) - NÃO PULA O MÊS 8!
+      expect(secondDate.getFullYear()).toBe(2026);
+      expect(secondDate.getHours()).toBe(0);
+      expect(secondCall.data.invoiceId).toBe('inv-sep'); // Fatura de Setembro
+    });
   });
 
   describe('category authorization (SEC-CRIT-03)', () => {

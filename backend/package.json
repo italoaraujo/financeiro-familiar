@@ -1,6 +1,6 @@
 {
   "name": "financial-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend API para Sistema Financeiro Pessoal e Familiar",
   "author": "Antigravity & TLC",
   "private": true,

@@ -12,7 +12,7 @@ describe('getAppVersion utility', () => {
     expect(version.length).toBeGreaterThan(0);
   });
 
-  it('should return fallback 1.0.0 if fs reading fails', () => {
+  it('should return fallback 1.0.1 if fs reading fails', () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
     // Since cachedVersion might be populated, testing fallback behavior
     expect(typeof getAppVersion()).toBe('string');

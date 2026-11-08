@@ -15,6 +15,7 @@ import {
   X,
   Pencil,
   Trash2,
+  FileText,
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
@@ -378,10 +379,10 @@ export default function CreditCardsPage() {
                                   <button
                                     onClick={() => openInvoiceDetails(inv.id)}
                                     className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors shrink-0 flex items-center gap-1.5"
-                                    title="Ver divisão de gastos por pessoa"
+                                    title="Ver detalhes da fatura"
                                   >
-                                    <Users className="h-3.5 w-3.5 text-purple-400" />
-                                    <span>Divisão por Pessoa</span>
+                                    <FileText className="h-3.5 w-3.5 text-purple-400" />
+                                    <span>Ver fatura</span>
                                   </button>
 
                                   {!isViewer && inv.status !== 'PAID' && Number(inv.totalAmount) > 0 && (
