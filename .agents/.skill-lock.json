@@ -13,6 +13,32 @@
       ],
       "method": "copy",
       "global": false
+    },
+    "gitflow-start": {
+      "name": "gitflow-start",
+      "source": "local",
+      "contentHash": "b8eddaf423cbc1509b461508c6b98853d8059846dc2f2675c3f940d5ee92ec80",
+      "installedAt": "2026-11-08T19:08:00.000Z",
+      "updatedAt": "2026-11-08T19:08:00.000Z",
+      "agents": [
+        "antigravity",
+        "gemini"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "gitflow-finish": {
+      "name": "gitflow-finish",
+      "source": "local",
+      "contentHash": "836c448eb9a292ccf9d0d0a0ade98b77e52007a32bd447ac3b76ce7502894616",
+      "installedAt": "2026-11-08T19:08:00.000Z",
+      "updatedAt": "2026-11-08T19:08:00.000Z",
+      "agents": [
+        "antigravity",
+        "gemini"
+      ],
+      "method": "copy",
+      "global": false
     }
   }
 }
