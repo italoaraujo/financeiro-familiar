@@ -169,6 +169,9 @@ export class TransactionsService {
         const [firstYear, firstMonth] = refMonthBase.split('-').map(Number);
         const closingDay = card?.closingDay || 1;
 
+        const baseYear = baseDate.getFullYear();
+        const baseMonth = baseDate.getMonth();
+
         for (let i = 1; i <= totalInstallments; i++) {
           let installmentDate: Date;
           let invoice = firstInvoice;
@@ -176,15 +179,24 @@ export class TransactionsService {
           if (i === 1) {
             installmentDate = baseDate;
           } else {
-            const targetMonth = firstMonth + (i - 1);
-            const targetYear = firstYear + Math.floor((targetMonth - 1) / 12);
-            const normalizedMonth = ((targetMonth - 1) % 12) + 1;
-            const refMonth = `${targetYear}-${String(normalizedMonth).padStart(2, '0')}`;
+            // Data da parcela futura: dia de fechamento do cartão no mês civil subsequente à compra
+            const targetDateMonthIndex = baseMonth + (i - 1);
+            const dateYear = baseYear + Math.floor(targetDateMonthIndex / 12);
+            const normalizedDateMonthIndex = ((targetDateMonthIndex % 12) + 12) % 12;
+            const maxDaysInMonth = new Date(dateYear, normalizedDateMonthIndex + 1, 0).getDate();
+            const targetDay = Math.min(closingDay, maxDaysInMonth);
+            installmentDate = new Date(dateYear, normalizedDateMonthIndex, targetDay, 0, 0, 0, 0);
+
+            // Fatura de destino: sequencial a partir da primeira fatura calculada
+            const targetInvoiceMonth = firstMonth + (i - 1);
+            const invoiceYear = firstYear + Math.floor((targetInvoiceMonth - 1) / 12);
+            const normalizedInvoiceMonth = ((targetInvoiceMonth - 1) % 12) + 1;
+            const refMonth = `${invoiceYear}-${String(normalizedInvoiceMonth).padStart(2, '0')}`;
 
             if (this.creditCardsService.getOrCreateInvoice) {
               invoice = await this.creditCardsService.getOrCreateInvoice(dto.creditCardId!, refMonth);
             } else {
-              invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, baseDate);
+              invoice = await this.creditCardsService.determineInvoiceForDate(dto.creditCardId!, installmentDate);
             }
 
             if (invoice.status === InvoiceStatus.PAID) {
@@ -192,10 +204,6 @@ export class TransactionsService {
                 `Não é possível gerar a parcela ${i}/${totalInstallments} na fatura ${refMonth} porque ela já foi totalmente paga`,
               );
             }
-
-            const maxDaysInMonth = new Date(targetYear, normalizedMonth, 0).getDate();
-            const targetDay = Math.min(closingDay, maxDaysInMonth);
-            installmentDate = new Date(targetYear, normalizedMonth - 1, targetDay, 0, 0, 0, 0);
           }
 
           const instAmount = i === totalInstallments ? lastInstallmentValue : baseInstallmentValue;

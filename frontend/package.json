@@ -1,6 +1,6 @@
 {
   "name": "financial-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Frontend Web para Sistema Financeiro Pessoal e Familiar",
   "private": true,
   "scripts": {
