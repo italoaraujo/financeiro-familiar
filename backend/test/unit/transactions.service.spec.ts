@@ -56,6 +56,7 @@ describe('TransactionsService', () => {
         delete: jest.fn(),
         count: jest.fn(),
         findMany: jest.fn(),
+        groupBy: jest.fn(),
       },
       transactionTag: {
         create: jest.fn(),
@@ -1214,6 +1215,162 @@ describe('TransactionsService', () => {
       });
 
       expect(result).toBeDefined();
+    });
+  });
+
+  describe('getDistinctDescriptions (autocomplete)', () => {
+    it('should return distinct descriptions for EXPENSE in personal scope (AUTO-01, AUTO-06)', async () => {
+      prisma.transaction.groupBy.mockResolvedValueOnce([
+        { description: 'Supermercado' },
+        { description: 'Aluguel' },
+      ]);
+
+      const result = await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.EXPENSE,
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith({
+        by: ['description'],
+        where: {
+          type: TransactionType.EXPENSE,
+          deletedAt: null,
+          description: { not: '' },
+          userId: 'user-1',
+          familyId: null,
+          OR: [{ isPrivate: false }, { userId: 'user-1' }],
+        },
+        _max: { transactionDate: true },
+        orderBy: { _max: { transactionDate: 'desc' } },
+        take: 10,
+      });
+      expect(result).toEqual(['Supermercado', 'Aluguel']);
+    });
+
+    it('should return distinct descriptions for INCOME in personal scope (AUTO-02)', async () => {
+      prisma.transaction.groupBy.mockResolvedValueOnce([
+        { description: 'Salário' },
+        { description: 'Freelance' },
+      ]);
+
+      const result = await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.INCOME,
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: TransactionType.INCOME,
+          }),
+        }),
+      );
+      expect(result).toEqual(['Salário', 'Freelance']);
+    });
+
+    it('should return distinct descriptions for TRANSFER in personal scope (AUTO-03)', async () => {
+      prisma.transaction.groupBy.mockResolvedValueOnce([
+        { description: 'Reserva de Emergência' },
+      ]);
+
+      const result = await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.TRANSFER,
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: TransactionType.TRANSFER,
+          }),
+        }),
+      );
+      expect(result).toEqual(['Reserva de Emergência']);
+    });
+
+    it('should filter by search term case-insensitively with trimming (AUTO-01, AUTO-02, AUTO-03)', async () => {
+      prisma.transaction.groupBy.mockResolvedValueOnce([
+        { description: 'Supermercado Dia' },
+      ]);
+
+      const result = await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.EXPENSE,
+        search: '  super  ',
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: TransactionType.EXPENSE,
+            description: { contains: 'super', mode: 'insensitive' },
+          }),
+        }),
+      );
+      expect(result).toEqual(['Supermercado Dia']);
+    });
+
+    it('should filter by familyId and verify family membership (AUTO-04, AUTO-05)', async () => {
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'member-1',
+        familyId: 'family-1',
+        userId: 'user-1',
+        role: 'MEMBER',
+      });
+      prisma.transaction.groupBy.mockResolvedValueOnce([
+        { description: 'Condomínio Familiar' },
+      ]);
+
+      const result = await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.EXPENSE,
+        familyId: 'family-1',
+      });
+
+      expect(prisma.familyMember.findUnique).toHaveBeenCalledWith({
+        where: { familyId_userId: { familyId: 'family-1', userId: 'user-1' } },
+      });
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: TransactionType.EXPENSE,
+            familyId: 'family-1',
+            deletedAt: null,
+            OR: [{ isPrivate: false }, { userId: 'user-1' }],
+          }),
+        }),
+      );
+      expect(result).toEqual(['Condomínio Familiar']);
+    });
+
+    it('should throw ForbiddenException if user does not belong to family (AUTO-05)', async () => {
+      prisma.familyMember.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.getDistinctDescriptions('user-1', {
+          type: TransactionType.EXPENSE,
+          familyId: 'foreign-family',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should clamp limit between 1 and 20 (AUTO-06, AUTO-12)', async () => {
+      prisma.transaction.groupBy.mockResolvedValueOnce([]);
+
+      await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.EXPENSE,
+        limit: 5,
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 5 }),
+      );
+
+      prisma.transaction.groupBy.mockResolvedValueOnce([]);
+
+      await service.getDistinctDescriptions('user-1', {
+        type: TransactionType.EXPENSE,
+        limit: 100, // deve ser truncado para 20
+      });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 20 }),
+      );
     });
   });
 });

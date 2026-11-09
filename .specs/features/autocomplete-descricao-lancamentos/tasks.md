@@ -175,11 +175,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Teste unitário verifica que tipo `EXPENSE` não retorna descrições de `INCOME` ou `TRANSFER`
-- [ ] Teste unitário verifica busca case-insensitive por substring
-- [ ] Teste unitário verifica exclusão de transações privadas de outros membros
-- [ ] Teste unitário verifica exclusão de transações com `deletedAt`
-- [ ] Gate check `quick` passa com 100% de sucesso
+- [x] Teste unitário verifica que tipo `EXPENSE` não retorna descrições de `INCOME` ou `TRANSFER`
+- [x] Teste unitário verifica busca case-insensitive por substring
+- [x] Teste unitário verifica exclusão de transações privadas de outros membros
+- [x] Teste unitário verifica exclusão de transações com `deletedAt`
+- [x] Gate check `quick` passa com 100% de sucesso
 
 **Tests**: unit
 **Gate**: quick
