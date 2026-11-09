@@ -101,11 +101,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Campo `type` validado com enum `TransactionType`
-- [ ] Campo opcional `search` do tipo string sanitizável
-- [ ] Campo opcional `familyId` com validação de UUID
-- [ ] Campo opcional `limit` validado com mínimo 1 e máximo 20 (padrão 10)
-- [ ] Swagger devidamente anotado
+- [x] Campo `type` validado com enum `TransactionType`
+- [x] Campo opcional `search` do tipo string sanitizável
+- [x] Campo opcional `familyId` com validação de UUID
+- [x] Campo opcional `limit` validado com mínimo 1 e máximo 20 (padrão 10)
+- [x] Swagger devidamente anotado
 
 **Tests**: unit
 **Gate**: quick
