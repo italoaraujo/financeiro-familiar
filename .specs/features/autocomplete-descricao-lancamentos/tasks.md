@@ -128,10 +128,10 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Método `getDistinctDescriptions` implementado com `groupBy` em `description`
-- [ ] Filtro estrito por `type` (`EXPENSE`, `INCOME`, `TRANSFER`)
-- [ ] Ignora transações deletadas (`deletedAt != null`) e privadas de outros usuários
-- [ ] Ordenado por recência (`_max: { transactionDate: 'desc' }`) e limitado pelo `limit`
+- [x] Método `getDistinctDescriptions` implementado com `groupBy` em `description`
+- [x] Filtro estrito por `type` (`EXPENSE`, `INCOME`, `TRANSFER`)
+- [x] Ignora transações deletadas (`deletedAt != null`) e privadas de outros usuários
+- [x] Ordenado por recência (`_max: { transactionDate: 'desc' }`) e limitado pelo `limit`
 
 **Tests**: unit
 **Gate**: quick
