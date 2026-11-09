@@ -202,11 +202,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Componente implementa debounce de 250ms antes de disparar requisição ao backend
-- [ ] Cache em memória particionado por `familyId:type:search` com resposta imediata
-- [ ] Suporte a navegação por teclado (setas para cima/baixo, Enter para selecionar, Escape para fechar)
-- [ ] Fecha a lista ao clicar fora
-- [ ] Exibe as 10 sugestões mais recentes ao focar campo vazio
+- [x] Componente implementa debounce de 250ms antes de disparar requisição ao backend
+- [x] Cache em memória particionado por `familyId:type:search` com resposta imediata
+- [x] Suporte a navegação por teclado (setas para cima/baixo, Enter para selecionar, Escape para fechar)
+- [x] Fecha a lista ao clicar fora
+- [x] Exibe as 10 sugestões mais recentes ao focar campo vazio
 
 **Tests**: none
 **Gate**: build
