@@ -6,11 +6,11 @@ Atualmente, ao cadastrar um novo lançamento financeiro (nas abas de Despesa, Re
 
 ## Goals
 
-- [ ] Disponibilizar endpoint backend seguro e otimizado (`GET /transactions/descriptions`) para consulta de descrições anteriores distintas com ordenação por frequência/recência e estrito isolamento por tipo (`EXPENSE`, `INCOME`, `TRANSFER`).
-- [ ] Implementar componente de autocomplete no frontend (`AutocompleteInput`) integrado ao modal de novo lançamento nas 3 abas (Despesa, Receita, Transferência) com navegação via teclado, debounce e cache client-side.
-- [ ] Garantir isolamento total entre as abas: a aba de Despesa nunca deve sugerir descrições de Receita ou Transferência, e vice-versa.
-- [ ] Garantir performance consistente em cenários de alta volumetria de dados no banco através de índices compostos, agrupamento eficiente (`groupBy`), paginação rígida (`limit` máximo) e debounce/cache em memória no frontend.
-- [ ] Assegurar privacidade e multi-tenancy: nunca vazar descrições de lançamentos privados (`isPrivate: true`) de outros membros nem descrições de transações excluídas (`deletedAt`).
+- [x] Disponibilizar endpoint backend seguro e otimizado (`GET /transactions/descriptions`) para consulta de descrições anteriores distintas com ordenação por frequência/recência e estrito isolamento por tipo (`EXPENSE`, `INCOME`, `TRANSFER`).
+- [x] Implementar componente de autocomplete no frontend (`AutocompleteInput`) integrado ao modal de novo lançamento nas 3 abas (Despesa, Receita, Transferência) com navegação via teclado, debounce e cache client-side.
+- [x] Garantir isolamento total entre as abas: a aba de Despesa nunca deve sugerir descrições de Receita ou Transferência, e vice-versa.
+- [x] Garantir performance consistente em cenários de alta volumetria de dados no banco através de índices compostos, agrupamento eficiente (`groupBy`), paginação rígida (`limit` máximo) e debounce/cache em memória no frontend.
+- [x] Assegurar privacidade e multi-tenancy: nunca vazar descrições de lançamentos privados (`isPrivate: true`) de outros membros nem descrições de transações excluídas (`deletedAt`).
 
 ## Out of Scope
 
@@ -97,18 +97,18 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| AUTO-01 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-02 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-03 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-04 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-05 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-06 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-07 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-08 | P1: Autocomplete Isolado por Aba nos Lançamentos | Design | Pending |
-| AUTO-09 | P2: Otimização de Performance para Grandes Volumes de Dados | Design | Pending |
-| AUTO-10 | P2: Otimização de Performance para Grandes Volumes de Dados | Design | Pending |
-| AUTO-11 | P2: Otimização de Performance para Grandes Volumes de Dados | Design | Pending |
-| AUTO-12 | P2: Otimização de Performance para Grandes Volumes de Dados | Design | Pending |
+| AUTO-01 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-02 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-03 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-04 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-05 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-06 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-07 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-08 | P1: Autocomplete Isolado por Aba nos Lançamentos | Execute | Implemented |
+| AUTO-09 | P2: Otimização de Performance para Grandes Volumes de Dados | Execute | Implemented |
+| AUTO-10 | P2: Otimização de Performance para Grandes Volumes de Dados | Execute | Implemented |
+| AUTO-11 | P2: Otimização de Performance para Grandes Volumes de Dados | Execute | Implemented |
+| AUTO-12 | P2: Otimização de Performance para Grandes Volumes de Dados | Execute | Implemented |
 
 **Coverage:** 12 total, 12 mapped to tasks, 0 unmapped
 
@@ -118,7 +118,7 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 How we know the feature is successful:
 
-- [ ] Campo de descrição exibe sugestões anteriores isoladas estritamente por tipo (Despesa, Receita, Transferência).
-- [ ] 0 vazamentos de descrições entre abas diferentes e 0 vazamentos de lançamentos privados de outros usuários.
-- [ ] Resposta do autocomplete no frontend perceptivelmente instantânea com debounce e cache local ativo.
-- [ ] 100% de aprovação na suíte de testes unitários e de integração no backend e compilação limpa do frontend.
+- [x] Campo de descrição exibe sugestões anteriores isoladas estritamente por tipo (Despesa, Receita, Transferência).
+- [x] 0 vazamentos de descrições entre abas diferentes e 0 vazamentos de lançamentos privados de outros usuários.
+- [x] Resposta do autocomplete no frontend perceptivelmente instantânea com debounce e cache local ativo.
+- [x] 100% de aprovação na suíte de testes unitários e de integração no backend e compilação limpa do frontend.

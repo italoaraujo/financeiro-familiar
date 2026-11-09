@@ -7,7 +7,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - índices no Prisma, endpoint no módulo Transactions e componente AutocompleteInput no Frontend)
-**Status**: Ready
+**Status**: Done
 
 ---
 
@@ -227,11 +227,11 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Campo de descrição utiliza `AutocompleteInput` passando `modalType` dinâmico (`EXPENSE`, `INCOME`, `TRANSFER`)
-- [ ] Troca de aba entre Despesa, Receita e Transferência reseta e atualiza imediatamente as sugestões
-- [ ] Nenhuma descrição de Despesa aparece nas abas de Receita ou Transferência
-- [ ] Submissão do formulário mantém o comportamento original sem regressão
-- [ ] Lint e build de produção do frontend passam com código 0
+- [x] Campo de descrição utiliza `AutocompleteInput` passando `modalType` dinâmico (`EXPENSE`, `INCOME`, `TRANSFER`)
+- [x] Troca de aba entre Despesa, Receita e Transferência reseta e atualiza imediatamente as sugestões
+- [x] Nenhuma descrição de Despesa aparece nas abas de Receita ou Transferência
+- [x] Submissão do formulário mantém o comportamento original sem regressão
+- [x] Lint e build de produção do frontend passam com código 0
 
 **Tests**: none
 **Gate**: build
