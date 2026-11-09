@@ -152,9 +152,9 @@ T6 → T7
 
 **Done when**:
 
-- [ ] Rota `GET /transactions/descriptions` declarada antes das rotas genéricas
-- [ ] Endpoint decorado com `@ApiOperation` e `@ApiResponse`
-- [ ] Delegação correta para `transactionsService.getDistinctDescriptions`
+- [x] Rota `GET /transactions/descriptions` declarada antes das rotas genéricas
+- [x] Endpoint decorado com `@ApiOperation` e `@ApiResponse`
+- [x] Delegação correta para `transactionsService.getDistinctDescriptions`
 
 **Tests**: unit
 **Gate**: quick

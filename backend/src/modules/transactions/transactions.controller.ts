@@ -13,6 +13,7 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
+import { GetDescriptionsDto } from './dto/get-descriptions.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 
@@ -41,6 +42,16 @@ export class TransactionsController {
     @Body() dto: TransferDto,
   ) {
     return this.transactionsService.transfer(userId, dto);
+  }
+
+  @Get('descriptions')
+  @ApiOperation({ summary: 'Obter descrições anteriores distintas para autocomplete por tipo' })
+  @ApiResponse({ status: 200, description: 'Lista de descrições distintas' })
+  async getDescriptions(
+    @GetUser('id') userId: string,
+    @Query() dto: GetDescriptionsDto,
+  ) {
+    return this.transactionsService.getDistinctDescriptions(userId, dto);
   }
 
   @Get()
