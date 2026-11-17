@@ -219,7 +219,7 @@ export class TransactionsService {
               categoryId: dto.categoryId,
               type: TransactionType.EXPENSE,
               amount: instAmount,
-              description: `${dto.description} (${i}/${totalInstallments})`,
+              description: dto.description,
               notes: dto.notes,
               transactionDate: installmentDate,
               status: dto.status || TransactionStatus.COMPLETED,

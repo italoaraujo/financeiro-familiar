@@ -249,8 +249,10 @@ describe('TransactionsService', () => {
         1,
         expect.objectContaining({
           data: expect.objectContaining({
+            description: 'Tênis Pedro',
             personId: 'person-child',
             installmentNumber: 1,
+            totalInstallments: 3,
           }),
         }),
       );
@@ -258,11 +260,42 @@ describe('TransactionsService', () => {
         3,
         expect.objectContaining({
           data: expect.objectContaining({
+            description: 'Tênis Pedro',
             personId: 'person-child',
             installmentNumber: 3,
+            totalInstallments: 3,
           }),
         }),
       );
+    });
+
+    it('should persist clean description without installment suffix (i/N) across all installments', async () => {
+      creditCardsService.determineInvoiceForDate.mockResolvedValue({ id: 'inv-month' });
+      prisma.transaction.create.mockResolvedValue({ id: 'tx-inst-1' });
+
+      await service.create('user-1', {
+        type: TransactionType.EXPENSE,
+        amount: 500,
+        totalInstallments: 5,
+        description: 'Seguro carro',
+        transactionDate: '2026-11-17',
+        categoryId: 'cat-seguro',
+        creditCardId: 'card-1',
+      });
+
+      expect(prisma.transaction.create).toHaveBeenCalledTimes(5);
+      for (let i = 1; i <= 5; i++) {
+        expect(prisma.transaction.create).toHaveBeenNthCalledWith(
+          i,
+          expect.objectContaining({
+            data: expect.objectContaining({
+              description: 'Seguro carro',
+              installmentNumber: i,
+              totalInstallments: 5,
+            }),
+          }),
+        );
+      }
     });
 
     it('should reject transaction creation when totalInstallments exceeds 72 (SEC-HIGH-02)', async () => {
