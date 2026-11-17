@@ -20,6 +20,10 @@ interface AutocompleteInputProps {
 const descriptionCache = new Map<string, { data: string[]; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+export function clearDescriptionCache() {
+  descriptionCache.clear();
+}
+
 export function AutocompleteInput({
   value,
   onChange,
@@ -39,6 +43,7 @@ export function AutocompleteInput({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const requestIdRef = useRef(0);
   const listboxId = useId();
 
   const getCacheKey = useCallback(
@@ -51,16 +56,22 @@ export function AutocompleteInput({
 
   const fetchSuggestions = useCallback(
     async (searchTerm: string) => {
+      const currentRequestId = ++requestIdRef.current;
       const cacheKey = getCacheKey(searchTerm);
       const cached = descriptionCache.get(cacheKey);
 
       if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        await Promise.resolve();
+        if (currentRequestId !== requestIdRef.current) return;
         setSuggestions(cached.data);
+        setLoading(false);
         return;
       }
 
       await Promise.resolve();
+      if (currentRequestId !== requestIdRef.current) return;
       setLoading(true);
+
       try {
         const params: Record<string, string | number | undefined> = {
           type,
@@ -77,19 +88,36 @@ export function AutocompleteInput({
         }
 
         const data = await apiRequest<string[]>('/transactions/descriptions', { params });
+        if (currentRequestId !== requestIdRef.current) return;
+
         const results = Array.isArray(data) ? data : [];
 
         descriptionCache.set(cacheKey, { data: results, timestamp: Date.now() });
         setSuggestions(results);
       } catch (err) {
+        if (currentRequestId !== requestIdRef.current) return;
         console.error('Falha ao buscar descrições para autocomplete:', err);
         setSuggestions([]);
       } finally {
-        setLoading(false);
+        if (currentRequestId === requestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [familyId, type, getCacheKey],
   );
+
+  // Limpa cache, timers e invalida requisições em voo ao desmontar (fechamento do modal)
+  useEffect(() => {
+    return () => {
+      requestIdRef.current += 1;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      clearDescriptionCache();
+    };
+  }, []);
 
   // Fecha o dropdown ao clicar fora do componente
   useEffect(() => {
@@ -106,23 +134,35 @@ export function AutocompleteInput({
     };
   }, []);
 
-  const prevTypeRef = useRef(type);
+  const prevScopeRef = useRef({ type, familyId });
   useEffect(() => {
-    let isMounted = true;
-    if (prevTypeRef.current !== type) {
-      prevTypeRef.current = type;
-      if (isOpen) {
-        (async () => {
-          if (isMounted) {
-            await fetchSuggestions(value);
-          }
-        })();
-      }
+    const scopeChanged =
+      prevScopeRef.current.type !== type || prevScopeRef.current.familyId !== familyId;
+    if (!scopeChanged) return;
+
+    prevScopeRef.current = { type, familyId };
+    requestIdRef.current += 1;
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
+
+    let isMounted = true;
+    (async () => {
+      await Promise.resolve();
+      if (!isMounted) return;
+      setSuggestions([]);
+      setHighlightedIndex(-1);
+      setLoading(false);
+      if (isOpen) {
+        await fetchSuggestions(value);
+      }
+    })();
+
     return () => {
       isMounted = false;
     };
-  }, [type, isOpen, value, fetchSuggestions]);
+  }, [type, familyId, isOpen, value, fetchSuggestions]);
 
   // Trata digitação com debounce de 250ms
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,6 +170,8 @@ export function AutocompleteInput({
     onChange(newValue);
     setIsOpen(true);
     setHighlightedIndex(-1);
+    requestIdRef.current += 1;
+    setLoading(false);
 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -146,6 +188,12 @@ export function AutocompleteInput({
   };
 
   const handleSelectSuggestion = (selected: string) => {
+    requestIdRef.current += 1;
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    setLoading(false);
     onChange(selected);
     setIsOpen(false);
     setHighlightedIndex(-1);

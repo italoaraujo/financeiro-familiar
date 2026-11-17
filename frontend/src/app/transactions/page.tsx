@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { TagInput } from '../../components/ui/TagInput';
-import { AutocompleteInput } from '../../components/ui/AutocompleteInput';
+import { AutocompleteInput, clearDescriptionCache } from '../../components/ui/AutocompleteInput';
 
 export default function TransactionsPage() {
   const { user, selectedFamilyId, isViewer } = useAuth();
@@ -189,6 +189,7 @@ export default function TransactionsPage() {
         });
       }
 
+      clearDescriptionCache();
       setIsModalOpen(false);
       // Reset form
       setAmount('');
@@ -215,6 +216,7 @@ export default function TransactionsPage() {
 
     try {
       await apiRequest(`/transactions/${id}`, { method: 'DELETE' });
+      clearDescriptionCache();
       loadTransactions();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir transação');
