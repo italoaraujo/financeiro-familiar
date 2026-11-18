@@ -32,13 +32,20 @@ export class AccountsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar contas ativas' })
+  @ApiOperation({ summary: 'Listar contas (ativas por padrão, ou incluindo arquivadas)' })
   @ApiQuery({ name: 'familyId', required: false, description: 'Filtrar por grupo familiar' })
+  @ApiQuery({
+    name: 'includeArchived',
+    required: false,
+    type: Boolean,
+    description: 'Incluir contas arquivadas na listagem',
+  })
   async findAll(
     @GetUser('id') userId: string,
     @Query('familyId') familyId?: string,
+    @Query('includeArchived') includeArchived?: string,
   ) {
-    return this.accountsService.findAll(userId, familyId);
+    return this.accountsService.findAll(userId, familyId, includeArchived === 'true');
   }
 
   @Get(':id')
@@ -67,6 +74,16 @@ export class AccountsController {
     @Param('id') id: string,
   ) {
     return this.accountsService.archive(userId, id);
+  }
+
+  @Patch(':id/unarchive')
+  @ApiOperation({ summary: 'Desarquivar uma conta' })
+  @ApiResponse({ status: 200, description: 'Conta desarquivada com sucesso' })
+  async unarchive(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.accountsService.unarchive(userId, id);
   }
 
   @Delete(':id')

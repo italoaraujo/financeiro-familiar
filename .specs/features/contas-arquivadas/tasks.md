@@ -124,9 +124,9 @@ T4
 
 **Done when**:
 
-- [ ] `@Get()` recebe `@Query('includeArchived') includeArchived?: string`, documenta com `@ApiQuery` e repassa `includeArchived === 'true'` para `accountsService.findAll`
-- [ ] `@Patch(':id/unarchive')` declarado com `@ApiOperation` e `@ApiResponse`, delegando para `accountsService.unarchive(userId, id)`
-- [ ] Gate `full` (backend build + testes unitários) passa integralmente
+- [x] `@Get()` recebe `@Query('includeArchived') includeArchived?: string`, documenta com `@ApiQuery` e repassa `includeArchived === 'true'` para `accountsService.findAll`
+- [x] `@Patch(':id/unarchive')` declarado com `@ApiOperation` e `@ApiResponse`, delegando para `accountsService.unarchive(userId, id)`
+- [x] Gate `full` (backend build + testes unitários) passa integralmente
 
 **Tests**: unit
 **Gate**: full
