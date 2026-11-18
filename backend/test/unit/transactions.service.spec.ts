@@ -53,6 +53,7 @@ describe('TransactionsService', () => {
         create: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
         delete: jest.fn(),
         count: jest.fn(),
         findMany: jest.fn(),
@@ -60,6 +61,7 @@ describe('TransactionsService', () => {
       },
       transactionTag: {
         create: jest.fn(),
+        deleteMany: jest.fn(),
       },
       familyMember: {
         findUnique: jest.fn(),
@@ -1404,6 +1406,307 @@ describe('TransactionsService', () => {
       expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
         expect.objectContaining({ take: 20 }),
       );
+    });
+  });
+
+  describe('update (only description and tags)', () => {
+    it('should update description and tags without changing account balance or invoice (EDITTX-01)', async () => {
+      const existingTx = {
+        id: 'tx-1',
+        userId: 'user-1',
+        familyId: null,
+        accountId: 'acc-1',
+        categoryId: 'cat-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(150),
+        description: 'Mercado Antigo',
+        isPrivate: false,
+        installmentGroupId: null,
+        deletedAt: null,
+      };
+
+      prisma.transaction.findUnique
+        .mockResolvedValueOnce(existingTx)
+        .mockResolvedValueOnce({
+          ...existingTx,
+          description: 'Supermercado Novo',
+          tags: [
+            { tag: { id: 'tag-1', name: 'mercado', color: '#10b981' } },
+            { tag: { id: 'tag-2', name: 'casa', color: '#3b82f6' } },
+          ],
+        });
+
+      tagsService.findOrCreateMany.mockResolvedValueOnce([
+        { id: 'tag-1', name: 'mercado', color: '#10b981' },
+        { id: 'tag-2', name: 'casa', color: '#3b82f6' },
+      ]);
+
+      const result = await service.update('user-1', 'tx-1', {
+        description: '  Supermercado Novo  ',
+        tags: ['mercado', 'casa'],
+      });
+
+      expect(prisma.transaction.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: ['tx-1'] } },
+        data: { description: 'Supermercado Novo' },
+      });
+      expect(tagsService.findOrCreateMany).toHaveBeenCalledWith(
+        'user-1',
+        null,
+        ['mercado', 'casa'],
+        prisma,
+      );
+      expect(prisma.transactionTag.deleteMany).toHaveBeenCalledWith({
+        where: { transactionId: { in: ['tx-1'] } },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenCalledTimes(2);
+      expect(prisma.transactionTag.create).toHaveBeenNthCalledWith(1, {
+        data: { transactionId: 'tx-1', tagId: 'tag-1' },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenNthCalledWith(2, {
+        data: { transactionId: 'tx-1', tagId: 'tag-2' },
+      });
+      expect(prisma.account.update).not.toHaveBeenCalled();
+      expect(prisma.creditCardInvoice.update).not.toHaveBeenCalled();
+      expect(result.description).toBe('Supermercado Novo');
+      expect(result.tags).toEqual([
+        { id: 'tag-1', name: 'mercado', color: '#10b981' },
+        { id: 'tag-2', name: 'casa', color: '#3b82f6' },
+      ]);
+    });
+
+    it('should propagate description and tags to all active installments sharing installmentGroupId (EDITTX-02)', async () => {
+      const existingTx = {
+        id: 'tx-inst-1',
+        userId: 'user-1',
+        familyId: 'fam-1',
+        creditCardId: 'card-1',
+        invoiceId: 'inv-1',
+        type: TransactionType.EXPENSE,
+        amount: new Prisma.Decimal(100),
+        description: 'Notebook',
+        isPrivate: false,
+        installmentGroupId: 'group-123',
+        deletedAt: null,
+      };
+
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'mem-1',
+        familyId: 'fam-1',
+        userId: 'user-1',
+        role: 'MEMBER',
+      });
+      prisma.transaction.findUnique
+        .mockResolvedValueOnce(existingTx)
+        .mockResolvedValueOnce({
+          ...existingTx,
+          description: 'Notebook Trabalho',
+          tags: [{ tag: { id: 'tag-work', name: 'trabalho', color: '#8b5cf6' } }],
+        });
+      prisma.transaction.findMany.mockResolvedValueOnce([
+        { id: 'tx-inst-1' },
+        { id: 'tx-inst-2' },
+        { id: 'tx-inst-3' },
+      ]);
+      tagsService.findOrCreateMany.mockResolvedValueOnce([
+        { id: 'tag-work', name: 'trabalho', color: '#8b5cf6' },
+      ]);
+
+      const result = await service.update('user-1', 'tx-inst-1', {
+        description: 'Notebook Trabalho',
+        tags: ['trabalho'],
+      });
+
+      expect(prisma.transaction.findMany).toHaveBeenCalledWith({
+        where: { installmentGroupId: 'group-123', deletedAt: null },
+        select: { id: true },
+      });
+      expect(prisma.transaction.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: ['tx-inst-1', 'tx-inst-2', 'tx-inst-3'] } },
+        data: { description: 'Notebook Trabalho' },
+      });
+      expect(prisma.transactionTag.deleteMany).toHaveBeenCalledWith({
+        where: { transactionId: { in: ['tx-inst-1', 'tx-inst-2', 'tx-inst-3'] } },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenCalledTimes(3);
+      expect(prisma.transactionTag.create).toHaveBeenNthCalledWith(1, {
+        data: { transactionId: 'tx-inst-1', tagId: 'tag-work' },
+      });
+      expect(prisma.transactionTag.create).toHaveBeenNthCalledWith(3, {
+        data: { transactionId: 'tx-inst-3', tagId: 'tag-work' },
+      });
+      expect(result.tags).toEqual([
+        { id: 'tag-work', name: 'trabalho', color: '#8b5cf6' },
+      ]);
+    });
+
+    it('should clear all tags when tags array is empty (Edge Case)', async () => {
+      const existingTx = {
+        id: 'tx-clear',
+        userId: 'user-1',
+        familyId: null,
+        type: TransactionType.EXPENSE,
+        description: 'Café',
+        isPrivate: false,
+        installmentGroupId: null,
+        deletedAt: null,
+      };
+
+      prisma.transaction.findUnique
+        .mockResolvedValueOnce(existingTx)
+        .mockResolvedValueOnce({
+          ...existingTx,
+          tags: [],
+        });
+
+      const result = await service.update('user-1', 'tx-clear', {
+        tags: [],
+      });
+
+      expect(tagsService.findOrCreateMany).not.toHaveBeenCalled();
+      expect(prisma.transactionTag.deleteMany).toHaveBeenCalledWith({
+        where: { transactionId: { in: ['tx-clear'] } },
+      });
+      expect(prisma.transactionTag.create).not.toHaveBeenCalled();
+      expect(prisma.transaction.updateMany).not.toHaveBeenCalled();
+      expect(result.tags).toEqual([]);
+    });
+
+    it('should allow editing TRANSFER, goal-linked, and PAID invoice transactions (EDITTX-04)', async () => {
+      const paidInvoiceTx = {
+        id: 'tx-paid',
+        userId: 'user-1',
+        familyId: null,
+        creditCardId: 'card-1',
+        invoiceId: 'inv-paid',
+        type: TransactionType.EXPENSE,
+        description: 'Compra fatura paga',
+        isPrivate: false,
+        installmentGroupId: null,
+        deletedAt: null,
+      };
+
+      prisma.transaction.findUnique
+        .mockResolvedValueOnce(paidInvoiceTx)
+        .mockResolvedValueOnce({
+          ...paidInvoiceTx,
+          description: 'Compra fatura paga ajustada',
+          tags: [],
+        });
+
+      const paidResult = await service.update('user-1', 'tx-paid', {
+        description: 'Compra fatura paga ajustada',
+      });
+      expect(paidResult.description).toBe('Compra fatura paga ajustada');
+
+      const transferTx = {
+        id: 'tx-transfer',
+        userId: 'user-1',
+        familyId: null,
+        type: TransactionType.TRANSFER,
+        description: 'Aporte Meta',
+        isPrivate: false,
+        installmentGroupId: null,
+        goalDeposits: [{ id: 'dep-1', goalId: 'goal-1' }],
+        deletedAt: null,
+      };
+
+      prisma.transaction.findUnique
+        .mockResolvedValueOnce(transferTx)
+        .mockResolvedValueOnce({
+          ...transferTx,
+          description: 'Transferência Reserva',
+          tags: [{ tag: { id: 't-res', name: 'reserva', color: '#10b981' } }],
+        });
+      tagsService.findOrCreateMany.mockResolvedValueOnce([
+        { id: 't-res', name: 'reserva', color: '#10b981' },
+      ]);
+
+      const transferResult = await service.update('user-1', 'tx-transfer', {
+        description: 'Transferência Reserva',
+        tags: ['reserva'],
+      });
+      expect(transferResult.description).toBe('Transferência Reserva');
+      expect(transferResult.tags).toEqual([
+        { id: 't-res', name: 'reserva', color: '#10b981' },
+      ]);
+    });
+
+    it('should throw NotFoundException if transaction does not exist or is soft-deleted (EDITTX-03)', async () => {
+      prisma.transaction.findUnique.mockResolvedValueOnce(null);
+      await expect(
+        service.update('user-1', 'tx-missing', { description: 'Teste' }),
+      ).rejects.toThrow(NotFoundException);
+
+      prisma.transaction.findUnique.mockResolvedValueOnce({
+        id: 'tx-deleted',
+        userId: 'user-1',
+        deletedAt: new Date(),
+      });
+      await expect(
+        service.update('user-1', 'tx-deleted', { description: 'Teste' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException for VIEWER, non-owner personal tx, or another user private tx (EDITTX-03)', async () => {
+      // VIEWER in family
+      prisma.transaction.findUnique.mockResolvedValueOnce({
+        id: 'tx-fam',
+        userId: 'owner-1',
+        familyId: 'fam-1',
+        isPrivate: false,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'mem-viewer',
+        familyId: 'fam-1',
+        userId: 'viewer-1',
+        role: 'VIEWER',
+      });
+
+      await expect(
+        service.update('viewer-1', 'tx-fam', { description: 'Tentativa viewer' }),
+      ).rejects.toThrow(ForbiddenException);
+
+      // Personal transaction belonging to another user
+      prisma.transaction.findUnique.mockResolvedValueOnce({
+        id: 'tx-other',
+        userId: 'owner-1',
+        familyId: null,
+        isPrivate: false,
+        deletedAt: null,
+      });
+
+      await expect(
+        service.update('attacker-1', 'tx-other', { description: 'IDOR' }),
+      ).rejects.toThrow(ForbiddenException);
+
+      // Private family transaction belonging to another user (even if caller is ADMIN in the family)
+      prisma.transaction.findUnique.mockResolvedValueOnce({
+        id: 'tx-priv',
+        userId: 'owner-1',
+        familyId: 'fam-1',
+        isPrivate: true,
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'mem-admin',
+        familyId: 'fam-1',
+        userId: 'admin-2',
+        role: 'ADMIN',
+      });
+
+      await expect(
+        service.update('admin-2', 'tx-priv', { description: 'Espionar' }),
+      ).rejects.toThrow(new ForbiddenException('Apenas o autor pode editar um lançamento privado'));
+      expect(prisma.transaction.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when description is whitespace-only (Edge Case)', async () => {
+      await expect(
+        service.update('user-1', 'tx-1', { description: '   ' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(prisma.transaction.updateMany).not.toHaveBeenCalled();
     });
   });
 });

@@ -5,12 +5,14 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
 import { GetDescriptionsDto } from './dto/get-descriptions.dto';
@@ -61,6 +63,17 @@ export class TransactionsController {
     @Query() filter: FilterTransactionDto,
   ) {
     return this.transactionsService.findAll(userId, filter);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualizar exclusivamente a descrição e as tags de um lançamento' })
+  @ApiResponse({ status: 200, description: 'Lançamento atualizado com sucesso' })
+  async update(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateTransactionDto,
+  ) {
+    return this.transactionsService.update(userId, id, dto);
   }
 
   @Delete(':id')
