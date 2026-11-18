@@ -6,10 +6,10 @@ Atualmente, no módulo de cartões de crédito (`/cards`), a inativação de um 
 
 ## Goals
 
-- [ ] Permitir listar cartões arquivados via parâmetro opcional `includeArchived=true` em `GET /credit-cards`, preservando o comportamento padrão de retornar apenas cartões ativos (`isActive: true`).
-- [ ] Disponibilizar endpoints dedicados `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive` no backend com validação de estado e RBAC.
-- [ ] Remover o checkbox `"Cartão Ativo (exibir no painel)"` do formulário de edição de cartão em `/cards`.
-- [ ] Exibir abas de filtro "Ativos" e "Arquivados" com contadores em `/cards`, selo visual `Arquivado` e ícones de ação direta para arquivar (`Archive`) e desarquivar (`ArchiveRestore`) em cada card.
+- [x] Permitir listar cartões arquivados via parâmetro opcional `includeArchived=true` em `GET /credit-cards`, preservando o comportamento padrão de retornar apenas cartões ativos (`isActive: true`).
+- [x] Disponibilizar endpoints dedicados `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive` no backend com validação de estado e RBAC.
+- [x] Remover o checkbox `"Cartão Ativo (exibir no painel)"` do formulário de edição de cartão em `/cards`.
+- [x] Exibir abas de filtro "Ativos" e "Arquivados" com contadores em `/cards`, selo visual `Arquivado` e ícones de ação direta para arquivar (`Archive`) e desarquivar (`ArchiveRestore`) em cada card.
 
 ## Out of Scope
 
@@ -92,13 +92,13 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| ARCHCARD-01 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHCARD-02 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHCARD-03 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHCARD-04 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHCARD-05 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
-| ARCHCARD-06 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivados e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
-| ARCHCARD-07 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivamento e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
+| ARCHCARD-01 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHCARD-02 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHCARD-03 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHCARD-04 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHCARD-05 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Verified |
+| ARCHCARD-06 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Verified |
+| ARCHCARD-07 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivamento e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 
@@ -110,8 +110,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] `GET /credit-cards` sem `includeArchived=true` continua retornando apenas cartões ativos (`isActive: true`) para não impactar seletores de transações.
-- [ ] `GET /credit-cards?includeArchived=true` retorna cartões ativos e arquivados não excluídos no escopo pessoal ou familiar.
-- [ ] `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive` alternam `isActive` respeitando RBAC e validando o estado prévio.
-- [ ] Modal de edição em `/cards` não possui mais o checkbox `"Cartão Ativo (exibir no painel)"`.
-- [ ] Tela `/cards` exibe abas "Ativos" e "Arquivados" com contadores, selo `Arquivado` e ícones funcionais de arquivar/desarquivar.
+- [x] `GET /credit-cards` sem `includeArchived=true` continua retornando apenas cartões ativos (`isActive: true`) para não impactar seletores de transações.
+- [x] `GET /credit-cards?includeArchived=true` retorna cartões ativos e arquivados não excluídos no escopo pessoal ou familiar.
+- [x] `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive` alternam `isActive` respeitando RBAC e validando o estado prévio.
+- [x] Modal de edição em `/cards` não possui mais o checkbox `"Cartão Ativo (exibir no painel)"`.
+- [x] Tela `/cards` exibe abas "Ativos" e "Arquivados" com contadores, selo `Arquivado` e ícones funcionais de arquivar/desarquivar.

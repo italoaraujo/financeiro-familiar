@@ -242,20 +242,28 @@
 - **Date**: 2026-11-17
 - **Status**: active
 
+### AD-031
+- **Decision**: Reaproveitar `CreditCard.isActive` (`true` = ativo, `false` = arquivado com `deletedAt: null`), estendendo `GET /credit-cards` com o parâmetro opcional `includeArchived=true` (mantendo `isActive: true` como padrão), expondo os endpoints `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive` no `CreditCardsController`/`CreditCardsService`, removendo o checkbox `"Cartão Ativo (exibir no painel)"` e `editIsActive` do modal de edição em `frontend/src/app/cards/page.tsx`, e adicionando abas "Ativos"/"Arquivados" com contadores, selo `Arquivado` e botões `Archive`/`ArchiveRestore` nos cards.
+- **Reason**: Alinha a experiência de arquivamento e desarquivamento de cartões de crédito ao padrão adotado em Contas Bancárias (`/accounts`), sem exigir migração de schema e mantendo `/transactions` exibindo apenas cartões ativos.
+- **Trade-off**: A tela `/cards` passa a carregar cartões ativos e arquivados em uma única chamada (`includeArchived=true`), filtrando no cliente por `isActive`.
+- **Scope**: `backend/src/modules/credit-cards/credit-cards.service.ts`, `backend/src/modules/credit-cards/credit-cards.controller.ts`, `backend/test/unit/credit-cards.service.spec.ts` e `frontend/src/app/cards/page.tsx`.
+- **Date**: 2026-11-18
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `contas-arquivadas`
+- **Active Feature**: `cartoes-arquivados`
 - **Total Tasks**: 4
 - **Completed Tasks**: 4 / 4 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Backend `npm run build` limpo; `accounts.service.spec.ts` aprovado (18/18 testes); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
+- **Build Status**: Backend `npm run build` limpo; `credit-cards.service.spec.ts` aprovado (56/56 testes); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
 - **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/contas-arquivadas
+- **Feature**: .specs/features/cartoes-arquivados
 - **Phase / Task**: Phase 2 / T4 (All tasks complete & Verifier PASS)
-- **Completed**: T1 (`AccountsService.findAll` com `includeArchived` e `unarchive`), T2 (11 testes unitários em `accounts.service.spec.ts`), T3 (`GET /accounts?includeArchived=true` e `PATCH /accounts/:id/unarchive`), T4 (Abas Ativas/Arquivadas, selo Arquivada e ação Desarquivar em `/accounts`)
+- **Completed**: T1 (`CreditCardsService.findAll` com `includeArchived`, `archive` e `unarchive`), T2 (18 novos testes unitários em `credit-cards.service.spec.ts`), T3 (`GET /credit-cards?includeArchived=true`, `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive`), T4 (Remoção do checkbox `"Cartão Ativo"`, abas Ativos/Arquivados, selo Arquivado e botões Archive/ArchiveRestore em `/cards`)
 - **In-progress**: None
 - **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
