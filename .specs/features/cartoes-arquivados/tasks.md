@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - extensão de `CreditCardsService.findAll`, novos métodos `archive`/`unarchive`, endpoints `PATCH` no controller, remoção do checkbox e adição de abas/ícones em `/cards`)
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -150,12 +150,12 @@ T4
 
 **Done when**:
 
-- [ ] Checkbox `"Cartão Ativo (exibir no painel)"`, estado `editIsActive` e campo `isActive` removidos do modal e payload de edição em `frontend/src/app/cards/page.tsx`
-- [ ] `loadData` consulta `/credit-cards` com `includeArchived: 'true'` mantendo `/accounts` com apenas contas ativas
-- [ ] Abas "Ativos" e "Arquivados" exibem seus respectivos contadores (`activeCards.length` e `archivedCards.length`)
-- [ ] Cards ativos exibem botão de ícone `Archive` (`title="Arquivar cartão"`) e cards arquivados exibem selo `Arquivado` e botão de ícone `ArchiveRestore` (`title="Desarquivar cartão"`) para usuários `!isViewer`, chamando os respectivos endpoints `PATCH` após confirmação
-- [ ] Mensagens de estado vazio são contextuais à aba selecionada
-- [ ] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
+- [x] Checkbox `"Cartão Ativo (exibir no painel)"`, estado `editIsActive` e campo `isActive` removidos do modal e payload de edição em `frontend/src/app/cards/page.tsx`
+- [x] `loadData` consulta `/credit-cards` com `includeArchived: 'true'` mantendo `/accounts` com apenas contas ativas
+- [x] Abas "Ativos" e "Arquivados" exibem seus respectivos contadores (`activeCards.length` e `archivedCards.length`)
+- [x] Cards ativos exibem botão de ícone `Archive` (`title="Arquivar cartão"`) e cards arquivados exibem selo `Arquivado` e botão de ícone `ArchiveRestore` (`title="Desarquivar cartão"`) para usuários `!isViewer`, chamando os respectivos endpoints `PATCH` após confirmação
+- [x] Mensagens de estado vazio são contextuais à aba selecionada
+- [x] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
 
 **Tests**: none
 **Gate**: build

@@ -96,9 +96,9 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | ARCHCARD-02 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
 | ARCHCARD-03 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
 | ARCHCARD-04 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHCARD-05 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |
-| ARCHCARD-06 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivados e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |
-| ARCHCARD-07 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivamento e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |
+| ARCHCARD-05 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
+| ARCHCARD-06 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivados e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
+| ARCHCARD-07 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivamento e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Implementing |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 

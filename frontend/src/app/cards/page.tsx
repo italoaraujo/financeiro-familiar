@@ -16,6 +16,8 @@ import {
   Pencil,
   Trash2,
   FileText,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
@@ -55,6 +57,7 @@ export default function CreditCardsPage() {
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
 
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -81,7 +84,6 @@ export default function CreditCardsPage() {
   const [editClosingDay, setEditClosingDay] = useState(20);
   const [editDueDay, setEditDueDay] = useState(27);
   const [editColor, setEditColor] = useState('#8b5cf6');
-  const [editIsActive, setEditIsActive] = useState(true);
 
   // Pay Invoice Form
   const [paymentAccountId, setPaymentAccountId] = useState('');
@@ -91,10 +93,15 @@ export default function CreditCardsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
+      const baseParams: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
       const [cardsData, accsData] = await Promise.all([
-        apiRequest('/credit-cards', { params }),
-        apiRequest('/accounts', { params }),
+        apiRequest('/credit-cards', {
+          params: {
+            ...baseParams,
+            includeArchived: 'true',
+          },
+        }),
+        apiRequest('/accounts', { params: baseParams }),
       ]);
       setCards(cardsData || []);
       setAccounts(accsData || []);
@@ -149,7 +156,6 @@ export default function CreditCardsPage() {
     setEditClosingDay(card.closingDay || 20);
     setEditDueDay(card.dueDay || 27);
     setEditColor(card.color || '#8b5cf6');
-    setEditIsActive(card.isActive ?? true);
     setIsEditModalOpen(true);
   };
 
@@ -168,7 +174,6 @@ export default function CreditCardsPage() {
           closingDay: Number(editClosingDay),
           dueDay: Number(editDueDay),
           color: editColor,
-          isActive: editIsActive,
         }),
       });
 
@@ -196,6 +201,30 @@ export default function CreditCardsPage() {
       alert(err.message || 'Erro ao excluir cartão');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleArchiveCard = async (cardId: string) => {
+    if (!confirm('Deseja arquivar este cartão de crédito? Ele não aparecerá na listagem ativa, mas o histórico e faturas serão preservados.')) {
+      return;
+    }
+    try {
+      await apiRequest(`/credit-cards/${cardId}/archive`, { method: 'PATCH' });
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao arquivar cartão');
+    }
+  };
+
+  const handleUnarchiveCard = async (cardId: string) => {
+    if (!confirm('Deseja desarquivar este cartão de crédito? Ele voltará a aparecer na listagem ativa.')) {
+      return;
+    }
+    try {
+      await apiRequest(`/credit-cards/${cardId}/unarchive`, { method: 'PATCH' });
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao desarquivar cartão');
     }
   };
 
@@ -245,6 +274,10 @@ export default function CreditCardsPage() {
     }
   };
 
+  const activeCards = cards.filter((c) => c.isActive !== false);
+  const archivedCards = cards.filter((c) => c.isActive === false);
+  const displayedCards = activeTab === 'active' ? activeCards : archivedCards;
+
   return (
     <AppShell>
       <div className="space-y-6 sm:space-y-8">
@@ -268,16 +301,59 @@ export default function CreditCardsPage() {
           )}
         </div>
 
+        {/* Tabs Ativos / Arquivados */}
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab('active')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              activeTab === 'active'
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent'
+            }`}
+          >
+            <span>Ativos</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                activeTab === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'
+              }`}
+            >
+              {activeCards.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('archived')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              activeTab === 'archived'
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent'
+            }`}
+          >
+            <span>Arquivados</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                activeTab === 'archived' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'
+              }`}
+            >
+              {archivedCards.length}
+            </span>
+          </button>
+        </div>
+
         {/* Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
           {loading ? (
             <div className="col-span-full py-12 text-center text-slate-500 text-xs sm:text-sm">Carregando cartões...</div>
-          ) : cards.length === 0 ? (
+          ) : displayedCards.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-500 bg-slate-900/40 border border-slate-800/80 rounded-2xl text-xs sm:text-sm">
-              Nenhum cartão de crédito cadastrado.
+              {activeTab === 'active'
+                ? 'Nenhum cartão de crédito ativo cadastrado.'
+                : 'Nenhum cartão de crédito arquivado no momento.'}
             </div>
           ) : (
-            cards.map((card) => {
+            displayedCards.map((card) => {
               const limit = Number(card.creditLimit || 0);
               const committed = Number(card.committedAmount || 0);
               const available = Number(card.availableLimit || 0);
@@ -286,7 +362,9 @@ export default function CreditCardsPage() {
               return (
                 <div
                   key={card.id}
-                  className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative flex flex-col justify-between shadow-xl"
+                  className={`bg-slate-900/80 border rounded-2xl p-4 sm:p-6 relative flex flex-col justify-between shadow-xl ${
+                    card.isActive === false ? 'border-amber-500/20 opacity-90' : 'border-slate-800'
+                  }`}
                 >
                   {/* Card Visual Header */}
                   <div>
@@ -299,7 +377,14 @@ export default function CreditCardsPage() {
                           <CardIcon className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-bold text-white text-base sm:text-lg leading-tight truncate">{card.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-white text-base sm:text-lg leading-tight truncate">{card.name}</h3>
+                            {card.isActive === false && (
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                Arquivado
+                              </span>
+                            )}
+                          </div>
                           <span className="text-xs text-slate-400">{card.brand || 'Cartão'}</span>
                         </div>
                       </div>
@@ -310,14 +395,35 @@ export default function CreditCardsPage() {
                           <p>Vencimento: dia <strong className="text-white">{card.dueDay}</strong></p>
                         </div>
                         {!isViewer && (
-                          <button
-                            onClick={() => openEditModal(card)}
-                            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
-                            title="Editar Cartão"
-                            aria-label="Editar Cartão"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {card.isActive === false ? (
+                              <button
+                                onClick={() => handleUnarchiveCard(card.id)}
+                                className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-emerald-400 bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                                title="Desarquivar cartão"
+                                aria-label="Desarquivar cartão"
+                              >
+                                <ArchiveRestore className="h-4 w-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleArchiveCard(card.id)}
+                                className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-amber-400 bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                                title="Arquivar cartão"
+                                aria-label="Arquivar cartão"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => openEditModal(card)}
+                              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                              title="Editar Cartão"
+                              aria-label="Editar Cartão"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -628,19 +734,6 @@ export default function CreditCardsPage() {
                     />
                     <span className="text-xs text-slate-400">{editColor}</span>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="checkbox"
-                    id="editIsActive"
-                    checked={editIsActive}
-                    onChange={(e) => setEditIsActive(e.target.checked)}
-                    className="h-4 w-4 rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
-                  />
-                  <label htmlFor="editIsActive" className="text-xs sm:text-sm text-slate-300 font-medium cursor-pointer">
-                    Cartão Ativo (exibir no painel)
-                  </label>
                 </div>
 
                 <div className="pt-3 flex flex-col sm:flex-row items-center gap-3">
