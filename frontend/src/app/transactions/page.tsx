@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { TagInput } from '../../components/ui/TagInput';
+import { AutocompleteInput, clearDescriptionCache } from '../../components/ui/AutocompleteInput';
 
 export default function TransactionsPage() {
   const { user, selectedFamilyId, isViewer } = useAuth();
@@ -188,6 +189,7 @@ export default function TransactionsPage() {
         });
       }
 
+      clearDescriptionCache();
       setIsModalOpen(false);
       // Reset form
       setAmount('');
@@ -214,6 +216,7 @@ export default function TransactionsPage() {
 
     try {
       await apiRequest(`/transactions/${id}`, { method: 'DELETE' });
+      clearDescriptionCache();
       loadTransactions();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir transação');
@@ -643,12 +646,19 @@ export default function TransactionsPage() {
                   <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
                     Descrição *
                   </label>
-                  <input
-                    type="text"
-                    required
+                  <AutocompleteInput
+                    type={modalType}
+                    familyId={selectedFamilyId}
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Ex: Aluguel, Supermercado, Salário..."
+                    onChange={setDescription}
+                    placeholder={
+                      modalType === 'EXPENSE'
+                        ? 'Ex: Aluguel, Supermercado, Combustível...'
+                        : modalType === 'INCOME'
+                        ? 'Ex: Salário, Rendimentos, Dividendos...'
+                        : 'Ex: Reserva de emergência, Poupança...'
+                    }
+                    required
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>

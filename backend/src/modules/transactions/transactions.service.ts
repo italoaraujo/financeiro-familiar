@@ -10,6 +10,7 @@ import { TagsService } from '../tags/tags.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
+import { GetDescriptionsDto } from './dto/get-descriptions.dto';
 import {
   GoalMovementType,
   GoalStatus,
@@ -218,7 +219,7 @@ export class TransactionsService {
               categoryId: dto.categoryId,
               type: TransactionType.EXPENSE,
               amount: instAmount,
-              description: `${dto.description} (${i}/${totalInstallments})`,
+              description: dto.description,
               notes: dto.notes,
               transactionDate: installmentDate,
               status: dto.status || TransactionStatus.COMPLETED,
@@ -607,6 +608,48 @@ export class TransactionsService {
 
       return { message: 'Transação excluída e saldo estornado com sucesso' };
     });
+  }
+
+  async getDistinctDescriptions(userId: string, dto: GetDescriptionsDto): Promise<string[]> {
+    if (dto.familyId) {
+      await this.verifyFamilyAccess(userId, dto.familyId, false);
+    }
+
+    const where: Prisma.TransactionWhereInput = {
+      type: dto.type,
+      deletedAt: null,
+      description: { not: '' },
+      ...(dto.familyId ? { familyId: dto.familyId } : { userId, familyId: null }),
+      OR: [
+        { isPrivate: false },
+        { userId },
+      ],
+    };
+
+    if (dto.search && dto.search.trim()) {
+      where.description = {
+        contains: dto.search.trim(),
+        mode: 'insensitive',
+      };
+    }
+
+    const limit = Math.min(Math.max(dto.limit || 10, 1), 20);
+
+    const grouped = await this.prisma.transaction.groupBy({
+      by: ['description'],
+      where,
+      _max: {
+        transactionDate: true,
+      },
+      orderBy: {
+        _max: {
+          transactionDate: 'desc',
+        },
+      },
+      take: limit,
+    });
+
+    return grouped.map((item: any) => item.description);
   }
 
   private async verifyFamilyAccess(userId: string, familyId: string, isMutation: boolean = false) {
