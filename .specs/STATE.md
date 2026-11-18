@@ -234,23 +234,31 @@
 - **Date**: 2026-11-17
 - **Status**: active
 
+### AD-030
+- **Decision**: Adicionar parâmetro opcional `includeArchived=true` em `GET /accounts` mantendo `isArchived: false` como padrão para todas as demais telas, expor o endpoint `PATCH /accounts/:id/unarchive` no `AccountsController`/`AccountsService` (validando `isArchived === true`, existência e RBAC `VIEWER`), e implementar abas de visualização "Ativas" e "Arquivadas" com contadores em `frontend/src/app/accounts/page.tsx` mantendo o "Saldo Total Consolidado" restrito às contas ativas.
+- **Reason**: Permite visualizar e restaurar contas arquivadas sem poluir os seletores de transações, cartões e metas e sem distorcer o saldo consolidado exibido em consistência com o Dashboard.
+- **Trade-off**: A tela `/accounts` passa a carregar todas as contas não excluídas em uma única chamada (`includeArchived=true`), filtrando ativas e arquivadas no cliente.
+- **Scope**: `backend/src/modules/accounts/accounts.service.ts`, `backend/src/modules/accounts/accounts.controller.ts`, `backend/test/unit/accounts.service.spec.ts` e `frontend/src/app/accounts/page.tsx`.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `edicao-lancamento-descricao-tags`
-- **Total Tasks**: 6
-- **Completed Tasks**: 6 / 6 (100%)
+- **Active Feature**: `contas-arquivadas`
+- **Total Tasks**: 4
+- **Completed Tasks**: 4 / 4 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Backend `npm run build` limpo; 3 suítes Jest em escopo aprovadas (69 testes: 8 DTO + 57 `TransactionsService` + 4 integração de tags); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (2/2 killed)
+- **Build Status**: Backend `npm run build` limpo; `accounts.service.spec.ts` aprovado (18/18 testes); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/edicao-lancamento-descricao-tags
-- **Phase / Task**: Phase 2 / T6 (All tasks complete & Verifier Round 2 PASS)
-- **Completed**: T1 (`UpdateTransactionDto`), T2 (Testes de validação/whitelist do DTO), T3 (`TransactionsService.update`), T4 (Testes unitários do service + Fix 1 privacidade), T5 (`PUT /transactions/:id`), T6 (Botão e modal de edição restrita em `/transactions`)
+- **Feature**: .specs/features/contas-arquivadas
+- **Phase / Task**: Phase 2 / T4 (All tasks complete & Verifier PASS)
+- **Completed**: T1 (`AccountsService.findAll` com `includeArchived` e `unarchive`), T2 (11 testes unitários em `accounts.service.spec.ts`), T3 (`GET /accounts?includeArchived=true` e `PATCH /accounts/:id/unarchive`), T4 (Abas Ativas/Arquivadas, selo Arquivada e ação Desarquivar em `/accounts`)
 - **In-progress**: None
 - **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/editar_lacamento
+- **Branch**: feature/contas_arquivadas
 

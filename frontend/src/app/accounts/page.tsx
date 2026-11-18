@@ -5,13 +5,14 @@ import AppShell from '../../components/layout/AppShell';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { formatCurrency } from '../../lib/formatters';
-import { Plus, Wallet, Archive, Trash2, X } from 'lucide-react';
+import { Plus, Wallet, Archive, ArchiveRestore, Trash2, X } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
 export default function AccountsPage() {
   const { user, selectedFamilyId, isViewer } = useAuth();
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form State
@@ -24,7 +25,10 @@ export default function AccountsPage() {
   const loadAccounts = async () => {
     setLoading(true);
     try {
-      const params: any = selectedFamilyId ? { familyId: selectedFamilyId } : {};
+      const params: any = {
+        includeArchived: 'true',
+        ...(selectedFamilyId ? { familyId: selectedFamilyId } : {}),
+      };
       const data = await apiRequest('/accounts', { params });
       setAccounts(data || []);
     } catch (err) {
@@ -79,6 +83,18 @@ export default function AccountsPage() {
     }
   };
 
+  const handleUnarchive = async (id: string) => {
+    if (!confirm('Deseja desarquivar esta conta? Ela voltará a aparecer no painel ativo e no saldo consolidado.')) {
+      return;
+    }
+    try {
+      await apiRequest(`/accounts/${id}/unarchive`, { method: 'PATCH' });
+      loadAccounts();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao desarquivar conta');
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Deseja excluir permanentemente esta conta? (Apenas permitido se não houver transações)')) {
       return;
@@ -106,7 +122,10 @@ export default function AccountsPage() {
     }
   };
 
-  const totalBalance = accounts.reduce((acc, a) => acc + Number(a.currentBalance || 0), 0);
+  const activeAccounts = accounts.filter((a) => !a.isArchived);
+  const archivedAccounts = accounts.filter((a) => a.isArchived);
+  const displayedAccounts = activeTab === 'active' ? activeAccounts : archivedAccounts;
+  const totalBalance = activeAccounts.reduce((acc, a) => acc + Number(a.currentBalance || 0), 0);
 
   return (
     <AppShell>
@@ -143,23 +162,68 @@ export default function AccountsPage() {
             </div>
           </div>
           <span className="text-xs text-slate-400 font-medium">
-            {accounts.length} {accounts.length === 1 ? 'conta ativa' : 'contas ativas'}
+            {activeAccounts.length} {activeAccounts.length === 1 ? 'conta ativa' : 'contas ativas'}
           </span>
+        </div>
+
+        {/* Tabs Ativas / Arquivadas */}
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab('active')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              activeTab === 'active'
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent'
+            }`}
+          >
+            <span>Ativas</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                activeTab === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'
+              }`}
+            >
+              {activeAccounts.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('archived')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              activeTab === 'archived'
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent'
+            }`}
+          >
+            <span>Arquivadas</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                activeTab === 'archived' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'
+              }`}
+            >
+              {archivedAccounts.length}
+            </span>
+          </button>
         </div>
 
         {/* Accounts Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {loading ? (
             <div className="col-span-full py-12 text-center text-slate-500 text-xs sm:text-sm">Carregando contas...</div>
-          ) : accounts.length === 0 ? (
+          ) : displayedAccounts.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-500 bg-slate-900/40 border border-slate-800/80 rounded-2xl text-xs sm:text-sm">
-              Nenhuma conta cadastrada no momento.
+              {activeTab === 'active'
+                ? 'Nenhuma conta ativa cadastrada no momento.'
+                : 'Nenhuma conta arquivada no momento.'}
             </div>
           ) : (
-            accounts.map((acc) => (
+            displayedAccounts.map((acc) => (
               <div
                 key={acc.id}
-                className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 relative group hover:border-slate-700 transition-all flex flex-col justify-between"
+                className={`bg-slate-900/80 border rounded-2xl p-4 sm:p-6 relative group hover:border-slate-700 transition-all flex flex-col justify-between ${
+                  acc.isArchived ? 'border-amber-500/20 opacity-90' : 'border-slate-800'
+                }`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -169,20 +233,37 @@ export default function AccountsPage() {
                         style={{ backgroundColor: acc.color || '#10b981' }}
                       ></span>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-white text-base sm:text-lg leading-tight truncate">{acc.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-white text-base sm:text-lg leading-tight truncate">{acc.name}</h3>
+                          {acc.isArchived && (
+                            <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                              Arquivada
+                            </span>
+                          )}
+                        </div>
                         <span className="text-xs text-slate-400">{getTypeName(acc.type)}</span>
                       </div>
                     </div>
 
                     {!isViewer && (
                       <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => handleArchive(acc.id)}
-                          title="Arquivar conta"
-                          className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
-                        >
-                          <Archive className="h-4 w-4" />
-                        </button>
+                        {acc.isArchived ? (
+                          <button
+                            onClick={() => handleUnarchive(acc.id)}
+                            title="Desarquivar conta"
+                            className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors"
+                          >
+                            <ArchiveRestore className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleArchive(acc.id)}
+                            title="Arquivar conta"
+                            className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
+                          >
+                            <Archive className="h-4 w-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(acc.id)}
                           title="Excluir conta"
