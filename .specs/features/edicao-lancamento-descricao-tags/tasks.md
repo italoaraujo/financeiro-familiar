@@ -179,9 +179,9 @@ T6
 
 **Done when**:
 
-- [ ] Endpoint `@Put(':id')` declarado com `@ApiOperation` e `@ApiResponse`
-- [ ] Utiliza `@GetUser('id')`, `@Param('id')` e `@Body() dto: UpdateTransactionDto`
-- [ ] Gate `full` (`npm test` no backend) passa integralmente
+- [x] Endpoint `@Put(':id')` declarado com `@ApiOperation` e `@ApiResponse`
+- [x] Utiliza `@GetUser('id')`, `@Param('id')` e `@Body() dto: UpdateTransactionDto`
+- [x] Gate `full` passa integralmente
 
 **Tests**: unit
 **Gate**: full
