@@ -152,12 +152,12 @@ T6
 
 **Done when**:
 
-- [ ] Teste de atualização de `description` e `tags` em lançamento simples preservando saldos/faturas
-- [ ] Teste de propagação em todas as parcelas ativas com mesmo `installmentGroupId`
-- [ ] Teste de remoção completa de tags quando `tags: []`
-- [ ] Teste permitindo edição em transferência, transação de meta e fatura `PAID`
-- [ ] Testes de erro para 404 (inexistente/deletada), 403 (`VIEWER`, outro usuário, lançamento privado de terceiros) e 400 (descrição só com espaços)
-- [ ] Gate `quick` passa com 100% dos testes aprovados
+- [x] Teste de atualização de `description` e `tags` em lançamento simples preservando saldos/faturas
+- [x] Teste de propagação em todas as parcelas ativas com mesmo `installmentGroupId`
+- [x] Teste de remoção completa de tags quando `tags: []`
+- [x] Teste permitindo edição em transferência, transação de meta e fatura `PAID`
+- [x] Testes de erro para 404 (inexistente/deletada), 403 (`VIEWER`, outro usuário, lançamento privado de terceiros) e 400 (descrição só com espaços)
+- [x] Gate `quick` passa com 100% dos testes aprovados
 
 **Tests**: unit
 **Gate**: quick
