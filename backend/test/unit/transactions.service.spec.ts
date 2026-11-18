@@ -1607,6 +1607,7 @@ describe('TransactionsService', () => {
         description: 'Aporte Meta',
         isPrivate: false,
         installmentGroupId: null,
+        goalDeposits: [{ id: 'dep-1', goalId: 'goal-1' }],
         deletedAt: null,
       };
 
@@ -1680,7 +1681,7 @@ describe('TransactionsService', () => {
         service.update('attacker-1', 'tx-other', { description: 'IDOR' }),
       ).rejects.toThrow(ForbiddenException);
 
-      // Private family transaction belonging to another user
+      // Private family transaction belonging to another user (even if caller is ADMIN in the family)
       prisma.transaction.findUnique.mockResolvedValueOnce({
         id: 'tx-priv',
         userId: 'owner-1',
@@ -1688,10 +1689,17 @@ describe('TransactionsService', () => {
         isPrivate: true,
         deletedAt: null,
       });
+      prisma.familyMember.findUnique.mockResolvedValueOnce({
+        id: 'mem-admin',
+        familyId: 'fam-1',
+        userId: 'admin-2',
+        role: 'ADMIN',
+      });
 
       await expect(
         service.update('admin-2', 'tx-priv', { description: 'Espionar' }),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(new ForbiddenException('Apenas o autor pode editar um lançamento privado'));
+      expect(prisma.transaction.updateMany).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when description is whitespace-only (Edge Case)', async () => {
