@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - extensão de `AccountsService.findAll`, novo método `unarchive`, query param e rota `PATCH /accounts/:id/unarchive` no controller, e abas Ativas/Arquivadas em `/accounts`)
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -150,12 +150,12 @@ T4
 
 **Done when**:
 
-- [ ] `loadAccounts` consulta `/accounts` com `includeArchived: 'true'` (além de `familyId` quando selecionado)
-- [ ] Abas "Ativas" e "Arquivadas" exibem seus respectivos contadores (`activeAccounts.length` e `archivedAccounts.length`)
-- [ ] Card "Saldo Total Consolidado" soma exclusivamente `activeAccounts` (`!a.isArchived`) em ambas as abas
-- [ ] Aba "Arquivadas" exibe somente contas arquivadas com selo `Arquivada` e, para `!isViewer`, botão "Desarquivar conta" (`ArchiveRestore`) chamando `PATCH /accounts/${id}/unarchive` após confirmação, além de `Trash2`
-- [ ] Mensagens de estado vazio são contextuais à aba selecionada
-- [ ] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
+- [x] `loadAccounts` consulta `/accounts` com `includeArchived: 'true'` (além de `familyId` quando selecionado)
+- [x] Abas "Ativas" e "Arquivadas" exibem seus respectivos contadores (`activeAccounts.length` e `archivedAccounts.length`)
+- [x] Card "Saldo Total Consolidado" soma exclusivamente `activeAccounts` (`!a.isArchived`) em ambas as abas
+- [x] Aba "Arquivadas" exibe somente contas arquivadas com selo `Arquivada` e, para `!isViewer`, botão "Desarquivar conta" (`ArchiveRestore`) chamando `PATCH /accounts/${id}/unarchive` após confirmação, além de `Trash2`
+- [x] Mensagens de estado vazio são contextuais à aba selecionada
+- [x] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
 
 **Tests**: none
 **Gate**: build
