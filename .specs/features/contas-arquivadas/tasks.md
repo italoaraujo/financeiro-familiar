@@ -97,12 +97,12 @@ T4
 
 **Done when**:
 
-- [ ] Testes cobrem `findAll` sem `includeArchived` (pessoal e familiar) filtrando `isArchived: false, deletedAt: null`
-- [ ] Testes cobrem `findAll` com `includeArchived = true` (pessoal e familiar) omitindo `isArchived` e mantendo `deletedAt: null`
-- [ ] Testes cobrem `archive` atualizando `{ isArchived: true, isActive: false }` e rejeitando `VIEWER` com `ForbiddenException`
-- [ ] Testes cobrem `unarchive` restaurando conta arquivada para `{ isArchived: false, isActive: true }`
-- [ ] Testes cobrem erros de `unarchive`: 400 para conta ativa (`!isArchived`), 404 para conta inexistente/deletada e 403 para `VIEWER` ou usuário de outra conta pessoal
-- [ ] Gate `quick` passa com todos os testes verdes (sem exclusões ou skips)
+- [x] Testes cobrem `findAll` sem `includeArchived` (pessoal e familiar) filtrando `isArchived: false, deletedAt: null`
+- [x] Testes cobrem `findAll` com `includeArchived = true` (pessoal e familiar) omitindo `isArchived` e mantendo `deletedAt: null`
+- [x] Testes cobrem `archive` atualizando `{ isArchived: true, isActive: false }` e rejeitando `VIEWER` com `ForbiddenException`
+- [x] Testes cobrem `unarchive` restaurando conta arquivada para `{ isArchived: false, isActive: true }`
+- [x] Testes cobrem erros de `unarchive`: 400 para conta ativa (`!isArchived`), 404 para conta inexistente/deletada e 403 para `VIEWER` ou usuário de outra conta pessoal
+- [x] Gate `quick` passa com todos os testes verdes (sem exclusões ou skips)
 
 **Tests**: unit
 **Gate**: quick
