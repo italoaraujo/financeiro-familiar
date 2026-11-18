@@ -46,7 +46,7 @@ export class CreditCardsService {
     return card;
   }
 
-  async findAll(userId: string, familyId?: string) {
+  async findAll(userId: string, familyId?: string, includeArchived: boolean = false) {
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId);
     }
@@ -54,10 +54,12 @@ export class CreditCardsService {
     await this.syncInvoiceStatuses();
     await this.cleanupOrphanZeroInvoices();
 
+    const activeFilter = includeArchived ? {} : { isActive: true };
+
     const cards = await this.prisma.creditCard.findMany({
       where: familyId
-        ? { familyId, isActive: true, deletedAt: null }
-        : { userId, familyId: null, isActive: true, deletedAt: null },
+        ? { familyId, ...activeFilter, deletedAt: null }
+        : { userId, familyId: null, ...activeFilter, deletedAt: null },
       include: {
         invoices: {
           orderBy: { referenceMonth: 'asc' },
@@ -193,6 +195,40 @@ export class CreditCardsService {
     }
 
     return this.findById(userId, id);
+  }
+
+  async archive(userId: string, id: string) {
+    const card = await this.findById(userId, id);
+
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    if (!card.isActive) {
+      throw new BadRequestException('O cartão de crédito já está arquivado');
+    }
+
+    return this.prisma.creditCard.update({
+      where: { id: card.id },
+      data: { isActive: false },
+    });
+  }
+
+  async unarchive(userId: string, id: string) {
+    const card = await this.findById(userId, id);
+
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    if (card.isActive) {
+      throw new BadRequestException('O cartão de crédito não está arquivado');
+    }
+
+    return this.prisma.creditCard.update({
+      where: { id: card.id },
+      data: { isActive: true },
+    });
   }
 
   async remove(userId: string, id: string) {

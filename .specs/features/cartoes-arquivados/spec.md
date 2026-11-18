@@ -92,10 +92,10 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| ARCHCARD-01 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHCARD-02 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHCARD-03 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHCARD-04 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Pending |
+| ARCHCARD-01 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHCARD-02 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHCARD-03 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHCARD-04 | P1: Listagem de Cartões Arquivados, Arquivamento e Desarquivamento no Backend | Phase 1 | Implementing |
 | ARCHCARD-05 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivar e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |
 | ARCHCARD-06 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivados e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |
 | ARCHCARD-07 | P2: Abas Ativos/Arquivados, Ícones de Arquivar/Desarquivamento e Remoção do Checkbox no Modal em `/cards` | Phase 2 | Pending |

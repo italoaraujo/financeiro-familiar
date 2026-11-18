@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - extensão de `CreditCardsService.findAll`, novos métodos `archive`/`unarchive`, endpoints `PATCH` no controller, remoção do checkbox e adição de abas/ícones em `/cards`)
-**Status**: Approved
+**Status**: In Progress
 
 ---
 
@@ -72,11 +72,11 @@ T4
 
 **Done when**:
 
-- [ ] `findAll` mantém `isActive: true, deletedAt: null` quando `includeArchived` é omitido ou `false`
-- [ ] `findAll` com `includeArchived = true` filtra por `deletedAt: null` sem restringir `isActive`, tanto para escopo familiar quanto pessoal
-- [ ] `archive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita cartão já arquivado (`!card.isActive`) com `BadRequestException` e atualiza para `{ isActive: false }`
-- [ ] `unarchive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita cartão já ativo (`card.isActive`) com `BadRequestException` e atualiza para `{ isActive: true }`
-- [ ] Gate `quick` passa com 100% dos testes verdes
+- [x] `findAll` mantém `isActive: true, deletedAt: null` quando `includeArchived` é omitido ou `false`
+- [x] `findAll` com `includeArchived = true` filtra por `deletedAt: null` sem restringir `isActive`, tanto para escopo familiar quanto pessoal
+- [x] `archive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita cartão já arquivado (`!card.isActive`) com `BadRequestException` e atualiza para `{ isActive: false }`
+- [x] `unarchive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita cartão já ativo (`card.isActive`) com `BadRequestException` e atualiza para `{ isActive: true }`
+- [x] Gate `quick` passa com 100% dos testes verdes
 
 **Tests**: unit
 **Gate**: quick
