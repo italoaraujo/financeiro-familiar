@@ -94,8 +94,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | -------------- | ----- | ----- | ------ |
 | EDITTX-01 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
 | EDITTX-02 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
-| EDITTX-03 | P1: Edição Segura de Descrição e Tags no Backend | Pending | Pending |
-| EDITTX-04 | P1: Edição Segura de Descrição e Tags no Backend | Pending | Pending |
+| EDITTX-03 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
+| EDITTX-04 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
 | EDITTX-05 | P2: Modal de Edição com Campos Imutáveis no Frontend | Pending | Pending |
 | EDITTX-06 | P2: Modal de Edição com Campos Imutáveis no Frontend | Pending | Pending |
 | EDITTX-07 | P2: Modal de Edição com Campos Imutáveis no Frontend | Pending | Pending |

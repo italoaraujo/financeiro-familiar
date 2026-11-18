@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreditCardsService } from '../credit-cards/credit-cards.service';
 import { TagsService } from '../tags/tags.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
 import { GetDescriptionsDto } from './dto/get-descriptions.dto';
@@ -525,6 +526,121 @@ export class TransactionsService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async update(userId: string, id: string, dto: UpdateTransactionDto) {
+    if (dto.description !== undefined && dto.description.trim().length === 0) {
+      throw new BadRequestException('Descrição é obrigatória');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.findUnique({
+        where: { id },
+      });
+
+      if (!transaction || transaction.deletedAt) {
+        throw new NotFoundException('Transação não encontrada');
+      }
+
+      if (transaction.isPrivate && transaction.userId !== userId) {
+        throw new ForbiddenException('Apenas o autor pode editar um lançamento privado');
+      }
+
+      if (transaction.familyId) {
+        await this.verifyFamilyAccess(userId, transaction.familyId, true);
+      } else if (transaction.userId !== userId) {
+        throw new ForbiddenException('Apenas o autor pode editar este lançamento');
+      }
+
+      let targetIds = [transaction.id];
+      if (transaction.installmentGroupId) {
+        const groupTransactions = await tx.transaction.findMany({
+          where: {
+            installmentGroupId: transaction.installmentGroupId,
+            deletedAt: null,
+          },
+          select: { id: true },
+        });
+        if (groupTransactions.length > 0) {
+          targetIds = groupTransactions.map((item) => item.id);
+        }
+      }
+
+      if (dto.description !== undefined) {
+        await tx.transaction.updateMany({
+          where: { id: { in: targetIds } },
+          data: { description: dto.description.trim() },
+        });
+      }
+
+      if (dto.tags !== undefined) {
+        const resolvedTags =
+          dto.tags.length > 0
+            ? await this.tagsService.findOrCreateMany(
+                userId,
+                transaction.familyId,
+                dto.tags,
+                tx,
+              )
+            : [];
+
+        const uniqueTags = Array.from(
+          new Map(resolvedTags.map((tag: any) => [tag.id, tag])).values(),
+        );
+
+        await tx.transactionTag.deleteMany({
+          where: { transactionId: { in: targetIds } },
+        });
+
+        for (const targetId of targetIds) {
+          for (const tag of uniqueTags) {
+            await tx.transactionTag.create({
+              data: {
+                transactionId: targetId,
+                tagId: tag.id,
+              },
+            });
+          }
+        }
+      }
+
+      const updated = await tx.transaction.findUnique({
+        where: { id },
+        include: {
+          category: true,
+          account: true,
+          destinationAccount: true,
+          creditCard: true,
+          goalDeposits: {
+            select: { id: true, goalId: true },
+          },
+          person: {
+            select: { id: true, name: true, color: true, avatarUrl: true },
+          },
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      });
+
+      if (!updated) {
+        throw new NotFoundException('Transação não encontrada');
+      }
+
+      const flatTags = (updated as any).tags
+        ? (updated as any).tags.map((tt: any) => tt.tag)
+        : [];
+
+      return {
+        ...updated,
+        tags: flatTags,
+      };
+    });
   }
 
   async remove(userId: string, id: string) {

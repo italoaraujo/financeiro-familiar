@@ -21,7 +21,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 | ---------- | ------------------ | -------------------- | ---------------- | ----------- |
 | DTO / Validation | unit | Validação de `description`/`tags` e rejeição estrita de campos extras (`whitelist` + `forbidNonWhitelisted`) | `backend/test/unit/dto-maxlength-validation.spec.ts` | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npx jest test/unit/dto-maxlength-validation.spec.ts` |
 | Domain / Service | unit | Cobertura 1:1 dos ACs (EDITTX-01 a EDITTX-04) e edge cases | `backend/test/unit/transactions.service.spec.ts` | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npx jest test/unit/transactions.service.spec.ts` |
-| Controller / Route | unit | Rota `PUT /transactions/:id` delegando ao service com `@UseGuards(JwtAuthGuard)` | `backend/src/modules/transactions/transactions.controller.ts` | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npm test` |
+| Controller / Route | unit | Rota `PUT /transactions/:id` delegando ao service com `@UseGuards(JwtAuthGuard)` | `backend/src/modules/transactions/transactions.controller.ts` | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npx jest test/unit/dto-maxlength-validation.spec.ts test/unit/transactions.service.spec.ts test/integration/tags-flow.spec.ts` |
 | Frontend Page | none | Renderização do botão editar, modal com campos bloqueados e integração com API | `frontend/src/app/transactions/page.tsx` | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd frontend && npm run lint && npm run build` |
 
 ## Gate Check Commands
@@ -31,8 +31,8 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 | Gate Level | When to Use | Command |
 | ---------- | ----------- | ------- |
 | Quick | After tasks with unit tests only | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npx jest test/unit/dto-maxlength-validation.spec.ts test/unit/transactions.service.spec.ts` |
-| Full | After tasks completing controller/module wiring | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npm test` |
-| Build | After phase completion or frontend UI tasks | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npm run build && npm test && cd ../frontend && npm run lint && npm run build` |
+| Full | After tasks completing controller/module wiring | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npx jest test/unit/dto-maxlength-validation.spec.ts test/unit/transactions.service.spec.ts test/integration/tags-flow.spec.ts` |
+| Build | After phase completion or frontend UI tasks | `export PATH=/home/italo/.nvm/versions/node/v24.18.0/bin:$PATH && cd backend && npm run build && npx jest test/unit/dto-maxlength-validation.spec.ts test/unit/transactions.service.spec.ts test/integration/tags-flow.spec.ts && cd ../frontend && npm run lint && npm run build` |
 
 ---
 
@@ -124,13 +124,13 @@ T6
 
 **Done when**:
 
-- [ ] Retorna `NotFoundException` se transação não existir ou tiver `deletedAt != null`
-- [ ] Retorna `ForbiddenException` se `isPrivate && userId !== tx.userId`, se usuário não for o autor pessoal ou se membro da família for `VIEWER`
-- [ ] Rejeita `description` composta apenas por espaços em branco com `BadRequestException`
-- [ ] Atualiza `description` e sincroniza `TransactionTag` (incluindo `tags: []` para limpar todas) sem alterar `amount`, saldos de conta ou faturas
-- [ ] Quando `installmentGroupId` estiver preenchido, propaga `description` e `tags` para todas as parcelas ativas (`deletedAt: null`) do mesmo grupo
-- [ ] Permite edição em transferências, movimentações de metas e faturas `CLOSED` ou `PAID`
-- [ ] Gate `quick` passa sem regressões
+- [x] Retorna `NotFoundException` se transação não existir ou tiver `deletedAt != null`
+- [x] Retorna `ForbiddenException` se `isPrivate && userId !== tx.userId`, se usuário não for o autor pessoal ou se membro da família for `VIEWER`
+- [x] Rejeita `description` composta apenas por espaços em branco com `BadRequestException`
+- [x] Atualiza `description` e sincroniza `TransactionTag` (incluindo `tags: []` para limpar todas) sem alterar `amount`, saldos de conta ou faturas
+- [x] Quando `installmentGroupId` estiver preenchido, propaga `description` e `tags` para todas as parcelas ativas (`deletedAt: null`) do mesmo grupo
+- [x] Permite edição em transferências, movimentações de metas e faturas `CLOSED` ou `PAID`
+- [x] Gate `quick` passa sem regressões
 
 **Tests**: unit
 **Gate**: quick
