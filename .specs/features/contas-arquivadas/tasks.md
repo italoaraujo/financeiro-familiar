@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - extensão de `AccountsService.findAll`, novo método `unarchive`, query param e rota `PATCH /accounts/:id/unarchive` no controller, e abas Ativas/Arquivadas em `/accounts`)
-**Status**: Approved
+**Status**: In Progress
 
 ---
 
@@ -72,10 +72,10 @@ T4
 
 **Done when**:
 
-- [ ] `findAll` mantém `isArchived: false, deletedAt: null` quando `includeArchived` é omitido ou `false`
-- [ ] `findAll` com `includeArchived = true` filtra por `deletedAt: null` sem restringir `isArchived`, tanto para escopo familiar quanto pessoal
-- [ ] `unarchive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita conta não arquivada com `BadRequestException('A conta não está arquivada')` e atualiza para `{ isArchived: false, isActive: true }`
-- [ ] Gate `quick` passa com 100% dos testes verdes
+- [x] `findAll` mantém `isArchived: false, deletedAt: null` quando `includeArchived` é omitido ou `false`
+- [x] `findAll` com `includeArchived = true` filtra por `deletedAt: null` sem restringir `isArchived`, tanto para escopo familiar quanto pessoal
+- [x] `unarchive` valida existência (`findById`), permissão de mutação na família (`verifyFamilyAccess(..., true)`), rejeita conta não arquivada com `BadRequestException('A conta não está arquivada')` e atualiza para `{ isArchived: false, isActive: true }`
+- [x] Gate `quick` passa com 100% dos testes verdes
 
 **Tests**: unit
 **Gate**: quick

@@ -89,10 +89,10 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| ARCHACC-01 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHACC-02 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHACC-03 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Pending |
-| ARCHACC-04 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Pending |
+| ARCHACC-01 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHACC-02 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHACC-03 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
+| ARCHACC-04 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
 | ARCHACC-05 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Pending |
 | ARCHACC-06 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Pending |
 | ARCHACC-07 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Pending |

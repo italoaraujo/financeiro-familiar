@@ -35,13 +35,15 @@ export class AccountsService {
     });
   }
 
-  async findAll(userId: string, familyId?: string) {
+  async findAll(userId: string, familyId?: string, includeArchived: boolean = false) {
+    const archiveFilter = includeArchived ? {} : { isArchived: false };
+
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId, false);
       return this.prisma.account.findMany({
         where: {
           familyId,
-          isArchived: false,
+          ...archiveFilter,
           deletedAt: null,
         },
         orderBy: { createdAt: 'desc' },
@@ -52,7 +54,7 @@ export class AccountsService {
       where: {
         userId,
         familyId: null,
-        isArchived: false,
+        ...archiveFilter,
         deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
@@ -110,6 +112,23 @@ export class AccountsService {
     return this.prisma.account.update({
       where: { id: account.id },
       data: { isArchived: true, isActive: false },
+    });
+  }
+
+  async unarchive(userId: string, id: string) {
+    const account = await this.findById(userId, id);
+
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
+    if (!account.isArchived) {
+      throw new BadRequestException('A conta não está arquivada');
+    }
+
+    return this.prisma.account.update({
+      where: { id: account.id },
+      data: { isArchived: false, isActive: true },
     });
   }
 
