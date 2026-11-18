@@ -124,9 +124,9 @@ T4
 
 **Done when**:
 
-- [ ] `@Get()` recebe `@Query('includeArchived') includeArchived?: string`, documenta com `@ApiQuery` e repassa `includeArchived === 'true'` para `creditCardsService.findAll`
-- [ ] `@Patch(':id/archive')` e `@Patch(':id/unarchive')` declarados com `@ApiOperation` e `@ApiResponse`, delegando para `creditCardsService.archive` e `creditCardsService.unarchive`
-- [ ] Gate `full` (backend build + testes unitários) passa integralmente
+- [x] `@Get()` recebe `@Query('includeArchived') includeArchived?: string`, documenta com `@ApiQuery` e repassa `includeArchived === 'true'` para `creditCardsService.findAll`
+- [x] `@Patch(':id/archive')` e `@Patch(':id/unarchive')` declarados com `@ApiOperation` e `@ApiResponse`, delegando para `creditCardsService.archive` e `creditCardsService.unarchive`
+- [x] Gate `full` (backend build + testes unitários) passa integralmente
 
 **Tests**: unit
 **Gate**: full
