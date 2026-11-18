@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - DTO restritivo, método `update` no `TransactionsService`, endpoint `PUT /transactions/:id` e modal de edição no extrato)
-**Status**: Draft
+**Status**: In Progress
 
 ---
 
@@ -73,11 +73,11 @@ T6
 
 **Done when**:
 
-- [ ] `UpdateTransactionDto` declara apenas `description?: string` e `tags?: string[]`
-- [ ] `description` possui `@IsOptional()`, `@IsString()`, `@IsNotEmpty()` e `@MaxLength(255)`
-- [ ] `tags` possui `@IsOptional()`, `@IsArray()`, `@IsString({ each: true })` e `@MaxLength(50, { each: true })`
-- [ ] Nenhum campo contábil (`amount`, `accountId`, `creditCardId`, `categoryId`, `transactionDate`, `type`, `personId`, `isPrivate`, `status`) está presente no DTO
-- [ ] Documentação Swagger (`@ApiProperty`) adicionada
+- [x] `UpdateTransactionDto` declara apenas `description?: string` e `tags?: string[]`
+- [x] `description` possui `@IsOptional()`, `@IsString()`, `@IsNotEmpty()` e `@MaxLength(255)`
+- [x] `tags` possui `@IsOptional()`, `@IsArray()`, `@IsString({ each: true })` e `@MaxLength(50, { each: true })`
+- [x] Nenhum campo contábil (`amount`, `accountId`, `creditCardId`, `categoryId`, `transactionDate`, `type`, `personId`, `isPrivate`, `status`) está presente no DTO
+- [x] Documentação Swagger (`@ApiProperty`) adicionada
 
 **Tests**: unit
 **Gate**: quick
