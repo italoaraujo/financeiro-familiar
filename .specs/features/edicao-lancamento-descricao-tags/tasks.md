@@ -99,10 +99,10 @@ T6
 
 **Done when**:
 
-- [ ] Teste valida que `UpdateTransactionDto` aceita `description` e `tags` válidos
-- [ ] Teste valida rejeição de `description` vazia ou maior que 255 caracteres e tag maior que 50 caracteres
-- [ ] Teste valida que `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })` lança `BadRequestException` ao receber `amount`, `categoryId`, `accountId` ou `transactionDate`
-- [ ] Gate `quick` passa com todos os testes verdes
+- [x] Teste valida que `UpdateTransactionDto` aceita `description` e `tags` válidos
+- [x] Teste valida rejeição de `description` vazia ou maior que 255 caracteres e tag maior que 50 caracteres
+- [x] Teste valida que `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })` lança `BadRequestException` ao receber `amount`, `categoryId`, `accountId` ou `transactionDate`
+- [x] Gate `quick` passa com todos os testes verdes
 
 **Tests**: unit
 **Gate**: quick
