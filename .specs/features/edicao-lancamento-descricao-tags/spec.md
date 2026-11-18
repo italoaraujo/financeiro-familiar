@@ -6,11 +6,11 @@ Atualmente, os lançamentos financeiros registrados no extrato (despesas, receit
 
 ## Goals
 
-- [ ] Disponibilizar endpoint `PUT /transactions/:id` no backend que permita atualizar exclusivamente `description` e `tags` de um lançamento.
-- [ ] Rejeitar qualquer tentativa de alteração de outros campos contábeis (`amount`, `type`, `accountId`, `destinationAccountId`, `creditCardId`, `categoryId`, `transactionDate`, `personId`, `status`, `isPrivate`, `totalInstallments`) via validação de DTO (`whitelist` + `forbidNonWhitelisted`).
-- [ ] Propagar automaticamente a edição de descrição e tags para todas as parcelas ativas da mesma compra parcelada (`installmentGroupId`) no cartão de crédito.
-- [ ] Permitir a edição de descrição e tags em todos os tipos e status de lançamentos do usuário/família (Despesas, Receitas, Transferências, movimentações de Metas e lançamentos em Faturas abertas, fechadas ou pagas), respeitando o bloqueio de perfil `VIEWER` e a privacidade de lançamentos (`isPrivate`).
-- [ ] Disponibilizar botão de edição e modal no extrato (`/transactions`) exibindo apenas Descrição e Tags habilitados e os demais campos visíveis em modo somente leitura/desabilitado (Imutável).
+- [x] Disponibilizar endpoint `PUT /transactions/:id` no backend que permita atualizar exclusivamente `description` e `tags` de um lançamento.
+- [x] Rejeitar qualquer tentativa de alteração de outros campos contábeis (`amount`, `type`, `accountId`, `destinationAccountId`, `creditCardId`, `categoryId`, `transactionDate`, `personId`, `status`, `isPrivate`, `totalInstallments`) via validação de DTO (`whitelist` + `forbidNonWhitelisted`).
+- [x] Propagar automaticamente a edição de descrição e tags para todas as parcelas ativas da mesma compra parcelada (`installmentGroupId`) no cartão de crédito.
+- [x] Permitir a edição de descrição e tags em todos os tipos e status de lançamentos do usuário/família (Despesas, Receitas, Transferências, movimentações de Metas e lançamentos em Faturas abertas, fechadas ou pagas), respeitando o bloqueio de perfil `VIEWER` e a privacidade de lançamentos (`isPrivate`).
+- [x] Disponibilizar botão de edição e modal no extrato (`/transactions`) exibindo apenas Descrição e Tags habilitados e os demais campos visíveis em modo somente leitura/desabilitado (Imutável).
 
 ## Out of Scope
 
@@ -92,13 +92,13 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| EDITTX-01 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
-| EDITTX-02 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
-| EDITTX-03 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
-| EDITTX-04 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Implementing |
-| EDITTX-05 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Implementing |
-| EDITTX-06 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Implementing |
-| EDITTX-07 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Implementing |
+| EDITTX-01 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Verified |
+| EDITTX-02 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Verified |
+| EDITTX-03 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Verified |
+| EDITTX-04 | P1: Edição Segura de Descrição e Tags no Backend | Execute | Verified |
+| EDITTX-05 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Verified |
+| EDITTX-06 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Verified |
+| EDITTX-07 | P2: Modal de Edição com Campos Imutáveis no Frontend | Execute | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 
@@ -110,7 +110,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] Usuário consegue editar exclusivamente a Descrição e as Tags de qualquer lançamento pelo modal na tela `/transactions`.
-- [ ] Demais campos permanecem visíveis porém bloqueados/somente leitura no frontend e estritamente rejeitados no backend (`forbidNonWhitelisted`).
-- [ ] Edição em compra parcelada atualiza Descrição e Tags em todas as parcelas ativas da mesma compra.
-- [ ] Todos os testes unitários e de validação de DTO do backend e o build do frontend passam com zero erros.
+- [x] Usuário consegue editar exclusivamente a Descrição e as Tags de qualquer lançamento pelo modal na tela `/transactions`.
+- [x] Demais campos permanecem visíveis porém bloqueados/somente leitura no frontend e estritamente rejeitados no backend (`forbidNonWhitelisted`).
+- [x] Edição em compra parcelada atualiza Descrição e Tags em todas as parcelas ativas da mesma compra.
+- [x] Todos os testes unitários e de validação de DTO do backend e o build do frontend passam com zero erros.

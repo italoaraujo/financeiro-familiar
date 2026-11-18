@@ -226,23 +226,31 @@
 - **Date**: 2026-10-16
 - **Status**: active
 
+### AD-029
+- **Decision**: Expor endpoint `PUT /transactions/:id` com DTO dedicado (`UpdateTransactionDto`) permitindo exclusivamente a alteração de `description` e `tags`, com rejeição estrita via `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })` para qualquer outro campo, propagação automática da edição para todas as parcelas ativas (`deletedAt: null`) vinculadas ao mesmo `installmentGroupId`, permissão de edição em transferências, metas e faturas `CLOSED`/`PAID` (sem alterar saldos), respeito ao bloqueio de perfil `VIEWER` e privacidade (`isPrivate`), e modal dedicado em `/transactions` exibindo todos os demais campos visíveis em modo somente leitura com badge `Imutável`.
+- **Reason**: Permite corrigir descrição e tags no extrato sem comprometer a conciliação contábil de saldos bancários, limites de cartão de crédito, faturas fechadas/pagas ou cofrinhos.
+- **Trade-off**: Alterações de descrição ou tags em compras parceladas atualizam todas as parcelas da compra de forma unificada.
+- **Scope**: `backend/src/modules/transactions/` (`UpdateTransactionDto`, `TransactionsService.update`, `TransactionsController.update`), testes unitários (`dto-maxlength-validation.spec.ts`, `transactions.service.spec.ts`) e `frontend/src/app/transactions/page.tsx`.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `exibicao-versao-sistema`
-- **Total Tasks**: 5
-- **Completed Tasks**: 5 / 5 (100%)
+- **Active Feature**: `edicao-lancamento-descricao-tags`
+- **Total Tasks**: 6
+- **Completed Tasks**: 6 / 6 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Build do Next.js Turbopack 100% limpo, lint aprovado com zero erros, 28 suítes do backend aprovadas (294 testes)
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors)
+- **Build Status**: Backend `npm run build` limpo; 3 suítes Jest em escopo aprovadas (69 testes: 8 DTO + 57 `TransactionsService` + 4 integração de tags); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
+- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (2/2 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/exibicao-versao-sistema
-- **Phase / Task**: Phase 2 / T5 (All tasks complete)
-- **Completed**: T1 (Injeção de NEXT_PUBLIC_APP_VERSION no Next.js), T2 (Criação de APP_VERSION com fallback), T3 (Exibição da versão no rodapé da Sidebar do AppShell), T4 (Exibição no rodapé da tela de Login), T5 (Exibição no rodapé da tela de Cadastro)
+- **Feature**: .specs/features/edicao-lancamento-descricao-tags
+- **Phase / Task**: Phase 2 / T6 (All tasks complete & Verifier Round 2 PASS)
+- **Completed**: T1 (`UpdateTransactionDto`), T2 (Testes de validação/whitelist do DTO), T3 (`TransactionsService.update`), T4 (Testes unitários do service + Fix 1 privacidade), T5 (`PUT /transactions/:id`), T6 (Botão e modal de edição restrita em `/transactions`)
 - **In-progress**: None
 - **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/exibicao-versao-sistema
+- **Branch**: feature/editar_lacamento
 

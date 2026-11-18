@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 2,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::mock valid membership and assert the exact error message when testing privacy guards inside family scoped methods so fallback membership checks cannot mask a missing privacy check",
+      "text": "Mock valid membership and assert the exact error message when testing privacy guards inside family-scoped methods so fallback membership checks cannot mask a missing privacy check",
+      "signal": "surviving_mutant",
+      "scope": "transactions",
+      "status": "candidate",
+      "features": [
+        "edicao-lancamento-descricao-tags"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "backend/test/unit/transactions.service.spec.ts:1683-1695 (Mutant 2) (transactions)"
+      ],
+      "created": "2026-11-18T01:39:23Z",
+      "last_seen": "2026-11-18T01:39:23Z"
+    }
+  ]
+}
