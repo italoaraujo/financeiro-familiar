@@ -12,6 +12,8 @@ import {
   ArrowDownRight,
   ArrowLeftRight,
   Trash2,
+  Pencil,
+  AlertCircle,
   Wallet,
   CreditCard,
   Lock,
@@ -64,6 +66,13 @@ export default function TransactionsPage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [editDescription, setEditDescription] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const selectedCard = cards.find((c) => c.id === creditCardId);
   const parsedAmount = parseFloat(amount) || 0;
@@ -220,6 +229,59 @@ export default function TransactionsPage() {
       loadTransactions();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir transação');
+    }
+  };
+
+  const openEditModal = (tx: any) => {
+    setEditingTransaction(tx);
+    setEditDescription(tx.description || '');
+    const initialTags = Array.isArray(tx.tags)
+      ? tx.tags
+          .map((tItem: any) => {
+            const tagObj = tItem?.tag || tItem;
+            return typeof tagObj === 'string' ? tagObj : tagObj?.name;
+          })
+          .filter((name: unknown): name is string => typeof name === 'string' && name.length > 0)
+      : [];
+    setEditTags(initialTags);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingTransaction(null);
+    setEditDescription('');
+    setEditTags([]);
+  };
+
+  const handleUpdateTransaction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTransaction) return;
+
+    const trimmedDescription = editDescription.trim();
+    if (!trimmedDescription) {
+      alert('A descrição não pode ser vazia.');
+      return;
+    }
+
+    setEditSubmitting(true);
+    try {
+      await apiRequest(`/transactions/${editingTransaction.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          description: trimmedDescription,
+          tags: editTags,
+        }),
+      });
+
+      clearDescriptionCache();
+      closeEditModal();
+      loadTransactions();
+      loadAuxData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar lançamento');
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -512,29 +574,65 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-right">
                         {isViewer ? (
-                          <span
-                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
-                            title="Modo somente leitura"
-                          >
-                            <Trash2 className="h-4 w-4 opacity-20" />
-                          </span>
-                        ) : tx.goalDeposits?.length > 0 ||
-                        tx.category?.name === 'Aporte em Meta' ||
-                        tx.category?.name === 'Resgate de Meta' ? (
-                          <span
-                            className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
-                            title="Lançamento de Cofrinho: gerencie através de aportes e resgates na tela de Metas"
-                          >
-                            <Trash2 className="h-4 w-4 opacity-30" />
-                          </span>
+                          <div className="inline-flex items-center justify-end gap-1">
+                            <span
+                              className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                              title="Modo somente leitura"
+                            >
+                              <Pencil className="h-4 w-4 opacity-20" />
+                            </span>
+                            <span
+                              className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                              title="Modo somente leitura"
+                            >
+                              <Trash2 className="h-4 w-4 opacity-20" />
+                            </span>
+                          </div>
                         ) : (
-                          <button
-                            onClick={() => handleDelete(tx.id)}
-                            className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                            title="Excluir lançamento"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="inline-flex items-center justify-end gap-1">
+                            {tx.isPrivate && tx.userId !== user?.id ? (
+                              <button
+                                type="button"
+                                disabled
+                                className="p-1.5 text-slate-600 cursor-not-allowed rounded-lg"
+                                title="Lançamento privado de outro membro"
+                                aria-label="Editar lançamento indisponível"
+                              >
+                                <Pencil className="h-4 w-4 opacity-30" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(tx)}
+                                className="p-1.5 text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                                title="Editar descrição e tags"
+                                aria-label="Editar lançamento"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                            )}
+
+                            {tx.goalDeposits?.length > 0 ||
+                            tx.category?.name === 'Aporte em Meta' ||
+                            tx.category?.name === 'Resgate de Meta' ? (
+                              <span
+                                className="p-1.5 text-slate-600 cursor-not-allowed inline-block"
+                                title="Lançamento de Cofrinho: gerencie através de aportes e resgates na tela de Metas"
+                              >
+                                <Trash2 className="h-4 w-4 opacity-30" />
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(tx.id)}
+                                className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                                title="Excluir lançamento"
+                                aria-label="Excluir lançamento"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -923,6 +1021,257 @@ export default function TransactionsPage() {
                 </button>
               </form>
             </div>
+        </Modal>
+
+        {/* Edit Transaction Modal (Only Description and Tags Editable) */}
+        <Modal
+          isOpen={isEditModalOpen && !!editingTransaction}
+          onClose={closeEditModal}
+        >
+          {editingTransaction && (() => {
+            const editFormatted = formatTransactionDateTime(editingTransaction.transactionDate);
+            const typeLabel =
+              editingTransaction.type === 'INCOME'
+                ? 'Receita'
+                : editingTransaction.type === 'TRANSFER'
+                ? 'Transferência'
+                : 'Despesa';
+            const accountOrCardLabel =
+              editingTransaction.type === 'TRANSFER'
+                ? `${editingTransaction.account?.name || '-'}${
+                    editingTransaction.destinationAccount
+                      ? ` → ${editingTransaction.destinationAccount.name}`
+                      : ''
+                  }`
+                : editingTransaction.creditCard
+                ? `${editingTransaction.creditCard.name}${
+                    editingTransaction.totalInstallments && editingTransaction.totalInstallments > 1
+                      ? ` (${editingTransaction.installmentNumber}/${editingTransaction.totalInstallments})`
+                      : ''
+                  }`
+                : editingTransaction.account?.name || '-';
+            const hasInstallments =
+              Boolean(editingTransaction.installmentGroupId) ||
+              (editingTransaction.totalInstallments && editingTransaction.totalInstallments > 1);
+
+            return (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative my-auto">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                  aria-label="Fechar"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-3 pr-6">Editar Lançamento</h2>
+
+                <div className="mb-4 rounded-xl bg-slate-800/70 border border-slate-700/80 p-3 space-y-1.5">
+                  <p className="text-[11px] sm:text-xs text-amber-400/90 flex items-start gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <span>
+                      Apenas <strong>Descrição</strong> e <strong>Tags</strong> podem ser editadas. Os demais campos são imutáveis para preservar os saldos e faturas.
+                    </span>
+                  </p>
+                  {hasInstallments && (
+                    <p className="text-[11px] text-emerald-400/90 pl-5">
+                      Compra parcelada ({editingTransaction.installmentNumber}/{editingTransaction.totalInstallments}): as alterações serão aplicadas automaticamente a todas as parcelas desta compra.
+                    </p>
+                  )}
+                </div>
+
+                <form onSubmit={handleUpdateTransaction} className="space-y-3.5 sm:space-y-4">
+                  {/* Editable: Description */}
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-emerald-400 mb-1">
+                      Descrição *
+                    </label>
+                    <AutocompleteInput
+                      type={editingTransaction.type || 'EXPENSE'}
+                      familyId={editingTransaction.familyId ?? selectedFamilyId}
+                      value={editDescription}
+                      onChange={setEditDescription}
+                      placeholder="Informe a descrição do lançamento..."
+                      required
+                      autoFocus
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  {/* Editable: Tags */}
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-emerald-400 mb-1">
+                      Tags (opcional)
+                    </label>
+                    <TagInput
+                      value={editTags}
+                      onChange={setEditTags}
+                      familyId={editingTransaction.familyId ?? selectedFamilyId}
+                      placeholder="Adicionar ou remover tags (ex: #viagem, #festa)..."
+                    />
+                  </div>
+
+                  {/* Immutable fields */}
+                  <div className="pt-2 border-t border-slate-800 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Tipo</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={typeLabel}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Valor (R$)</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={formatCurrency(editingTransaction.amount)}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Data</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={editFormatted.date}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Horário</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={editFormatted.time || '--:--'}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Categoria</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={editingTransaction.category?.name || 'Geral'}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">Conta / Cartão</label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={accountOrCardLabel}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    {(people.length > 0 || editingTransaction.person) && (
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-semibold uppercase text-slate-400">
+                            Pessoa Responsável
+                          </label>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded">
+                            Imutável
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={editingTransaction.person?.name || 'Nenhum / Não atribuído (Titular)'}
+                          disabled
+                          readOnly
+                          className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-400 cursor-not-allowed"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="flex items-center gap-2 text-xs text-slate-500 cursor-not-allowed">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(editingTransaction.isPrivate)}
+                          disabled
+                          className="accent-emerald-500 rounded shrink-0 cursor-not-allowed opacity-60"
+                        />
+                        <span>Lançamento privado (ocultar de outros membros)</span>
+                      </label>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-700/80 text-slate-400 px-1.5 py-0.5 rounded shrink-0 ml-2">
+                        Imutável
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={closeEditModal}
+                      className="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 sm:py-3 px-3 rounded-xl transition-all text-xs sm:text-sm"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={editSubmitting}
+                      className="w-2/3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                    >
+                      {editSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            );
+          })()}
         </Modal>
       </div>
     </AppShell>

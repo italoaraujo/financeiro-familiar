@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: Inline (escopo Medium - DTO restritivo, método `update` no `TransactionsService`, endpoint `PUT /transactions/:id` e modal de edição no extrato)
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -205,12 +205,12 @@ T6
 
 **Done when**:
 
-- [ ] Botão de edição (`Pencil`) exibido na coluna Ações para não-`VIEWER` (desabilitado se `tx.isPrivate && tx.userId !== user?.id`)
-- [ ] Modal de edição pré-preenche `editDescription` e `editTags` a partir do lançamento selecionado
-- [ ] Demais campos (Tipo, Valor, Data/Horário, Categoria, Conta/Cartão, Parcelas, Pessoa, Privacidade) exibidos bloqueados/desabilitados com indicação `Imutável`
-- [ ] Exibe aviso informativo quando lançamento for parcelado indicando atualização em todas as parcelas
-- [ ] Submissão chama `PUT /transactions/${editingTransaction.id}` com `{ description, tags }`, limpa cache de autocomplete e recarrega transações e tags
-- [ ] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
+- [x] Botão de edição (`Pencil`) exibido na coluna Ações para não-`VIEWER` (desabilitado se `tx.isPrivate && tx.userId !== user?.id`)
+- [x] Modal de edição pré-preenche `editDescription` e `editTags` a partir do lançamento selecionado
+- [x] Demais campos (Tipo, Valor, Data/Horário, Categoria, Conta/Cartão, Parcelas, Pessoa, Privacidade) exibidos bloqueados/desabilitados com indicação `Imutável`
+- [x] Exibe aviso informativo quando lançamento for parcelado indicando atualização em todas as parcelas
+- [x] Submissão chama `PUT /transactions/${editingTransaction.id}` com `{ description, tags }`, limpa cache de autocomplete e recarrega transações e tags
+- [x] Gate `build` (backend build + test, frontend lint + build) passa com exit code 0
 
 **Tests**: none
 **Gate**: build
