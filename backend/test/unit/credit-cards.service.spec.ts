@@ -978,4 +978,422 @@ describe('CreditCardsService', () => {
       expect(result).toHaveLength(1);
     });
   });
+
+  describe('findAll (archived filter)', () => {
+    it('should filter only active cards in personal scope by default', async () => {
+      const activeCards = [
+        {
+          id: 'card-1',
+          name: 'Nubank',
+          isActive: true,
+          creditLimit: new Prisma.Decimal(2000),
+          invoices: [],
+        },
+      ];
+      prisma.creditCard.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce(activeCards);
+
+      const result = await service.findAll('user-1');
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('card-1');
+      expect(prisma.creditCard.findMany).toHaveBeenLastCalledWith({
+        where: {
+          userId: 'user-1',
+          familyId: null,
+          isActive: true,
+          deletedAt: null,
+        },
+        include: {
+          invoices: {
+            orderBy: { referenceMonth: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('should filter only active cards in family scope when includeArchived is false', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-1',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      const familyActive = [
+        {
+          id: 'card-fam-1',
+          name: 'Itaú',
+          isActive: true,
+          creditLimit: new Prisma.Decimal(3000),
+          invoices: [],
+        },
+      ];
+      prisma.creditCard.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce(familyActive);
+
+      const result = await service.findAll('user-1', 'family-1', false);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('card-fam-1');
+      expect(prisma.creditCard.findMany).toHaveBeenLastCalledWith({
+        where: {
+          familyId: 'family-1',
+          isActive: true,
+          deletedAt: null,
+        },
+        include: {
+          invoices: {
+            orderBy: { referenceMonth: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('should include archived cards in personal scope when includeArchived is true', async () => {
+      const allCards = [
+        {
+          id: 'card-1',
+          name: 'Nubank',
+          isActive: true,
+          creditLimit: new Prisma.Decimal(2000),
+          invoices: [],
+        },
+        {
+          id: 'card-2',
+          name: 'Inter Antigo',
+          isActive: false,
+          creditLimit: new Prisma.Decimal(1500),
+          invoices: [],
+        },
+      ];
+      prisma.creditCard.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce(allCards);
+
+      const result = await service.findAll('user-1', undefined, true);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((c) => c.id)).toEqual(['card-1', 'card-2']);
+      expect(prisma.creditCard.findMany).toHaveBeenLastCalledWith({
+        where: {
+          userId: 'user-1',
+          familyId: null,
+          deletedAt: null,
+        },
+        include: {
+          invoices: {
+            orderBy: { referenceMonth: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('should include archived cards in family scope when includeArchived is true', async () => {
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+      const allFamilyCards = [
+        {
+          id: 'card-fam-1',
+          name: 'Itaú',
+          isActive: true,
+          creditLimit: new Prisma.Decimal(3000),
+          invoices: [],
+        },
+        {
+          id: 'card-fam-2',
+          name: 'Bradesco',
+          isActive: false,
+          creditLimit: new Prisma.Decimal(1000),
+          invoices: [],
+        },
+      ];
+      prisma.creditCard.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce(allFamilyCards);
+
+      const result = await service.findAll('user-viewer', 'family-1', true);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((c) => c.id)).toEqual(['card-fam-1', 'card-fam-2']);
+      expect(prisma.creditCard.findMany).toHaveBeenLastCalledWith({
+        where: {
+          familyId: 'family-1',
+          deletedAt: null,
+        },
+        include: {
+          invoices: {
+            orderBy: { referenceMonth: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+  });
+
+  describe('archive', () => {
+    it('should archive an active personal card setting isActive false', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+      const archived = { id: 'card-1', isActive: false };
+      prisma.creditCard.update.mockResolvedValue(archived);
+
+      const result = await service.archive('user-1', 'card-1');
+
+      expect(result).toEqual(archived);
+      expect(result.isActive).toBe(false);
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-1' },
+        data: { isActive: false },
+      });
+    });
+
+    it('should archive an active family card when user is MEMBER or ADMIN', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-member',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      const archived = { id: 'card-fam-1', isActive: false };
+      prisma.creditCard.update.mockResolvedValue(archived);
+
+      const result = await service.archive('user-member', 'card-fam-1');
+
+      expect(result).toEqual(archived);
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-fam-1' },
+        data: { isActive: false },
+      });
+    });
+
+    it('should throw BadRequestException if card is already archived', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.archive('user-1', 'card-1')).rejects.toThrow(
+        new BadRequestException('O cartão de crédito já está arquivado'),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if card to archive does not exist', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue(null);
+
+      await expect(service.archive('user-1', 'card-missing')).rejects.toThrow(NotFoundException);
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if card to archive is soft-deleted', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-deleted',
+        userId: 'user-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: new Date(),
+      });
+
+      await expect(service.archive('user-1', 'card-deleted')).rejects.toThrow(NotFoundException);
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to archive family card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(service.archive('user-viewer', 'card-fam-1')).rejects.toThrow(
+        new ForbiddenException(
+          'Membros com perfil de apenas visualização não podem realizar alterações',
+        ),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when another user tries to archive personal card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-owner',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.archive('user-intruder', 'card-1')).rejects.toThrow(
+        new ForbiddenException('Acesso negado ao cartão'),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unarchive', () => {
+    it('should unarchive an archived personal card setting isActive true', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+      const reactivated = { id: 'card-1', isActive: true };
+      prisma.creditCard.update.mockResolvedValue(reactivated);
+
+      const result = await service.unarchive('user-1', 'card-1');
+
+      expect(result).toEqual(reactivated);
+      expect(result.isActive).toBe(true);
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-1' },
+        data: { isActive: true },
+      });
+    });
+
+    it('should unarchive an archived family card when user is MEMBER or ADMIN', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: false,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-member',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      const reactivated = { id: 'card-fam-1', isActive: true };
+      prisma.creditCard.update.mockResolvedValue(reactivated);
+
+      const result = await service.unarchive('user-member', 'card-fam-1');
+
+      expect(result).toEqual(reactivated);
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-fam-1' },
+        data: { isActive: true },
+      });
+    });
+
+    it('should throw BadRequestException if card is already active', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.unarchive('user-1', 'card-1')).rejects.toThrow(
+        new BadRequestException('O cartão de crédito não está arquivado'),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if card to unarchive does not exist', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue(null);
+
+      await expect(service.unarchive('user-1', 'card-missing')).rejects.toThrow(NotFoundException);
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if card to unarchive is soft-deleted', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-deleted',
+        userId: 'user-1',
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: new Date(),
+      });
+
+      await expect(service.unarchive('user-1', 'card-deleted')).rejects.toThrow(NotFoundException);
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to unarchive family card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: false,
+        creditLimit: new Prisma.Decimal(5000),
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-1',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(service.unarchive('user-viewer', 'card-fam-1')).rejects.toThrow(
+        new ForbiddenException(
+          'Membros com perfil de apenas visualização não podem realizar alterações',
+        ),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when another user tries to unarchive personal card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-owner',
+        familyId: null,
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.unarchive('user-intruder', 'card-1')).rejects.toThrow(
+        new ForbiddenException('Acesso negado ao cartão'),
+      );
+      expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+  });
 });

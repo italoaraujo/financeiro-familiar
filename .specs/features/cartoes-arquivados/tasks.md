@@ -98,11 +98,11 @@ T4
 
 **Done when**:
 
-- [ ] Testes cobrem `findAll` sem `includeArchived` (pessoal e familiar) filtrando `isActive: true, deletedAt: null`
-- [ ] Testes cobrem `findAll` com `includeArchived = true` (pessoal e familiar) omitindo `isActive` e mantendo `deletedAt: null`
-- [ ] Testes cobrem `archive` atualizando `{ isActive: false }` (pessoal e familiar) e rejeitando cartão já arquivado (400), inexistente/deletado (404) e `VIEWER`/não-titular (403)
-- [ ] Testes cobrem `unarchive` atualizando `{ isActive: true }` (pessoal e familiar) e rejeitando cartão já ativo (400), inexistente/deletado (404) e `VIEWER`/não-titular (403)
-- [ ] Gate `quick` passa com todos os testes verdes (sem exclusões ou skips)
+- [x] Testes cobrem `findAll` sem `includeArchived` (pessoal e familiar) filtrando `isActive: true, deletedAt: null`
+- [x] Testes cobrem `findAll` com `includeArchived = true` (pessoal e familiar) omitindo `isActive` e mantendo `deletedAt: null`
+- [x] Testes cobrem `archive` atualizando `{ isActive: false }` (pessoal e familiar) e rejeitando cartão já arquivado (400), inexistente/deletado (404) e `VIEWER`/não-titular (403)
+- [x] Testes cobrem `unarchive` atualizando `{ isActive: true }` (pessoal e familiar) e rejeitando cartão já ativo (400), inexistente/deletado (404) e `VIEWER`/não-titular (403)
+- [x] Gate `quick` passa com todos os testes verdes (sem exclusões ou skips)
 
 **Tests**: unit
 **Gate**: quick
