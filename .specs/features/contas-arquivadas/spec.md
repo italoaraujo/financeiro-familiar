@@ -6,10 +6,10 @@ Atualmente, o sistema permite arquivar contas bancárias e carteiras (`PATCH /ac
 
 ## Goals
 
-- [ ] Permitir listar contas arquivadas via parâmetro opcional `includeArchived=true` em `GET /accounts`, preservando o comportamento padrão de retornar apenas contas ativas.
-- [ ] Disponibilizar endpoint `PATCH /accounts/:id/unarchive` no backend para restaurar uma conta arquivada (`isArchived: false`, `isActive: true`) com validação de estado e RBAC.
-- [ ] Exibir abas de visualização "Ativas" e "Arquivadas" com contadores na tela `/accounts`, mantendo o "Saldo Total Consolidado" restrito às contas ativas.
-- [ ] Permitir desarquivar contas diretamente na aba "Arquivadas" do frontend com recarregamento imediato da listagem e dos saldos.
+- [x] Permitir listar contas arquivadas via parâmetro opcional `includeArchived=true` em `GET /accounts`, preservando o comportamento padrão de retornar apenas contas ativas.
+- [x] Disponibilizar endpoint `PATCH /accounts/:id/unarchive` no backend para restaurar uma conta arquivada (`isArchived: false`, `isActive: true`) com validação de estado e RBAC.
+- [x] Exibir abas de visualização "Ativas" e "Arquivadas" com contadores na tela `/accounts`, mantendo o "Saldo Total Consolidado" restrito às contas ativas.
+- [x] Permitir desarquivar contas diretamente na aba "Arquivadas" do frontend com recarregamento imediato da listagem e dos saldos.
 
 ## Out of Scope
 
@@ -89,13 +89,13 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| ARCHACC-01 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHACC-02 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHACC-03 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHACC-04 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Implementing |
-| ARCHACC-05 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Implementing |
-| ARCHACC-06 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Implementing |
-| ARCHACC-07 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Implementing |
+| ARCHACC-01 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHACC-02 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHACC-03 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHACC-04 | P1: Listagem de Contas Arquivadas e Desarquivamento no Backend | Phase 1 | Verified |
+| ARCHACC-05 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Verified |
+| ARCHACC-06 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Verified |
+| ARCHACC-07 | P2: Abas de Contas Ativas/Arquivadas e Ação de Desarquivar no Frontend | Phase 2 | Verified |
 
 **ID format:** `[CATEGORY]-[NUMBER]`
 
@@ -107,7 +107,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] `GET /accounts` sem `includeArchived=true` continua retornando apenas contas ativas para não impactar seletores de transações, cartões e metas.
-- [ ] `GET /accounts?includeArchived=true` retorna contas ativas e arquivadas não excluídas no escopo pessoal ou familiar.
-- [ ] `PATCH /accounts/:id/unarchive` restaura a conta (`isArchived: false`, `isActive: true`) respeitando RBAC e validando estado prévio.
-- [ ] Tela `/accounts` exibe abas "Ativas" e "Arquivadas" com contadores, mantém o saldo consolidado apenas para contas ativas e permite desarquivar com atualização imediata.
+- [x] `GET /accounts` sem `includeArchived=true` continua retornando apenas contas ativas para não impactar seletores de transações, cartões e metas.
+- [x] `GET /accounts?includeArchived=true` retorna contas ativas e arquivadas não excluídas no escopo pessoal ou familiar.
+- [x] `PATCH /accounts/:id/unarchive` restaura a conta (`isArchived: false`, `isActive: true`) respeitando RBAC e validando estado prévio.
+- [x] Tela `/accounts` exibe abas "Ativas" e "Arquivadas" com contadores, mantém o saldo consolidado apenas para contas ativas e permite desarquivar com atualização imediata.
