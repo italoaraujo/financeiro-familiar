@@ -191,16 +191,11 @@ export default function CreditCardsPage() {
     if (!confirm('Deseja excluir este cartão de crédito? (Apenas permitido se não houver lançamentos vinculados)')) {
       return;
     }
-    setSubmitting(true);
     try {
       await apiRequest(`/credit-cards/${cardId}`, { method: 'DELETE' });
-      setIsEditModalOpen(false);
-      setEditingCard(null);
       loadData();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir cartão');
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -422,6 +417,14 @@ export default function CreditCardsPage() {
                               aria-label="Editar Cartão"
                             >
                               <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCard(card.id)}
+                              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-rose-400 bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0"
+                              title="Excluir cartão"
+                              aria-label="Excluir cartão"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         )}
@@ -736,24 +739,13 @@ export default function CreditCardsPage() {
                   </div>
                 </div>
 
-                <div className="pt-3 flex flex-col sm:flex-row items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCard(editingCard.id)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs sm:text-sm font-semibold transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Excluir</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
-                  >
-                    {submitting ? 'Salvando...' : 'Salvar Alterações'}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold py-2.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 text-xs sm:text-sm"
+                >
+                  {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
               </form>
             </div>
           )}
