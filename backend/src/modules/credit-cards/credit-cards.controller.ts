@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -34,11 +35,18 @@ export class CreditCardsController {
   @Get()
   @ApiOperation({ summary: 'Listar cartões com limite disponível e faturas' })
   @ApiQuery({ name: 'familyId', required: false })
+  @ApiQuery({
+    name: 'includeArchived',
+    required: false,
+    type: Boolean,
+    description: 'Incluir cartões arquivados na listagem',
+  })
   async findAll(
     @GetUser('id') userId: string,
     @Query('familyId') familyId?: string,
+    @Query('includeArchived') includeArchived?: string,
   ) {
-    return this.creditCardsService.findAll(userId, familyId);
+    return this.creditCardsService.findAll(userId, familyId, includeArchived === 'true');
   }
 
   @Get('invoices/:invoiceId')
@@ -78,6 +86,26 @@ export class CreditCardsController {
     @Body() dto: UpdateCreditCardDto,
   ) {
     return this.creditCardsService.update(userId, id, dto);
+  }
+
+  @Patch(':id/archive')
+  @ApiOperation({ summary: 'Arquivar um cartão de crédito' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito arquivado com sucesso' })
+  async archive(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.creditCardsService.archive(userId, id);
+  }
+
+  @Patch(':id/unarchive')
+  @ApiOperation({ summary: 'Desarquivar um cartão de crédito' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito desarquivado com sucesso' })
+  async unarchive(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.creditCardsService.unarchive(userId, id);
   }
 
   @Delete(':id')
