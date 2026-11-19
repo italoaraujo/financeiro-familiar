@@ -198,9 +198,9 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Endpoints `PATCH /credit-cards/:id/favorite` e `PATCH /credit-cards/:id/unfavorite` delegam para `creditCardsService.favorite` e `creditCardsService.unfavorite` com `userId` e `id`
-- [ ] Testes unitários em `backend/test/unit/credit-cards.controller.spec.ts` cobrem happy paths e propagação de `BadRequestException` (400), `ForbiddenException` (403) e `NotFoundException` (404) (mínimo 6 testes)
-- [ ] Gate check passes: `cd backend && npm run build && npm test`
+- [x] Endpoints `PATCH /credit-cards/:id/favorite` e `PATCH /credit-cards/:id/unfavorite` delegam para `creditCardsService.favorite` e `creditCardsService.unfavorite` com `userId` e `id`
+- [x] Testes unitários em `backend/test/unit/credit-cards.controller.spec.ts` cobrem happy paths e propagação de `BadRequestException` (400), `ForbiddenException` (403) e `NotFoundException` (404) (mínimo 6 testes)
+- [x] Gate check passes: `cd backend && npm run build && npm test`
 
 **Tests**: unit
 **Gate**: build
