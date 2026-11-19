@@ -89,10 +89,10 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Modelos `UserFavoriteAccount` (`user_favorite_accounts`) e `UserFavoriteCreditCard` (`user_favorite_credit_cards`) definidos com PK composta `@@id`, índices de entidade e `onDelete: Cascade`
-- [ ] Relações inversas adicionadas em `User`, `Account` e `CreditCard`
-- [ ] `npx prisma validate` e `npx prisma generate` executam sem erros
-- [ ] Gate check passes: `cd backend && npx prisma validate && npx prisma generate && npm run build`
+- [x] Modelos `UserFavoriteAccount` (`user_favorite_accounts`) e `UserFavoriteCreditCard` (`user_favorite_credit_cards`) definidos com PK composta `@@id`, índices de entidade e `onDelete: Cascade`
+- [x] Relações inversas adicionadas em `User`, `Account` e `CreditCard`
+- [x] `npx prisma validate` e `npx prisma generate` executam sem erros
+- [x] Gate check passes: `cd backend && npx prisma validate && npx prisma generate && npm run build`
 
 **Tests**: none
 **Gate**: build
