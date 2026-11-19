@@ -170,12 +170,12 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] `findAll` preserva `committedAmount`/`availableLimit`, injeta `isFavorite` por `userId` e ordena por `isFavorite DESC, createdAt DESC` mantendo `prisma.creditCard.findMany` intacto
-- [ ] `findById` retorna `isFavorite` específico do `userId`
-- [ ] `favorite` e `unfavorite` são idempotentes, validam acesso e bloqueiam `VIEWER` (403), retornam 404 para cartão inexistente/excluído e 400 `"Não é possível favoritar um cartão arquivado"` para cartão arquivado
-- [ ] `archive` e `remove` removem todos os vínculos `UserFavoriteCreditCard` do cartão em `$transaction`, e `unarchive` retorna `isFavorite: false`
-- [ ] Testes unitários escritos em `backend/test/unit/credit-cards.service.spec.ts` cobrindo 1:1 os ACs `FAV-04`, `FAV-05`, `FAV-06`, `FAV-10` e edge cases (mínimo 12 novos casos + todos existentes passando)
-- [ ] Gate check passes: `cd backend && npm test -- test/unit/credit-cards.service.spec.ts`
+- [x] `findAll` preserva `committedAmount`/`availableLimit`, injeta `isFavorite` por `userId` e ordena por `isFavorite DESC, createdAt DESC` mantendo `prisma.creditCard.findMany` intacto
+- [x] `findById` retorna `isFavorite` específico do `userId`
+- [x] `favorite` e `unfavorite` são idempotentes, validam acesso e bloqueiam `VIEWER` (403), retornam 404 para cartão inexistente/excluído e 400 `"Não é possível favoritar um cartão arquivado"` para cartão arquivado
+- [x] `archive` e `remove` removem todos os vínculos `UserFavoriteCreditCard` do cartão em `$transaction`, e `unarchive` retorna `isFavorite: false`
+- [x] Testes unitários escritos em `backend/test/unit/credit-cards.service.spec.ts` cobrindo 1:1 os ACs `FAV-04`, `FAV-05`, `FAV-06`, `FAV-10` e edge cases (mínimo 12 novos casos + todos existentes passando)
+- [x] Gate check passes: `cd backend && npm test -- test/unit/credit-cards.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
