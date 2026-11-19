@@ -141,8 +141,8 @@ Usuários com múltiplas contas bancárias e cartões de crédito precisam perco
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
 | FAV-01 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
-| FAV-02 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Pending |
-| FAV-03 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Pending |
+| FAV-02 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
+| FAV-03 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
 | FAV-04 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
 | FAV-05 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Pending |
 | FAV-06 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Pending |

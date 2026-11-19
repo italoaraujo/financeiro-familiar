@@ -117,12 +117,12 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] `findAll` retorna `isFavorite` por `userId` ordenado por `isFavorite DESC, createdAt DESC` mantendo `prisma.account.findMany` intacto
-- [ ] `findById` retorna `isFavorite` específico do `userId`
-- [ ] `favorite` e `unfavorite` são idempotentes (`upsert`/`deleteMany`), validam acesso e bloqueiam `VIEWER` (403), retornam 404 para conta inexistente/excluída e 400 `"Não é possível favoritar uma conta arquivada"` para conta arquivada
-- [ ] `archive` e `remove` removem todos os vínculos `UserFavoriteAccount` da conta em `$transaction`, e `unarchive` retorna `isFavorite: false`
-- [ ] Testes unitários escritos em `backend/test/unit/accounts.service.spec.ts` cobrindo 1:1 os ACs `FAV-01`, `FAV-02`, `FAV-03`, `FAV-10` e edge cases (mínimo 12 novos casos + todos existentes passando)
-- [ ] Gate check passes: `cd backend && npm test -- test/unit/accounts.service.spec.ts`
+- [x] `findAll` retorna `isFavorite` por `userId` ordenado por `isFavorite DESC, createdAt DESC` mantendo `prisma.account.findMany` intacto
+- [x] `findById` retorna `isFavorite` específico do `userId`
+- [x] `favorite` e `unfavorite` são idempotentes (`upsert`/`deleteMany`), validam acesso e bloqueiam `VIEWER` (403), retornam 404 para conta inexistente/excluída e 400 `"Não é possível favoritar uma conta arquivada"` para conta arquivada
+- [x] `archive` e `remove` removem todos os vínculos `UserFavoriteAccount` da conta em `$transaction`, e `unarchive` retorna `isFavorite: false`
+- [x] Testes unitários escritos em `backend/test/unit/accounts.service.spec.ts` cobrindo 1:1 os ACs `FAV-01`, `FAV-02`, `FAV-03`, `FAV-10` e edge cases (mínimo 12 novos casos + todos existentes passando)
+- [x] Gate check passes: `cd backend && npm test -- test/unit/accounts.service.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
