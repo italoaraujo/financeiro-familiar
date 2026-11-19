@@ -145,9 +145,9 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Endpoints `PATCH /accounts/:id/favorite` e `PATCH /accounts/:id/unfavorite` delegam para `accountsService.favorite` e `accountsService.unfavorite` com `userId` e `id`
-- [ ] Testes unitários em `backend/test/unit/accounts.controller.spec.ts` cobrem happy paths e propagação de `BadRequestException` (400), `ForbiddenException` (403) e `NotFoundException` (404) (mínimo 6 testes)
-- [ ] Gate check passes: `cd backend && npm test -- test/unit/accounts.service.spec.ts test/unit/accounts.controller.spec.ts`
+- [x] Endpoints `PATCH /accounts/:id/favorite` e `PATCH /accounts/:id/unfavorite` delegam para `accountsService.favorite` e `accountsService.unfavorite` com `userId` e `id`
+- [x] Testes unitários em `backend/test/unit/accounts.controller.spec.ts` cobrem happy paths e propagação de `BadRequestException` (400), `ForbiddenException` (403) e `NotFoundException` (404) (mínimo 6 testes)
+- [x] Gate check passes: `cd backend && npm test -- test/unit/accounts.service.spec.ts test/unit/accounts.controller.spec.ts`
 
 **Tests**: unit
 **Gate**: quick
