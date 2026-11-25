@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/favorito-conta-cartao/design.md`
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -301,9 +301,9 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Combo "Conta Vinculada (Cofrinho)" exibe `"★ "` nas opções com `isFavorite === true` ordenadas no topo pela API
-- [ ] Pré-seleção acompanha o primeiro item ao abrir ou trocar de contexto (ou limpa se a lista vier vazia)
-- [ ] Gate check passes: `cd backend && npx prisma validate && npx prisma generate && npm run build && npm test && cd ../frontend && npm run lint && npm run build`
+- [x] Combo "Conta Vinculada (Cofrinho)" exibe `"★ "` nas opções com `isFavorite === true` ordenadas no topo pela API
+- [x] Pré-seleção acompanha o primeiro item ao abrir ou trocar de contexto (ou limpa se a lista vier vazia)
+- [x] Gate check passes: `cd backend && npx prisma validate && npx prisma generate && npm run build && npm test && cd ../frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build

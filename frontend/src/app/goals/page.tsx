@@ -71,8 +71,12 @@ export default function GoalsPage() {
       ]);
       setGoals(gData || []);
       setAccounts(aData || []);
-      if (aData && aData.length > 0 && !accountId) {
-        setAccountId(aData[0].id);
+      if (aData && aData.length > 0) {
+        if (!accountId || !aData.some((a: any) => a.id === accountId)) {
+          setAccountId(aData[0].id);
+        }
+      } else {
+        setAccountId('');
       }
     } catch (err) {
       console.error('Error loading goals data:', err);
@@ -491,7 +495,7 @@ export default function GoalsPage() {
                   <option value="">Selecione a conta bancária de custódia...</option>
                   {accounts.map((acc) => (
                     <option key={acc.id} value={acc.id}>
-                      {acc.name} ({formatCurrency(acc.currentBalance)})
+                      {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                     </option>
                   ))}
                 </select>
