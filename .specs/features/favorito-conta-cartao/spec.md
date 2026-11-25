@@ -146,7 +146,7 @@ Usuários com múltiplas contas bancárias e cartões de crédito precisam perco
 | FAV-04 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
 | FAV-05 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
 | FAV-06 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
-| FAV-07 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Pending |
+| FAV-07 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Implementing |
 | FAV-08 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Pending |
 | FAV-09 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Pending |
 | FAV-10 | P2: Integridade de Ciclo de Vida ao Arquivar ou Excluir | Tasks | Implementing |

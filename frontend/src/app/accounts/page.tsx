@@ -5,7 +5,7 @@ import AppShell from '../../components/layout/AppShell';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { formatCurrency } from '../../lib/formatters';
-import { Plus, Wallet, Archive, ArchiveRestore, Trash2, X } from 'lucide-react';
+import { Plus, Wallet, Archive, ArchiveRestore, Trash2, X, Star } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
 export default function AccountsPage() {
@@ -14,6 +14,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [togglingFavoriteId, setTogglingFavoriteId] = useState<string | null>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -68,6 +69,20 @@ export default function AccountsPage() {
       alert(err.message || 'Erro ao criar conta');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleToggleFavorite = async (acc: any) => {
+    setTogglingFavoriteId(acc.id);
+    try {
+      await apiRequest(`/accounts/${acc.id}/${acc.isFavorite ? 'unfavorite' : 'favorite'}`, {
+        method: 'PATCH',
+      });
+      await loadAccounts();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar favorito da conta');
+    } finally {
+      setTogglingFavoriteId(null);
     }
   };
 
@@ -247,6 +262,20 @@ export default function AccountsPage() {
 
                     {!isViewer && (
                       <div className="flex items-center gap-1 shrink-0">
+                        {!acc.isArchived && (
+                          <button
+                            type="button"
+                            disabled={togglingFavoriteId === acc.id}
+                            onClick={() => handleToggleFavorite(acc)}
+                            title={acc.isFavorite ? 'Remover dos favoritos' : 'Favoritar conta'}
+                            aria-label={acc.isFavorite ? 'Remover dos favoritos' : 'Favoritar conta'}
+                            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 ${
+                              acc.isFavorite ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'
+                            }`}
+                          >
+                            <Star className={`h-4 w-4 ${acc.isFavorite ? 'fill-amber-400' : ''}`} />
+                          </button>
+                        )}
                         {acc.isArchived ? (
                           <button
                             onClick={() => handleUnarchive(acc.id)}

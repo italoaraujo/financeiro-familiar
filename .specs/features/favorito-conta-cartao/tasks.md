@@ -225,10 +225,10 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Cards ativos exibem botão estrela apenas quando `!isViewer && !acc.isArchived`
-- [ ] Clique alterna favorito sem confirmação, desabilita o botão durante a requisição e recarrega a lista mantendo favoritos primeiro
-- [ ] Falha na API mantém estado anterior e exibe alerta de erro
-- [ ] Gate check passes: `cd frontend && npm run lint && npm run build`
+- [x] Cards ativos exibem botão estrela apenas quando `!isViewer && !acc.isArchived`
+- [x] Clique alterna favorito sem confirmação, desabilita o botão durante a requisição e recarrega a lista mantendo favoritos primeiro
+- [x] Falha na API mantém estado anterior e exibe alerta de erro
+- [x] Gate check passes: `cd frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build
