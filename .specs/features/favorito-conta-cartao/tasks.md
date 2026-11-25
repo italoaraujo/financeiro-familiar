@@ -276,9 +276,9 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Combos Conta Origem, Conta Destino, Conta (Despesa), Cartão de Crédito (Despesa) e Conta de Destino (Receita) exibem `"★ "` para itens com `isFavorite === true` no topo da lista
-- [ ] Pré-seleção inicial em `loadAuxData()` seleciona o primeiro item retornado (favorito prioritário) ou `''` quando não houver itens
-- [ ] Gate check passes: `cd frontend && npm run lint && npm run build`
+- [x] Combos Conta Origem, Conta Destino, Conta (Despesa), Cartão de Crédito (Despesa) e Conta de Destino (Receita) exibem `"★ "` para itens com `isFavorite === true` no topo da lista
+- [x] Pré-seleção inicial em `loadAuxData()` seleciona o primeiro item retornado (favorito prioritário) ou `''` quando não houver itens
+- [x] Gate check passes: `cd frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build
