@@ -108,6 +108,31 @@ export class CreditCardsController {
     return this.creditCardsService.unarchive(userId, id);
   }
 
+  @Patch(':id/favorite')
+  @ApiOperation({ summary: 'Favoritar um cartão de crédito para o usuário autenticado' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito favoritado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Não é possível favoritar um cartão arquivado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ao cartão ou permissão insuficiente' })
+  @ApiResponse({ status: 404, description: 'Cartão de crédito não encontrado' })
+  async favorite(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.creditCardsService.favorite(userId, id);
+  }
+
+  @Patch(':id/unfavorite')
+  @ApiOperation({ summary: 'Desfavoritar um cartão de crédito para o usuário autenticado' })
+  @ApiResponse({ status: 200, description: 'Cartão de crédito desfavoritado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ao cartão ou permissão insuficiente' })
+  @ApiResponse({ status: 404, description: 'Cartão de crédito não encontrado' })
+  async unfavorite(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.creditCardsService.unfavorite(userId, id);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Excluir cartão de crédito sem histórico de lançamentos' })
   @ApiResponse({ status: 200, description: 'Cartão de crédito removido com sucesso' })

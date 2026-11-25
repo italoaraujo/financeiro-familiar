@@ -250,23 +250,31 @@
 - **Date**: 2026-11-18
 - **Status**: active
 
+### AD-032
+- **Decision**: Modelar favoritos individuais por usuário com as tabelas de junção explícitas `UserFavoriteAccount` (`user_favorite_accounts`) e `UserFavoriteCreditCard` (`user_favorite_credit_cards`) usando chave primária composta (`@@id([userId, accountId])` e `@@id([userId, creditCardId])`) e `onDelete: Cascade`. Expor endpoints idempotentes `PATCH /accounts/:id/favorite|unfavorite` e `PATCH /credit-cards/:id/favorite|unfavorite` com bloqueio de perfil `VIEWER` (`AD-014`) e de itens arquivados (`HTTP 400`), enriquecer `GET /accounts`, `GET /accounts/:id`, `GET /credit-cards` e `GET /credit-cards/:id` com `isFavorite: boolean` ordenado por `isFavorite DESC, createdAt DESC`, remover vínculos de favorito atomicamente em `prisma.$transaction` ao arquivar ou excluir (`archive`/`remove`), adicionar botão estrela nos cards ativos de `/accounts` e `/cards` e destacar favoritos no topo com prefixo `"★ "` nos combos de `/transactions`, `/cards` (Liquidação de Fatura) e `/goals` (Nova Meta).
+- **Reason**: Permite que cada membro de um grupo familiar priorize suas próprias contas e cartões mais utilizados nos combos de lançamento sem interferir nos demais membros, preservando integridade referencial, idempotência e consistência de ciclo de vida.
+- **Trade-off**: Introduz uma consulta indexada auxiliar em `user_favorite_accounts`/`user_favorite_credit_cards` nas listagens para preservar as consultas principais `findMany` e evitar vazamento de relações internas no payload JSON.
+- **Scope**: `backend/prisma/schema.prisma`, módulos `accounts` e `credit-cards` (services, controllers e testes unitários), e páginas `/accounts`, `/cards`, `/transactions` e `/goals` no frontend.
+- **Date**: 2026-11-19
+- **Status**: active
+
 ## Current Execution State
 
-- **Active Feature**: `cartoes-arquivados`
-- **Total Tasks**: 4
-- **Completed Tasks**: 4 / 4 (100%)
+- **Active Feature**: `favorito-conta-cartao`
+- **Total Tasks**: 9
+- **Completed Tasks**: 9 / 9 (100%)
 - **Status**: **COMPLETE**
-- **Build Status**: Backend `npm run build` limpo; `credit-cards.service.spec.ts` aprovado (56/56 testes); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos
-- **Gates Verified**: `validate_spec.py` (0 errors), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (3/3 killed)
+- **Build Status**: Backend `prisma validate/generate` e `npm run build` limpos; suíte Jest aprovada (32 suites, 398/398 testes, +52 novos); Frontend `npm run lint` (0 erros) e `npm run build` Next.js 16.3.8 Turbopack limpos (13/13 páginas)
+- **Gates Verified**: `validate_spec.py --strict` (0 errors, 0 warnings), `validate_tasks.py` (0 errors), `validate_state.py` (0 errors), Discrimination Sensor (3/3 killed)
 
 ## Handoff
 
-- **Feature**: .specs/features/cartoes-arquivados
-- **Phase / Task**: Phase 2 / T4 (All tasks complete & Verifier PASS)
-- **Completed**: T1 (`CreditCardsService.findAll` com `includeArchived`, `archive` e `unarchive`), T2 (18 novos testes unitários em `credit-cards.service.spec.ts`), T3 (`GET /credit-cards?includeArchived=true`, `PATCH /credit-cards/:id/archive` e `PATCH /credit-cards/:id/unarchive`), T4 (Remoção do checkbox `"Cartão Ativo"`, abas Ativos/Arquivados, selo Arquivado e botões Archive/ArchiveRestore em `/cards`)
+- **Feature**: .specs/features/favorito-conta-cartao
+- **Phase / Task**: Phase 3 / T9 (All 9 tasks complete & Independent Verifier PASS)
+- **Completed**: T1 (`63acbc8`, Prisma schema), T2 (`856b37d`, `AccountsService` + testes), T3 (`7579c8b`, `AccountsController` + testes), T4 (`c794daf`, `CreditCardsService` + testes), T5 (`a3eae06`, `CreditCardsController` + testes), T6 (`bfe91db`, `/accounts`), T7 (`e1fb521`, `/cards`), T8 (`d17f77f`, `/transactions`), T9 (`2bb2d28`, `/goals`)
 - **In-progress**: None
-- **Next step**: Revisão do usuário e merge para a branch develop conforme autorizado
+- **Next step**: Revisão do usuário e push/merge conforme autorizado
 - **Blockers**: none
 - **Uncommitted files**: none
-- **Branch**: feature/contas_arquivadas
+- **Branch**: favorito_conta_cartao
 

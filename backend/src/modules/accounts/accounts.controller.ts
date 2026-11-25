@@ -86,6 +86,31 @@ export class AccountsController {
     return this.accountsService.unarchive(userId, id);
   }
 
+  @Patch(':id/favorite')
+  @ApiOperation({ summary: 'Favoritar uma conta para o usuário autenticado' })
+  @ApiResponse({ status: 200, description: 'Conta favoritada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Não é possível favoritar uma conta arquivada' })
+  @ApiResponse({ status: 403, description: 'Acesso negado à conta ou permissão insuficiente' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  async favorite(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.accountsService.favorite(userId, id);
+  }
+
+  @Patch(':id/unfavorite')
+  @ApiOperation({ summary: 'Desfavoritar uma conta para o usuário autenticado' })
+  @ApiResponse({ status: 200, description: 'Conta desfavoritada com sucesso' })
+  @ApiResponse({ status: 403, description: 'Acesso negado à conta ou permissão insuficiente' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  async unfavorite(
+    @GetUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.accountsService.unfavorite(userId, id);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Excluir conta sem histórico de lançamentos' })
   async remove(

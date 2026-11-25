@@ -77,9 +77,11 @@ model User {
   recurrences   Recurrence[]
   budgets       Budget[]
   goals         Goal[]
-  personProfiles Person[]
-  auditLogs     AuditLog[]
-  tags          Tag[]
+  personProfiles      Person[]
+  auditLogs           AuditLog[]
+  tags                Tag[]
+  favoriteAccounts    UserFavoriteAccount[]
+  favoriteCreditCards UserFavoriteCreditCard[]
 
   @@map("users")
 }
@@ -146,6 +148,7 @@ model Account {
   destTransfers  Transaction[] @relation("DestAccount")
   recurrences    Recurrence[]
   goals          Goal[]
+  favoritedBy    UserFavoriteAccount[]
 
   @@index([userId, deletedAt])
   @@index([familyId, deletedAt])
@@ -173,6 +176,7 @@ model CreditCard {
   account      Account?            @relation(fields: [accountId], references: [id], onDelete: SetNull)
   invoices     CreditCardInvoice[]
   transactions Transaction[]
+  favoritedBy  UserFavoriteCreditCard[]
 
   @@index([userId, deletedAt])
   @@index([familyId, deletedAt])
@@ -447,6 +451,32 @@ model TransactionTag {
 
   @@id([transactionId, tagId])
   @@map("transaction_tags")
+}
+
+model UserFavoriteAccount {
+  userId    String   @map("user_id") @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@id([userId, accountId])
+  @@index([accountId])
+  @@map("user_favorite_accounts")
+}
+
+model UserFavoriteCreditCard {
+  userId       String     @map("user_id") @db.Uuid
+  creditCardId String     @map("credit_card_id") @db.Uuid
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditCard   CreditCard @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
+
+  @@id([userId, creditCardId])
+  @@index([creditCardId])
+  @@map("user_favorite_credit_cards")
 }
 
 model RevokedToken {

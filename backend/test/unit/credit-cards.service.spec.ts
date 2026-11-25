@@ -41,6 +41,12 @@ describe('CreditCardsService', () => {
       familyMember: {
         findUnique: jest.fn(),
       },
+      userFavoriteCreditCard: {
+        findMany: jest.fn().mockResolvedValue([]),
+        findUnique: jest.fn().mockResolvedValue(null),
+        upsert: jest.fn(),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -1147,7 +1153,7 @@ describe('CreditCardsService', () => {
 
       const result = await service.archive('user-1', 'card-1');
 
-      expect(result).toEqual(archived);
+      expect(result).toEqual({ ...archived, isFavorite: false });
       expect(result.isActive).toBe(false);
       expect(prisma.creditCard.update).toHaveBeenCalledWith({
         where: { id: 'card-1' },
@@ -1176,7 +1182,7 @@ describe('CreditCardsService', () => {
 
       const result = await service.archive('user-member', 'card-fam-1');
 
-      expect(result).toEqual(archived);
+      expect(result).toEqual({ ...archived, isFavorite: false });
       expect(prisma.creditCard.update).toHaveBeenCalledWith({
         where: { id: 'card-fam-1' },
         data: { isActive: false },
@@ -1280,7 +1286,7 @@ describe('CreditCardsService', () => {
 
       const result = await service.unarchive('user-1', 'card-1');
 
-      expect(result).toEqual(reactivated);
+      expect(result).toEqual({ ...reactivated, isFavorite: false });
       expect(result.isActive).toBe(true);
       expect(prisma.creditCard.update).toHaveBeenCalledWith({
         where: { id: 'card-1' },
@@ -1309,7 +1315,7 @@ describe('CreditCardsService', () => {
 
       const result = await service.unarchive('user-member', 'card-fam-1');
 
-      expect(result).toEqual(reactivated);
+      expect(result).toEqual({ ...reactivated, isFavorite: false });
       expect(prisma.creditCard.update).toHaveBeenCalledWith({
         where: { id: 'card-fam-1' },
         data: { isActive: true },
@@ -1394,6 +1400,573 @@ describe('CreditCardsService', () => {
         new ForbiddenException('Acesso negado ao cartão'),
       );
       expect(prisma.creditCard.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('favorite', () => {
+    it('should favorite an active personal credit card and return isFavorite: true', async () => {
+      const card = {
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        name: 'Nubank',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.userFavoriteCreditCard.upsert.mockResolvedValue({
+        userId: 'user-1',
+        creditCardId: 'card-1',
+      });
+
+      const result = await service.favorite('user-1', 'card-1');
+
+      expect(prisma.userFavoriteCreditCard.upsert).toHaveBeenCalledWith({
+        where: { userId_creditCardId: { userId: 'user-1', creditCardId: 'card-1' } },
+        create: { userId: 'user-1', creditCardId: 'card-1' },
+        update: {},
+      });
+      expect(result).toEqual({
+        ...card,
+        committedAmount: new Prisma.Decimal(0),
+        availableLimit: new Prisma.Decimal(2000),
+        isFavorite: true,
+      });
+    });
+
+    it('should favorite an active family credit card when user has write access', async () => {
+      const card = {
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        name: 'Cartão Família',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        closingDay: 15,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-2',
+        userId: 'user-member',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      prisma.userFavoriteCreditCard.upsert.mockResolvedValue({
+        userId: 'user-member',
+        creditCardId: 'card-fam-1',
+      });
+
+      const result = await service.favorite('user-member', 'card-fam-1');
+
+      expect(prisma.userFavoriteCreditCard.upsert).toHaveBeenCalledWith({
+        where: {
+          userId_creditCardId: { userId: 'user-member', creditCardId: 'card-fam-1' },
+        },
+        create: { userId: 'user-member', creditCardId: 'card-fam-1' },
+        update: {},
+      });
+      expect(result).toEqual({
+        ...card,
+        committedAmount: new Prisma.Decimal(0),
+        availableLimit: new Prisma.Decimal(5000),
+        isFavorite: true,
+      });
+    });
+
+    it('should handle repeated favorite idempotently via upsert without duplicate error', async () => {
+      const card = {
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        name: 'Nubank',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.userFavoriteCreditCard.findUnique.mockResolvedValue({
+        userId: 'user-1',
+        creditCardId: 'card-1',
+      });
+      prisma.userFavoriteCreditCard.upsert.mockResolvedValue({
+        userId: 'user-1',
+        creditCardId: 'card-1',
+      });
+
+      const first = await service.favorite('user-1', 'card-1');
+      const second = await service.favorite('user-1', 'card-1');
+
+      expect(first.isFavorite).toBe(true);
+      expect(second.isFavorite).toBe(true);
+      expect(prisma.userFavoriteCreditCard.upsert).toHaveBeenCalledTimes(2);
+      expect(prisma.userFavoriteCreditCard.upsert).toHaveBeenCalledWith({
+        where: { userId_creditCardId: { userId: 'user-1', creditCardId: 'card-1' } },
+        create: { userId: 'user-1', creditCardId: 'card-1' },
+        update: {},
+      });
+    });
+
+    it('should throw BadRequestException with exact message when favoriting an archived credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-arch',
+        userId: 'user-1',
+        familyId: null,
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.favorite('user-1', 'card-arch')).rejects.toThrow(
+        new BadRequestException('Não é possível favoritar um cartão arquivado'),
+      );
+      expect(prisma.userFavoriteCreditCard.upsert).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when favoriting a missing credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue(null);
+
+      await expect(service.favorite('user-1', 'card-missing')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(prisma.userFavoriteCreditCard.upsert).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when favoriting a soft-deleted credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-deleted',
+        userId: 'user-1',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: new Date(),
+      });
+
+      await expect(service.favorite('user-1', 'card-deleted')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(prisma.userFavoriteCreditCard.upsert).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to favorite family credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-viewer',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(service.favorite('user-viewer', 'card-fam-1')).rejects.toThrow(
+        new ForbiddenException(
+          'Membros com perfil de apenas visualização não podem realizar alterações',
+        ),
+      );
+      expect(prisma.userFavoriteCreditCard.upsert).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when unauthorized user tries to favorite personal credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-other',
+        userId: 'user-owner',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.favorite('user-intruder', 'card-other')).rejects.toThrow(
+        new ForbiddenException('Acesso negado ao cartão'),
+      );
+      expect(prisma.userFavoriteCreditCard.upsert).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unfavorite', () => {
+    it('should remove only the caller favorite link and return isFavorite: false', async () => {
+      const card = {
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        name: 'Nubank',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.userFavoriteCreditCard.findUnique.mockResolvedValue({
+        userId: 'user-1',
+        creditCardId: 'card-1',
+      });
+      prisma.userFavoriteCreditCard.deleteMany.mockResolvedValue({ count: 1 });
+
+      const result = await service.unfavorite('user-1', 'card-1');
+
+      expect(prisma.userFavoriteCreditCard.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', creditCardId: 'card-1' },
+      });
+      expect(result).toEqual({
+        ...card,
+        committedAmount: new Prisma.Decimal(0),
+        availableLimit: new Prisma.Decimal(2000),
+        isFavorite: false,
+      });
+    });
+
+    it('should unfavorite idempotently when credit card was not favorited', async () => {
+      const card = {
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        name: 'Nubank',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.userFavoriteCreditCard.findUnique.mockResolvedValue(null);
+      prisma.userFavoriteCreditCard.deleteMany.mockResolvedValue({ count: 0 });
+
+      const result = await service.unfavorite('user-1', 'card-1');
+
+      expect(prisma.userFavoriteCreditCard.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', creditCardId: 'card-1' },
+      });
+      expect(result).toEqual({
+        ...card,
+        committedAmount: new Prisma.Decimal(0),
+        availableLimit: new Prisma.Decimal(2000),
+        isFavorite: false,
+      });
+    });
+
+    it('should throw NotFoundException when unfavoriting a missing credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue(null);
+
+      await expect(service.unfavorite('user-1', 'card-missing')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(prisma.userFavoriteCreditCard.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when unfavoriting a soft-deleted credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-deleted',
+        userId: 'user-1',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: new Date(),
+      });
+
+      await expect(service.unfavorite('user-1', 'card-deleted')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(prisma.userFavoriteCreditCard.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when VIEWER tries to unfavorite family credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-fam-1',
+        userId: 'user-owner',
+        familyId: 'family-1',
+        isActive: true,
+        creditLimit: new Prisma.Decimal(5000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-viewer',
+        userId: 'user-viewer',
+        familyId: 'family-1',
+        role: 'VIEWER',
+      });
+
+      await expect(service.unfavorite('user-viewer', 'card-fam-1')).rejects.toThrow(
+        new ForbiddenException(
+          'Membros com perfil de apenas visualização não podem realizar alterações',
+        ),
+      );
+      expect(prisma.userFavoriteCreditCard.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when unauthorized user tries to unfavorite personal credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-other',
+        userId: 'user-owner',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+
+      await expect(service.unfavorite('user-intruder', 'card-other')).rejects.toThrow(
+        new ForbiddenException('Acesso negado ao cartão'),
+      );
+      expect(prisma.userFavoriteCreditCard.deleteMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('favorites ordering, limit preservation, and isolation', () => {
+    it('should sort multiple favorite cards first using isFavorite DESC, createdAt DESC while preserving committedAmount and availableLimit', async () => {
+      const openInvoice = {
+        id: 'inv-1',
+        status: InvoiceStatus.OPEN,
+        totalAmount: new Prisma.Decimal(300),
+        paidAmount: new Prisma.Decimal(50),
+      };
+      const cardNewNonFav = {
+        id: 'card-4',
+        name: 'Novo Não Fav',
+        creditLimit: new Prisma.Decimal(1000),
+        invoices: [],
+        createdAt: new Date('2026-04-01T10:00:00Z'),
+      };
+      const cardNewFav = {
+        id: 'card-3',
+        name: 'Fav Novo',
+        creditLimit: new Prisma.Decimal(2000),
+        invoices: [openInvoice],
+        createdAt: new Date('2026-03-01T10:00:00Z'),
+      };
+      const cardOldNonFav = {
+        id: 'card-2',
+        name: 'Antigo Não Fav',
+        creditLimit: new Prisma.Decimal(1500),
+        invoices: [],
+        createdAt: new Date('2026-02-01T10:00:00Z'),
+      };
+      const cardOldFav = {
+        id: 'card-1',
+        name: 'Fav Antigo',
+        creditLimit: new Prisma.Decimal(3000),
+        invoices: [],
+        createdAt: new Date('2026-01-01T10:00:00Z'),
+      };
+
+      prisma.creditCard.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([cardNewNonFav, cardNewFav, cardOldNonFav, cardOldFav]);
+      prisma.userFavoriteCreditCard.findMany.mockResolvedValue([
+        { creditCardId: 'card-1' },
+        { creditCardId: 'card-3' },
+      ]);
+
+      const result = await service.findAll('user-1');
+
+      expect(prisma.userFavoriteCreditCard.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          creditCardId: { in: ['card-4', 'card-3', 'card-2', 'card-1'] },
+        },
+        select: { creditCardId: true },
+      });
+      expect(result.map((c) => c.id)).toEqual(['card-3', 'card-1', 'card-4', 'card-2']);
+      expect(result.map((c) => c.isFavorite)).toEqual([true, true, false, false]);
+      expect(result[0].committedAmount).toEqual(new Prisma.Decimal(250));
+      expect(result[0].availableLimit).toEqual(new Prisma.Decimal(1750));
+    });
+
+    it('should isolate family credit card favorites per user in findAll', async () => {
+      const famCardNew = {
+        id: 'card-fam-2',
+        name: 'Itaú Família',
+        familyId: 'family-1',
+        creditLimit: new Prisma.Decimal(4000),
+        invoices: [],
+        createdAt: new Date('2026-03-01T10:00:00Z'),
+      };
+      const famCardOld = {
+        id: 'card-fam-1',
+        name: 'Nubank Família',
+        familyId: 'family-1',
+        creditLimit: new Prisma.Decimal(2500),
+        invoices: [],
+        createdAt: new Date('2026-01-01T10:00:00Z'),
+      };
+
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      prisma.creditCard.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([famCardNew, famCardOld])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([famCardNew, famCardOld]);
+      prisma.userFavoriteCreditCard.findMany
+        .mockResolvedValueOnce([{ creditCardId: 'card-fam-1' }])
+        .mockResolvedValueOnce([]);
+
+      const resultUserA = await service.findAll('user-a', 'family-1');
+      const resultUserB = await service.findAll('user-b', 'family-1');
+
+      expect(prisma.userFavoriteCreditCard.findMany).toHaveBeenNthCalledWith(1, {
+        where: { userId: 'user-a', creditCardId: { in: ['card-fam-2', 'card-fam-1'] } },
+        select: { creditCardId: true },
+      });
+      expect(prisma.userFavoriteCreditCard.findMany).toHaveBeenNthCalledWith(2, {
+        where: { userId: 'user-b', creditCardId: { in: ['card-fam-2', 'card-fam-1'] } },
+        select: { creditCardId: true },
+      });
+      expect(resultUserA.map((c) => ({ id: c.id, isFavorite: c.isFavorite }))).toEqual([
+        { id: 'card-fam-1', isFavorite: true },
+        { id: 'card-fam-2', isFavorite: false },
+      ]);
+      expect(resultUserB.map((c) => ({ id: c.id, isFavorite: c.isFavorite }))).toEqual([
+        { id: 'card-fam-2', isFavorite: false },
+        { id: 'card-fam-1', isFavorite: false },
+      ]);
+    });
+
+    it('should return isFavorite reflecting only caller state in findById', async () => {
+      const card = {
+        id: 'card-fam-1',
+        userId: 'user-a',
+        familyId: 'family-1',
+        name: 'Cartão Família',
+        creditLimit: new Prisma.Decimal(3000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      };
+      prisma.creditCard.findUnique.mockResolvedValue(card);
+      prisma.familyMember.findUnique.mockResolvedValue({
+        id: 'member-b',
+        userId: 'user-b',
+        familyId: 'family-1',
+        role: 'MEMBER',
+      });
+      prisma.userFavoriteCreditCard.findUnique
+        .mockResolvedValueOnce({ userId: 'user-a', creditCardId: 'card-fam-1' })
+        .mockResolvedValueOnce(null);
+
+      const resA = await service.findById('user-a', 'card-fam-1');
+      const resB = await service.findById('user-b', 'card-fam-1');
+
+      expect(resA.isFavorite).toBe(true);
+      expect(resB.isFavorite).toBe(false);
+      expect(resA.availableLimit).toEqual(new Prisma.Decimal(3000));
+      expect(prisma.userFavoriteCreditCard.findUnique).toHaveBeenNthCalledWith(1, {
+        where: { userId_creditCardId: { userId: 'user-a', creditCardId: 'card-fam-1' } },
+      });
+      expect(prisma.userFavoriteCreditCard.findUnique).toHaveBeenNthCalledWith(2, {
+        where: { userId_creditCardId: { userId: 'user-b', creditCardId: 'card-fam-1' } },
+      });
+    });
+
+    it('should return empty array without querying favorites when no credit cards exist', async () => {
+      prisma.creditCard.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      const result = await service.findAll('user-1');
+
+      expect(result).toEqual([]);
+      expect(prisma.userFavoriteCreditCard.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('favorites lifecycle on archive, unarchive, and remove', () => {
+    it('should delete all favorite links for the card inside $transaction on archive and return isFavorite: false', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: true,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+      const archived = { id: 'card-1', isActive: false };
+      prisma.creditCard.update.mockResolvedValue(archived);
+
+      const result = await service.archive('user-1', 'card-1');
+
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(prisma.userFavoriteCreditCard.deleteMany).toHaveBeenCalledWith({
+        where: { creditCardId: 'card-1' },
+      });
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-1' },
+        data: { isActive: false },
+      });
+      expect(result).toEqual({ ...archived, isFavorite: false });
+    });
+
+    it('should delete all favorite links for the card inside $transaction on remove', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        creditLimit: new Prisma.Decimal(1000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+      prisma.transaction.findFirst.mockResolvedValue(null);
+      prisma.creditCard.update.mockResolvedValue({ id: 'card-1', isActive: false });
+
+      const result = await service.remove('user-1', 'card-1');
+
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(prisma.userFavoriteCreditCard.deleteMany).toHaveBeenCalledWith({
+        where: { creditCardId: 'card-1' },
+      });
+      expect(prisma.creditCard.update).toHaveBeenCalledWith({
+        where: { id: 'card-1' },
+        data: { deletedAt: expect.any(Date), isActive: false },
+      });
+      expect(result).toEqual({ message: 'Cartão de crédito removido com sucesso' });
+    });
+
+    it('should return isFavorite: false after unarchiving a previously archived credit card', async () => {
+      prisma.creditCard.findUnique.mockResolvedValue({
+        id: 'card-1',
+        userId: 'user-1',
+        familyId: null,
+        isActive: false,
+        creditLimit: new Prisma.Decimal(2000),
+        closingDay: 10,
+        invoices: [],
+        deletedAt: null,
+      });
+      const reactivated = { id: 'card-1', isActive: true };
+      prisma.creditCard.update.mockResolvedValue(reactivated);
+
+      const result = await service.unarchive('user-1', 'card-1');
+
+      expect(result).toEqual({ ...reactivated, isFavorite: false });
     });
   });
 });

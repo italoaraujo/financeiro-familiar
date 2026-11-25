@@ -68,20 +68,43 @@ export class CreditCardsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Calcula limite disponível para cada cartão
-    return cards.map((card) => {
-      const openAmount = card.invoices
-        .filter((inv) => inv.status !== InvoiceStatus.PAID)
-        .reduce((acc, inv) => acc.add(inv.totalAmount.minus(inv.paidAmount)), new Prisma.Decimal(0));
+    if (cards.length === 0) {
+      return [];
+    }
 
-      const availableLimit = Prisma.Decimal.max(0, card.creditLimit.minus(openAmount));
-
-      return {
-        ...card,
-        committedAmount: openAmount,
-        availableLimit,
-      };
+    const favorites = await this.prisma.userFavoriteCreditCard.findMany({
+      where: {
+        userId,
+        creditCardId: { in: cards.map((c) => c.id) },
+      },
+      select: { creditCardId: true },
     });
+    const favoriteIds = new Set(favorites.map((f) => f.creditCardId));
+
+    // Calcula limite disponível e injeta favorito para cada cartão
+    return cards
+      .map((card) => {
+        const openAmount = card.invoices
+          .filter((inv) => inv.status !== InvoiceStatus.PAID)
+          .reduce((acc, inv) => acc.add(inv.totalAmount.minus(inv.paidAmount)), new Prisma.Decimal(0));
+
+        const availableLimit = Prisma.Decimal.max(0, card.creditLimit.minus(openAmount));
+
+        return {
+          ...card,
+          committedAmount: openAmount,
+          availableLimit,
+          isFavorite: favoriteIds.has(card.id),
+        };
+      })
+      .sort((a, b) => {
+        if (a.isFavorite !== b.isFavorite) {
+          return a.isFavorite ? -1 : 1;
+        }
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
   }
 
   async findById(userId: string, id: string) {
@@ -113,10 +136,17 @@ export class CreditCardsService {
 
     const availableLimit = Prisma.Decimal.max(0, card.creditLimit.minus(openAmount));
 
+    const favorite = await this.prisma.userFavoriteCreditCard.findUnique({
+      where: {
+        userId_creditCardId: { userId, creditCardId: card.id },
+      },
+    });
+
     return {
       ...card,
       committedAmount: openAmount,
       availableLimit,
+      isFavorite: Boolean(favorite),
     };
   }
 
@@ -197,6 +227,48 @@ export class CreditCardsService {
     return this.findById(userId, id);
   }
 
+  async favorite(userId: string, id: string) {
+    const card = await this.findById(userId, id);
+
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    if (!card.isActive) {
+      throw new BadRequestException('Não é possível favoritar um cartão arquivado');
+    }
+
+    await this.prisma.userFavoriteCreditCard.upsert({
+      where: {
+        userId_creditCardId: { userId, creditCardId: card.id },
+      },
+      create: { userId, creditCardId: card.id },
+      update: {},
+    });
+
+    return {
+      ...card,
+      isFavorite: true,
+    };
+  }
+
+  async unfavorite(userId: string, id: string) {
+    const card = await this.findById(userId, id);
+
+    if (card.familyId) {
+      await this.verifyFamilyAccess(userId, card.familyId, true);
+    }
+
+    await this.prisma.userFavoriteCreditCard.deleteMany({
+      where: { userId, creditCardId: card.id },
+    });
+
+    return {
+      ...card,
+      isFavorite: false,
+    };
+  }
+
   async archive(userId: string, id: string) {
     const card = await this.findById(userId, id);
 
@@ -208,10 +280,21 @@ export class CreditCardsService {
       throw new BadRequestException('O cartão de crédito já está arquivado');
     }
 
-    return this.prisma.creditCard.update({
-      where: { id: card.id },
-      data: { isActive: false },
+    const archived = await this.prisma.$transaction(async (tx) => {
+      await tx.userFavoriteCreditCard.deleteMany({
+        where: { creditCardId: card.id },
+      });
+
+      return tx.creditCard.update({
+        where: { id: card.id },
+        data: { isActive: false },
+      });
     });
+
+    return {
+      ...archived,
+      isFavorite: false,
+    };
   }
 
   async unarchive(userId: string, id: string) {
@@ -225,10 +308,15 @@ export class CreditCardsService {
       throw new BadRequestException('O cartão de crédito não está arquivado');
     }
 
-    return this.prisma.creditCard.update({
+    const reactivated = await this.prisma.creditCard.update({
       where: { id: card.id },
       data: { isActive: true },
     });
+
+    return {
+      ...reactivated,
+      isFavorite: false,
+    };
   }
 
   async remove(userId: string, id: string) {
@@ -247,9 +335,15 @@ export class CreditCardsService {
       );
     }
 
-    await this.prisma.creditCard.update({
-      where: { id: card.id },
-      data: { deletedAt: new Date(), isActive: false },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.userFavoriteCreditCard.deleteMany({
+        where: { creditCardId: card.id },
+      });
+
+      await tx.creditCard.update({
+        where: { id: card.id },
+        data: { deletedAt: new Date(), isActive: false },
+      });
     });
 
     return { message: 'Cartão de crédito removido com sucesso' };

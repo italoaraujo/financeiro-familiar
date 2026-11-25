@@ -99,8 +99,8 @@ export default function TransactionsPage() {
       setPeople(ppl || []);
       setAvailableTags(Array.isArray(tgs) ? tgs : []);
 
-      if (accs && accs.length > 0) setAccountId(accs[0].id);
-      if (cds && cds.length > 0) setCreditCardId(cds[0].id);
+      setAccountId(accs && accs.length > 0 ? accs[0].id : '');
+      setCreditCardId(cds && cds.length > 0 ? cds[0].id : '');
       if (cats && cats.length > 0) setCategoryId(cats[0].id);
     } catch (err) {
       console.error('Error loading auxiliary data:', err);
@@ -803,7 +803,7 @@ export default function TransactionsPage() {
                       >
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.name} ({formatCurrency(acc.currentBalance)})
+                            {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                           </option>
                         ))}
                       </select>
@@ -824,7 +824,7 @@ export default function TransactionsPage() {
                           .filter((a) => a.id !== accountId)
                           .map((acc) => (
                             <option key={acc.id} value={acc.id}>
-                              {acc.name} ({formatCurrency(acc.currentBalance)})
+                              {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                             </option>
                           ))}
                       </select>
@@ -891,7 +891,7 @@ export default function TransactionsPage() {
                             >
                               {accounts.map((acc) => (
                                 <option key={acc.id} value={acc.id}>
-                                  {acc.name} ({formatCurrency(acc.currentBalance)})
+                                  {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                                 </option>
                               ))}
                             </select>
@@ -907,7 +907,7 @@ export default function TransactionsPage() {
                                 >
                                   {cards.map((c) => (
                                     <option key={c.id} value={c.id}>
-                                      {c.name} (Disp: {formatCurrency(c.availableLimit)})
+                                      {c.isFavorite ? '★ ' : ''}{c.name} (Disp: {formatCurrency(c.availableLimit)})
                                     </option>
                                   ))}
                                 </select>
@@ -946,7 +946,7 @@ export default function TransactionsPage() {
                         >
                           {accounts.map((acc) => (
                             <option key={acc.id} value={acc.id}>
-                              {acc.name} ({formatCurrency(acc.currentBalance)})
+                              {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                             </option>
                           ))}
                         </select>

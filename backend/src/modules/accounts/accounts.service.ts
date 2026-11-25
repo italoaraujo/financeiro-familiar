@@ -38,9 +38,10 @@ export class AccountsService {
   async findAll(userId: string, familyId?: string, includeArchived: boolean = false) {
     const archiveFilter = includeArchived ? {} : { isArchived: false };
 
+    let accounts;
     if (familyId) {
       await this.verifyFamilyAccess(userId, familyId, false);
-      return this.prisma.account.findMany({
+      accounts = await this.prisma.account.findMany({
         where: {
           familyId,
           ...archiveFilter,
@@ -48,17 +49,44 @@ export class AccountsService {
         },
         orderBy: { createdAt: 'desc' },
       });
+    } else {
+      accounts = await this.prisma.account.findMany({
+        where: {
+          userId,
+          familyId: null,
+          ...archiveFilter,
+          deletedAt: null,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
     }
 
-    return this.prisma.account.findMany({
+    if (accounts.length === 0) {
+      return [];
+    }
+
+    const favorites = await this.prisma.userFavoriteAccount.findMany({
       where: {
         userId,
-        familyId: null,
-        ...archiveFilter,
-        deletedAt: null,
+        accountId: { in: accounts.map((a) => a.id) },
       },
-      orderBy: { createdAt: 'desc' },
+      select: { accountId: true },
     });
+    const favoriteIds = new Set(favorites.map((f) => f.accountId));
+
+    return accounts
+      .map((acc) => ({
+        ...acc,
+        isFavorite: favoriteIds.has(acc.id),
+      }))
+      .sort((a, b) => {
+        if (a.isFavorite !== b.isFavorite) {
+          return a.isFavorite ? -1 : 1;
+        }
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
   }
 
   async findById(userId: string, id: string) {
@@ -76,7 +104,16 @@ export class AccountsService {
       throw new ForbiddenException('Acesso negado à conta especificada');
     }
 
-    return account;
+    const favorite = await this.prisma.userFavoriteAccount.findUnique({
+      where: {
+        userId_accountId: { userId, accountId: account.id },
+      },
+    });
+
+    return {
+      ...account,
+      isFavorite: Boolean(favorite),
+    };
   }
 
   async update(userId: string, id: string, dto: UpdateAccountDto) {
@@ -102,6 +139,48 @@ export class AccountsService {
     });
   }
 
+  async favorite(userId: string, id: string) {
+    const account = await this.findById(userId, id);
+
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
+    if (account.isArchived) {
+      throw new BadRequestException('Não é possível favoritar uma conta arquivada');
+    }
+
+    await this.prisma.userFavoriteAccount.upsert({
+      where: {
+        userId_accountId: { userId, accountId: account.id },
+      },
+      create: { userId, accountId: account.id },
+      update: {},
+    });
+
+    return {
+      ...account,
+      isFavorite: true,
+    };
+  }
+
+  async unfavorite(userId: string, id: string) {
+    const account = await this.findById(userId, id);
+
+    if (account.familyId) {
+      await this.verifyFamilyAccess(userId, account.familyId, true);
+    }
+
+    await this.prisma.userFavoriteAccount.deleteMany({
+      where: { userId, accountId: account.id },
+    });
+
+    return {
+      ...account,
+      isFavorite: false,
+    };
+  }
+
   async archive(userId: string, id: string) {
     const account = await this.findById(userId, id);
 
@@ -109,10 +188,21 @@ export class AccountsService {
       await this.verifyFamilyAccess(userId, account.familyId, true);
     }
 
-    return this.prisma.account.update({
-      where: { id: account.id },
-      data: { isArchived: true, isActive: false },
+    const archived = await this.prisma.$transaction(async (tx) => {
+      await tx.userFavoriteAccount.deleteMany({
+        where: { accountId: account.id },
+      });
+
+      return tx.account.update({
+        where: { id: account.id },
+        data: { isArchived: true, isActive: false },
+      });
     });
+
+    return {
+      ...archived,
+      isFavorite: false,
+    };
   }
 
   async unarchive(userId: string, id: string) {
@@ -126,10 +216,15 @@ export class AccountsService {
       throw new BadRequestException('A conta não está arquivada');
     }
 
-    return this.prisma.account.update({
+    const reactivated = await this.prisma.account.update({
       where: { id: account.id },
       data: { isArchived: false, isActive: true },
     });
+
+    return {
+      ...reactivated,
+      isFavorite: false,
+    };
   }
 
   async remove(userId: string, id: string) {
@@ -152,9 +247,15 @@ export class AccountsService {
       );
     }
 
-    await this.prisma.account.update({
-      where: { id: account.id },
-      data: { deletedAt: new Date(), isActive: false },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.userFavoriteAccount.deleteMany({
+        where: { accountId: account.id },
+      });
+
+      await tx.account.update({
+        where: { id: account.id },
+        data: { deletedAt: new Date(), isActive: false },
+      });
     });
 
     return { message: 'Conta removida com sucesso' };
