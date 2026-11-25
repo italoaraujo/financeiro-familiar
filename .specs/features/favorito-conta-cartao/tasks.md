@@ -251,9 +251,9 @@ T9  (depends on Phase 2: T3)
 
 **Done when**:
 
-- [ ] Cartões ativos exibem botão estrela apenas quando `!isViewer && card.isActive !== false`, com `togglingFavoriteId` e tratamento de erro sem estado inconsistente
-- [ ] Combo "Conta de Débito" no modal de Liquidação de Fatura exibe prefixo `"★ "` para contas favoritas, já ordenadas no topo pela API
-- [ ] Gate check passes: `cd frontend && npm run lint && npm run build`
+- [x] Cartões ativos exibem botão estrela apenas quando `!isViewer && card.isActive !== false`, com `togglingFavoriteId` e tratamento de erro sem estado inconsistente
+- [x] Combo "Conta de Débito" no modal de Liquidação de Fatura exibe prefixo `"★ "` para contas favoritas, já ordenadas no topo pela API
+- [x] Gate check passes: `cd frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build

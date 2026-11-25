@@ -18,6 +18,7 @@ import {
   FileText,
   Archive,
   ArchiveRestore,
+  Star,
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
@@ -58,6 +59,7 @@ export default function CreditCardsPage() {
   const [cards, setCards] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  const [togglingFavoriteId, setTogglingFavoriteId] = useState<string | null>(null);
 
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -105,7 +107,7 @@ export default function CreditCardsPage() {
       ]);
       setCards(cardsData || []);
       setAccounts(accsData || []);
-      if (accsData && accsData.length > 0) setPaymentAccountId(accsData[0].id);
+      setPaymentAccountId(accsData && accsData.length > 0 ? accsData[0].id : '');
     } catch (err) {
       console.error('Error loading cards data:', err);
     } finally {
@@ -196,6 +198,20 @@ export default function CreditCardsPage() {
       loadData();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir cartão');
+    }
+  };
+
+  const handleToggleFavorite = async (card: any) => {
+    setTogglingFavoriteId(card.id);
+    try {
+      await apiRequest(`/credit-cards/${card.id}/${card.isFavorite ? 'unfavorite' : 'favorite'}`, {
+        method: 'PATCH',
+      });
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar favorito do cartão');
+    } finally {
+      setTogglingFavoriteId(null);
     }
   };
 
@@ -391,6 +407,20 @@ export default function CreditCardsPage() {
                         </div>
                         {!isViewer && (
                           <div className="flex items-center gap-1.5 shrink-0">
+                            {card.isActive !== false && (
+                              <button
+                                type="button"
+                                disabled={togglingFavoriteId === card.id}
+                                onClick={() => handleToggleFavorite(card)}
+                                className={`p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all shrink-0 disabled:opacity-50 ${
+                                  card.isFavorite ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'
+                                }`}
+                                title={card.isFavorite ? 'Remover dos favoritos' : 'Favoritar cartão'}
+                                aria-label={card.isFavorite ? 'Remover dos favoritos' : 'Favoritar cartão'}
+                              >
+                                <Star className={`h-4 w-4 ${card.isFavorite ? 'fill-amber-400' : ''}`} />
+                              </button>
+                            )}
                             {card.isActive === false ? (
                               <button
                                 onClick={() => handleUnarchiveCard(card.id)}
@@ -778,7 +808,7 @@ export default function CreditCardsPage() {
                 >
                   {accounts.map((acc) => (
                     <option key={acc.id} value={acc.id}>
-                      {acc.name} ({formatCurrency(acc.currentBalance)})
+                      {acc.isFavorite ? '★ ' : ''}{acc.name} ({formatCurrency(acc.currentBalance)})
                     </option>
                   ))}
                 </select>
