@@ -6,9 +6,9 @@ Usuários com múltiplas contas bancárias e cartões de crédito precisam perco
 
 ## Goals
 
-- [ ] Permitir que cada usuário favorite e desfavorite múltiplas contas bancárias e múltiplos cartões de crédito ativos de forma independente.
-- [ ] Exibir os itens favoritos do usuário autenticado primeiro (`isFavorite DESC, createdAt DESC`) nas listagens da API, nos cards ativos e nos combos de cadastro de lançamento e demais telas dependentes.
-- [ ] Preservar a integridade de ciclo de vida ao impedir favoritar itens arquivados ou excluídos e ao limpar os vínculos de favorito ao arquivar ou excluir um item.
+- [x] Permitir que cada usuário favorite e desfavorite múltiplas contas bancárias e múltiplos cartões de crédito ativos de forma independente.
+- [x] Exibir os itens favoritos do usuário autenticado primeiro (`isFavorite DESC, createdAt DESC`) nas listagens da API, nos cards ativos e nos combos de cadastro de lançamento e demais telas dependentes.
+- [x] Preservar a integridade de ciclo de vida ao impedir favoritar itens arquivados ou excluídos e ao limpar os vínculos de favorito ao arquivar ou excluir um item.
 
 ## Out of Scope
 
@@ -140,16 +140,16 @@ Usuários com múltiplas contas bancárias e cartões de crédito precisam perco
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| FAV-01 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
-| FAV-02 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
-| FAV-03 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Implementing |
-| FAV-04 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
-| FAV-05 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
-| FAV-06 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Implementing |
-| FAV-07 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Implementing |
-| FAV-08 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Implementing |
-| FAV-09 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Implementing |
-| FAV-10 | P2: Integridade de Ciclo de Vida ao Arquivar ou Excluir | Tasks | Implementing |
+| FAV-01 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Verified |
+| FAV-02 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Verified |
+| FAV-03 | P1: Favoritar e Desfavoritar Contas Bancárias por Usuário | Tasks | Verified |
+| FAV-04 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Verified |
+| FAV-05 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Verified |
+| FAV-06 | P1: Favoritar e Desfavoritar Cartões de Crédito por Usuário | Tasks | Verified |
+| FAV-07 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Verified |
+| FAV-08 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Verified |
+| FAV-09 | P1: Priorização de Favoritos nos Combos de Lançamento e Telas de Gestão | Tasks | Verified |
+| FAV-10 | P2: Integridade de Ciclo de Vida ao Arquivar ou Excluir | Tasks | Verified |
 
 **Coverage:** 10 total, 10 mapped to tasks, 0 unmapped ✅
 
@@ -157,6 +157,6 @@ Usuários com múltiplas contas bancárias e cartões de crédito precisam perco
 
 ## Success Criteria
 
-- [ ] Usuário consegue favoritar e desfavoritar múltiplas contas e cartões ativos diretamente pelos cards sem afetar outros membros da família.
-- [ ] Combos do cadastro de lançamento (`/transactions`) e combos secundários (`/cards`, `/goals`) exibem favoritos do usuário autenticado primeiro com prefixo `"★ "`.
-- [ ] Arquivar ou excluir uma conta ou cartão limpa seus vínculos de favorito e impede favoritar itens arquivados.
+- [x] Usuário consegue favoritar e desfavoritar múltiplas contas e cartões ativos diretamente pelos cards sem afetar outros membros da família.
+- [x] Combos do cadastro de lançamento (`/transactions`) e combos secundários (`/cards`, `/goals`) exibem favoritos do usuário autenticado primeiro com prefixo `"★ "`.
+- [x] Arquivar ou excluir uma conta ou cartão limpa seus vínculos de favorito e impede favoritar itens arquivados.
